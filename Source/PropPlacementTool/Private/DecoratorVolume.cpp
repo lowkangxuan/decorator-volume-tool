@@ -259,35 +259,44 @@ void ADecoratorVolume::GenerateNewPoints()
 // Function to be called in editor to regenerate new points
 void ADecoratorVolume::RegeneratePoints()
 {
+	DeleteInstMeshComps();
 	RandomizeSeed();
 	GenerateNewPoints();
-	DrawDebugLines();
+	AddInstMeshComps();
+
+	DrawDebugLines(); //For debugging "line rays" for each point generated
 }
 
-void ADecoratorVolume::AddNewComponent()
+// Add Instance Mesh Component
+void ADecoratorVolume::AddInstMeshComps()
 {
-	UInstancedStaticMeshComponent* InstMeshComp = NewObject<UInstancedStaticMeshComponent>(this, TEXT(""));
-	if (InstMeshComp)
+	for (int i = 0; i < Count; ++i)
 	{
+		UInstancedStaticMeshComponent* InstMeshComp = NewObject<UInstancedStaticMeshComponent>(this, TEXT(""));
+
+		if (!InstMeshComp) return; // Exit the function if for some reason the component is not created
 		InstMeshComp->OnComponentCreated();
 		InstMeshComp->CreationMethod = EComponentCreationMethod::Instance;
 		InstMeshComp->AttachToComponent(this->RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+		InstMeshComp->SetRelativeLocation(GeneratedPoints[i]);
 		InstMeshComp->RegisterComponent();
 		AddInstanceComponent(InstMeshComp);
-		InstMeshComps.Add(InstMeshComp);
+
+		InstMeshComp->AddInstance(FTransform());
 	}
 }
 
-void ADecoratorVolume::DeleteComponents()
+// Get all existing Instance Mesh Component in the actor and delete thems
+void ADecoratorVolume::DeleteInstMeshComps()
 {
-	TArray<UActorComponent*> InstMeshCompss = this->GetComponentsByClass(UInstancedStaticMeshComponent::StaticClass());
-	for (UActorComponent* Components : InstMeshCompss)
+	TArray<UActorComponent*> InstMeshComps = this->GetComponentsByClass(UInstancedStaticMeshComponent::StaticClass());
+	
+	if (InstMeshComps.Num() == 0) return; // Exit the function if no Instance Mesh Component exist
+	for (UActorComponent* Components : InstMeshComps)
 	{
 		Components->UnregisterComponent();
 		Components->DestroyComponent();
 	}
-
-	InstMeshComps.Empty();
 }
 
 void ADecoratorVolume::DrawDebugLines()

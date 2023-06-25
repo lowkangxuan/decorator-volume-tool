@@ -29,14 +29,10 @@ private:
 	UStaticMesh* DebugCubeMesh;
 	UMaterialInterface* DebugMeshMat;
 
-	//UInstancedStaticMeshComponent* InstMeshComp = nullptr;
-	UPROPERTY(VisibleAnywhere)
-	TArray<UInstancedStaticMeshComponent*> InstMeshComps;
-
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleDefaultsOnly)
 	USceneComponent* DefaultRoot = nullptr;
 
-	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, meta = (AllowPrivateAccess = true))
+	UPROPERTY(BlueprintReadOnly, VisibleDefaultsOnly, meta = (AllowPrivateAccess = true))
 	UStaticMeshComponent* DebugMesh = nullptr;
 
 	UPROPERTY(EditAnywhere, meta = (ClampMin = 0))
@@ -58,6 +54,12 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, EditAnywhere)
 	FVector2D Size = FVector2D(100, 100);
+
+	UPROPERTY()
+	float Breadth;
+
+	UPROPERTY()
+	float Depth;
 
 	UPROPERTY(EditAnywhere, meta = (ClampMin = -999999, ClampMax = 999999))
 	int32 Seed = 0;
@@ -88,17 +90,18 @@ public:
 	virtual void BeginDestroy() override;
 
 private:
+	UFUNCTION(CallInEditor, Category = "DecoratorVolume")
+	void AddInstMeshComps();
+
+	UFUNCTION(CallInEditor, Category = "DecoratorVolume")
+	void DeleteInstMeshComps();
+
 	UFUNCTION(CallInEditor, Category="DecoratorVolume")
 	void RegeneratePoints();
 
-	UFUNCTION(CallInEditor, Category = "DecoratorVolume")
-	void AddNewComponent();
-
-	UFUNCTION(CallInEditor, Category = "DecoratorVolume")
-	void DeleteComponents();
-
 	void GenerateNewPoints();
 	void UpdateMeshScale();
+
 	void InitNewStreamSeed();
 	void RandomizeSeed();
 
