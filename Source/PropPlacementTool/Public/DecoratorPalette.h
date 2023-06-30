@@ -19,7 +19,7 @@ public:
 	UPROPERTY(VisibleAnywhere)
 	int32 TotalDensity;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (TitleProperty="Density: {Density}"))
 	TArray<FDecoratorPaletteGroupStruct> Instances;
 
 public:
@@ -28,4 +28,6 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	int32 GetTotalDensity();
 
+	int32 GetNumberOfInstances();
+	int32 GetInstanceDensity(int32 index);
 };

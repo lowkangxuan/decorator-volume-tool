@@ -223,7 +223,7 @@ void ADecoratorVolume::GenerateNewPoints()
 	
 	for (int i = 0; i < Count; i++)
 	{
-		UE_LOG(LogTemp, Display, TEXT("Count: %d"), i);
+		//UE_LOG(LogTemp, Display, TEXT("Count: %d"), i);
 		float RandFloat = RandStream.FRand();
 		float x;
 		float y;
@@ -270,19 +270,42 @@ void ADecoratorVolume::RegeneratePoints()
 // Add Instance Mesh Component
 void ADecoratorVolume::AddInstMeshComps()
 {
-	for (int i = 0; i < Count; ++i)
+	//for (int i = 0; i < Count; ++i)
+	//{
+	//	UInstancedStaticMeshComponent* InstMeshComp = NewObject<UInstancedStaticMeshComponent>(this, TEXT(""));
+	//
+	//	if (!InstMeshComp) return; // Exit the function if for some reason the component is not created
+	//	InstMeshComp->OnComponentCreated();
+	//	InstMeshComp->CreationMethod = EComponentCreationMethod::Instance;
+	//	InstMeshComp->AttachToComponent(this->RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+	//	InstMeshComp->SetRelativeLocation(GeneratedPoints[i]);
+	//	InstMeshComp->RegisterComponent();
+	//	AddInstanceComponent(InstMeshComp);
+	//
+	//	InstMeshComp->AddInstance(FTransform());
+	//}
+
+	for (int i = 0; i < (Palette->GetNumberOfInstances()); ++i)
 	{
 		UInstancedStaticMeshComponent* InstMeshComp = NewObject<UInstancedStaticMeshComponent>(this, TEXT(""));
 
 		if (!InstMeshComp) return; // Exit the function if for some reason the component is not created
+		
 		InstMeshComp->OnComponentCreated();
 		InstMeshComp->CreationMethod = EComponentCreationMethod::Instance;
 		InstMeshComp->AttachToComponent(this->RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
-		InstMeshComp->SetRelativeLocation(GeneratedPoints[i]);
+		InstMeshComp->SetRelativeLocation(FVector(0)); // Ensure that the component is at the center of the actor
 		InstMeshComp->RegisterComponent();
 		AddInstanceComponent(InstMeshComp);
 
-		InstMeshComp->AddInstance(FTransform());
+		int32 c = (Count * (Palette->GetInstanceDensity(i))) + PrevCount;
+		UE_LOG(LogTemp, Display, TEXT("asd: %d"), c);
+		for (int j = PrevCount; j < c; ++j)
+		{
+			
+			InstMeshComp->AddInstance(FTransform(GeneratedPoints[j])); // Note: Not working!
+		}
+		PrevCount = c;
 	}
 }
 

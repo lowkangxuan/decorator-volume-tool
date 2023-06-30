@@ -21,7 +21,7 @@ public:
 	UStaticMesh* Mesh;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(ClampMin = 0))
-	int32 Density;
+	int32 Density = 1; // Defauly density set to 1
 
 	UPROPERTY(EditAnywhere)
 	UMaterial* Mat;

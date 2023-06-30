@@ -35,12 +35,13 @@ private:
 	UPROPERTY(BlueprintReadOnly, VisibleDefaultsOnly, meta = (AllowPrivateAccess = true))
 	UStaticMeshComponent* DebugMesh = nullptr;
 
-	UPROPERTY(EditAnywhere, meta = (ClampMin = 0))
-	int32 Count = 0;
-
 	UPROPERTY(EditAnywhere, Category = "DecoratorVolume|Debug", meta = (MakeEditWidget))
 	TArray<FVector> GeneratedPoints;
 
+	UPROPERTY(EditAnywhere, meta = (ClampMin = 0))
+	int32 Count = 0;
+
+	int32 PrevCount = 0;
 
 public:	
 	// Sets default values for this actor's properties
