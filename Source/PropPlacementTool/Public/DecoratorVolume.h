@@ -40,7 +40,6 @@ private:
 
 	UPROPERTY(EditAnywhere, meta = (ClampMin = 0))
 	int32 Count = 0;
-
 	int32 PrevCount = 0;
 
 public:	
