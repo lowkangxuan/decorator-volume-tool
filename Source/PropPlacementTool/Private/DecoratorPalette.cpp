@@ -1,6 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
+#include "GenericPlatform/GenericPlatformMath.h"
 #include "DecoratorPalette.h"
 
 #if WITH_EDITOR
@@ -34,8 +34,8 @@ int32 UDecoratorPalette::GetNumberOfInstances()
 	return Instances.Num();
 }
 
-int32 UDecoratorPalette::GetInstanceDensity(int32 index)
+float UDecoratorPalette::GetInstanceDensity(int32 index)
 {
-	int32 CalculatedDensity = Instances[index].Density / TotalDensity;
+	float CalculatedDensity = float(Instances[index].Density) / float(TotalDensity); // int32 to float to show decimal place
 	return CalculatedDensity;
 }

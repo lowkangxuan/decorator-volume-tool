@@ -29,5 +29,5 @@ public:
 	int32 GetTotalDensity();
 
 	int32 GetNumberOfInstances();
-	int32 GetInstanceDensity(int32 index);
+	float GetInstanceDensity(int32 index);
 };

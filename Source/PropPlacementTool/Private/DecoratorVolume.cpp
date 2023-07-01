@@ -106,17 +106,7 @@ ADecoratorVolume::ADecoratorVolume(const FObjectInitializer& ObjectInitializer) 
 
 void ADecoratorVolume::OnConstruction(const FTransform& Transform)
 {
-	//UE_LOG(LogTemp, Display, TEXT("Hello World!"));
-
-	for (FVector CurrPoint : GeneratedPoints)
-	{
-		FVector ActorLocation = this->GetActorLocation();
-		FVector ZOffset = FVector(0, 0, Size.Y / 2);
-		FVector LineStart = (CurrPoint + ActorLocation) + ZOffset;
-		FVector LineEnd = (CurrPoint + ActorLocation) - ZOffset;
-
-		DrawDebugLines(LineStart, LineEnd);
-	}
+	DrawDebugLines();
 }
 
 // Called when the game starts or when spawned
@@ -296,17 +286,19 @@ void ADecoratorVolume::AddInstMeshComps()
 		InstMeshComp->AttachToComponent(this->RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 		InstMeshComp->SetRelativeLocation(FVector(0)); // Ensure that the component is at the center of the actor
 		InstMeshComp->RegisterComponent();
+		InstMeshComp->SetStaticMesh(Palette->Instances[i].Mesh);
 		AddInstanceComponent(InstMeshComp);
 
-		int32 c = (Count * (Palette->GetInstanceDensity(i))) + PrevCount;
-		UE_LOG(LogTemp, Display, TEXT("asd: %d"), c);
+		float c = FMath::RoundHalfFromZero((Count * (Palette->GetInstanceDensity(i))) + PrevCount);
+		UE_LOG(LogTemp, Display, TEXT("C: %f, PrevCount: %d, Instance Density: %f"), c, PrevCount, Palette->GetInstanceDensity(i));
 		for (int j = PrevCount; j < c; ++j)
 		{
-			
-			InstMeshComp->AddInstance(FTransform(GeneratedPoints[j])); // Note: Not working!
+			UE_LOG(LogTemp, Display, TEXT("J: %d, Num: %d"), j, GeneratedPoints.Num());
+			InstMeshComp->AddInstance(FTransform(GeneratedPoints[j]));
 		}
-		PrevCount = c;
+		PrevCount = (c >= GeneratedPoints.Num()) ? GeneratedPoints.Num() - 1 : c; // Ensure that the value falls within the range of the array elements
 	}
+	PrevCount = 0;
 }
 
 // Get all existing Instance Mesh Component in the actor and delete thems
