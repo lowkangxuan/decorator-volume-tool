@@ -21,8 +21,8 @@ class PROPPLACEMENTTOOL_API ADecoratorVolume : public AActor
 	
 private:
 	// Min Max clamps for Seed value
-	int32 MinClamp = -999999;
-	uint32 MaxClamp = 999999;
+	const int32 MinClamp = -999999;
+	const int32 MaxClamp = 999999;
 	
 	UBillboardComponent* SpriteComponent;
 	UStaticMesh* DebugCylinderMesh;
@@ -90,14 +90,12 @@ public:
 	virtual void BeginDestroy() override;
 
 private:
-	UFUNCTION(CallInEditor, Category = "DecoratorVolume")
-	void AddInstMeshComps();
-
-	UFUNCTION(CallInEditor, Category = "DecoratorVolume")
-	void DeleteInstMeshComps();
-
 	UFUNCTION(CallInEditor, Category="DecoratorVolume")
-	void RegeneratePoints();
+	void Regenerate();
+	void RegenerateNoNewSeed();
+	
+	void AddInstMeshComps();
+	void DeleteInstMeshComps();
 
 	void GenerateNewPoints();
 	void UpdateMeshScale();
@@ -105,6 +103,7 @@ private:
 	void InitNewStreamSeed();
 	void RandomizeSeed();
 
+	// Overloads for DrawDebugLines
 	void DrawDebugLines();
 	void DrawDebugLines(FVector Start, FVector End);
 
