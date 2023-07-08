@@ -35,12 +35,12 @@ private:
 	UPROPERTY(BlueprintReadOnly, VisibleDefaultsOnly, meta = (AllowPrivateAccess = true))
 	UStaticMeshComponent* DebugMesh = nullptr;
 
-	UPROPERTY(EditAnywhere, Category = "DecoratorVolume|Debug", meta = (MakeEditWidget))
+	UPROPERTY(EditAnywhere, Category = "DecoratorVolume|Debug"/*, meta = (MakeEditWidget)*/)
 	TArray<FVector> GeneratedPoints;
+	TArray<FVector> PointsRotation;
 
 	UPROPERTY(EditAnywhere, meta = (ClampMin = 0))
 	int32 Count = 0;
-	int32 PrevCount = 0;
 
 public:	
 	// Sets default values for this actor's properties
@@ -54,12 +54,6 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, EditAnywhere)
 	FVector2D Size = FVector2D(100, 100);
-
-	UPROPERTY()
-	float Breadth;
-
-	UPROPERTY()
-	float Depth;
 
 	UPROPERTY(EditAnywhere, meta = (ClampMin = -999999, ClampMax = 999999))
 	int32 Seed = 0;
@@ -92,12 +86,13 @@ public:
 private:
 	UFUNCTION(CallInEditor, Category="DecoratorVolume")
 	void Regenerate();
-	void RegenerateNoNewSeed();
+	void TriggerRegeneration(bool NewSeed);
 	
 	void AddInstMeshComps();
 	void DeleteInstMeshComps();
+	void UpdateInstMeshComps();
 
-	void GenerateNewPoints();
+	void RegeneratePoints();
 	void UpdateMeshScale();
 
 	void InitNewStreamSeed();
