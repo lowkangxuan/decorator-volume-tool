@@ -146,7 +146,7 @@ void ADecoratorVolume::PostEditChangeProperty(FPropertyChangedEvent& e)
 	UE_LOG(LogTemp, Display, TEXT("Decorator Volume: %s"), *FString(PropertyName.ToString()));
 	
 	// Generate new points when these properties are edited
-	if (PropertyName == "Seed" || PropertyName == "Count" || PropertyName == "Shape")
+	if (PropertyName == "Seed" || PropertyName == "Shape")
 	{
 		// Init new seed as well when Seed property is edited
 		if (PropertyName == "Seed")
@@ -177,6 +177,11 @@ void ADecoratorVolume::PostEditChangeProperty(FPropertyChangedEvent& e)
 		GenerateNewPoints();
 	}
 
+	if (PropertyName == "Count")
+	{
+		RegenerateNoNewSeed();
+	}
+
 	// Call UpdateMeshScale() function when the Size property is edited
 	if (PropertyName == "X" || PropertyName == "Y")
 	{
@@ -188,8 +193,8 @@ void ADecoratorVolume::PostEditChangeProperty(FPropertyChangedEvent& e)
 // Scale DebugMesh based on Size.x and Size.y values
 void ADecoratorVolume::UpdateMeshScale()
 {
-	FVector2D length = FVector2D(Size.X / 100); //Scale of the mesh's XY
-	float height = Size.Y / 100; //Scale of the mesh's Z
+	const FVector2D length = FVector2D(Size.X / 100); //Scale of the mesh's XY
+	const float height = Size.Y / 100; //Scale of the mesh's Z
 
 	DebugMesh->SetWorldScale3D(FVector(length, height));
 }
@@ -246,8 +251,15 @@ void ADecoratorVolume::GenerateNewPoints()
 	}
 }
 
-// Function to be called in editor to regenerate new points
-void ADecoratorVolume::RegeneratePoints()
+/*
+	Function to be called in editor to regenerate new points
+	1. Deletes all Instance Mesh Components
+	2. Randomize a new Seed
+	3. Generate new points based on new Seed
+	4. Add new Instance Mesh Components
+	5. Draw Debug Lines for visual purposes
+*/
+void ADecoratorVolume::Regenerate()
 {
 	DeleteInstMeshComps();
 	RandomizeSeed();
@@ -257,24 +269,19 @@ void ADecoratorVolume::RegeneratePoints()
 	DrawDebugLines(); //For debugging "line rays" for each point generated
 }
 
+// Similar to the Regenerate() function, just without randomizing a new seed
+void ADecoratorVolume::RegenerateNoNewSeed()
+{
+	DeleteInstMeshComps();
+	GenerateNewPoints();
+	AddInstMeshComps();
+
+	DrawDebugLines(); //For debugging "line rays" for each point generated
+}
+
 // Add Instance Mesh Component
 void ADecoratorVolume::AddInstMeshComps()
 {
-	//for (int i = 0; i < Count; ++i)
-	//{
-	//	UInstancedStaticMeshComponent* InstMeshComp = NewObject<UInstancedStaticMeshComponent>(this, TEXT(""));
-	//
-	//	if (!InstMeshComp) return; // Exit the function if for some reason the component is not created
-	//	InstMeshComp->OnComponentCreated();
-	//	InstMeshComp->CreationMethod = EComponentCreationMethod::Instance;
-	//	InstMeshComp->AttachToComponent(this->RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
-	//	InstMeshComp->SetRelativeLocation(GeneratedPoints[i]);
-	//	InstMeshComp->RegisterComponent();
-	//	AddInstanceComponent(InstMeshComp);
-	//
-	//	InstMeshComp->AddInstance(FTransform());
-	//}
-
 	for (int i = 0; i < (Palette->GetNumberOfInstances()); ++i)
 	{
 		UInstancedStaticMeshComponent* InstMeshComp = NewObject<UInstancedStaticMeshComponent>(this, TEXT(""));
@@ -286,17 +293,19 @@ void ADecoratorVolume::AddInstMeshComps()
 		InstMeshComp->AttachToComponent(this->RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 		InstMeshComp->SetRelativeLocation(FVector(0)); // Ensure that the component is at the center of the actor
 		InstMeshComp->RegisterComponent();
-		InstMeshComp->SetStaticMesh(Palette->Instances[i].Mesh);
+		InstMeshComp->SetStaticMesh(Palette->Instances[i].Mesh); // Setting mesh to c
 		AddInstanceComponent(InstMeshComp);
 
 		float c = FMath::RoundHalfFromZero((Count * (Palette->GetInstanceDensity(i))) + PrevCount);
-		UE_LOG(LogTemp, Display, TEXT("C: %f, PrevCount: %d, Instance Density: %f"), c, PrevCount, Palette->GetInstanceDensity(i));
+		c = (c >= GeneratedPoints.Num()) ? GeneratedPoints.Num() - 1 : c; // Ensure that the value falls within the range of the array elements
 		for (int j = PrevCount; j < c; ++j)
 		{
+			if (j >= GeneratedPoints.Num()) break;
 			UE_LOG(LogTemp, Display, TEXT("J: %d, Num: %d"), j, GeneratedPoints.Num());
 			InstMeshComp->AddInstance(FTransform(GeneratedPoints[j]));
 		}
-		PrevCount = (c >= GeneratedPoints.Num()) ? GeneratedPoints.Num() - 1 : c; // Ensure that the value falls within the range of the array elements
+		PrevCount = c;
+		UE_LOG(LogTemp, Display, TEXT("C: %f, PrevCount: %d, Instance Density: %f"), c, PrevCount, Palette->GetInstanceDensity(i));
 	}
 	PrevCount = 0;
 }
@@ -304,8 +313,8 @@ void ADecoratorVolume::AddInstMeshComps()
 // Get all existing Instance Mesh Component in the actor and delete thems
 void ADecoratorVolume::DeleteInstMeshComps()
 {
-	TArray<UActorComponent*> InstMeshComps = this->GetComponentsByClass(UInstancedStaticMeshComponent::StaticClass());
-	
+	TArray<UActorComponent*> InstMeshComps = GetComponentsByClass(UInstancedStaticMeshComponent::StaticClass());
+
 	if (InstMeshComps.Num() == 0) return; // Exit the function if no Instance Mesh Component exist
 	for (UActorComponent* Components : InstMeshComps)
 	{
