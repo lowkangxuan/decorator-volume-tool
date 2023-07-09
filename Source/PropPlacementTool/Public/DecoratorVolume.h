@@ -35,9 +35,10 @@ private:
 	UPROPERTY(BlueprintReadOnly, VisibleDefaultsOnly, meta = (AllowPrivateAccess = true))
 	UStaticMeshComponent* DebugMesh = nullptr;
 
-	UPROPERTY(EditAnywhere, Category = "DecoratorVolume|Debug"/*, meta = (MakeEditWidget)*/)
+	UPROPERTY(EditAnywhere/*, meta = (MakeEditWidget)*/)
 	TArray<FVector> GeneratedPoints;
-	TArray<FVector> PointsRotation;
+	TArray<FVector> LineTracedLocations;
+	TArray<FVector> LineTracedRotations;
 
 	UPROPERTY(EditAnywhere, meta = (ClampMin = 0))
 	int32 Count = 0;
@@ -87,12 +88,14 @@ private:
 	UFUNCTION(CallInEditor, Category="DecoratorVolume")
 	void Regenerate();
 	void TriggerRegeneration(bool NewSeed);
+	void RegeneratePoints();
 	
 	void AddInstMeshComps();
 	void DeleteInstMeshComps();
 	void UpdateInstMeshComps();
-
-	void RegeneratePoints();
+	UFUNCTION(CallInEditor, Category="DecoratorVolume")
+	void RunLineTraces();
+	
 	void UpdateMeshScale();
 
 	void InitNewStreamSeed();

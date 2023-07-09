@@ -7,6 +7,7 @@
 #include "Math/UnrealMathUtility.h"
 
 #include "Engine/Selection.h"
+#include "GeometryCollection/GeometryCollectionSimulationTypes.h"
 
 // Sets default values
 ADecoratorVolume::ADecoratorVolume(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
@@ -286,6 +287,7 @@ void ADecoratorVolume::AddInstMeshComps()
 		InstMeshComp->CreationMethod = EComponentCreationMethod::Instance;
 		InstMeshComp->AttachToComponent(this->RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 		InstMeshComp->SetRelativeLocation(FVector(0)); // Ensure that the component is at the center of the actor
+		InstMeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		InstMeshComp->RegisterComponent();
 		AddInstanceComponent(InstMeshComp);
 	}
@@ -312,11 +314,11 @@ void ADecoratorVolume::UpdateInstMeshComps()
 	this->GetComponents<UInstancedStaticMeshComponent>(InstMeshComps);
 	unsigned int  i = 0; // Fake "index" for the for-loop below
 	unsigned int PrevCount = 0; // Sort of a "range" for the nested loop
+	
 	/*
 	 * Number of elements in InstMeshComps is equivalent to the number of instances in the Palette
 	 * InstMeshComps.Num() == Palette->GetNumberOfInstances()
 	*/
-
 	for (UInstancedStaticMeshComponent* Component : InstMeshComps)
 	{
 		Component->SetStaticMesh(Palette->Instances[i].Mesh); // Set instance mesh to the current palette index mesh
@@ -330,7 +332,7 @@ void ADecoratorVolume::UpdateInstMeshComps()
 			// else, add a new instance Transform
 			if (Component->GetInstanceCount() == (CurrCount - PrevCount))
 			{
-				Component->UpdateInstanceTransform(k, FTransform(GeneratedPoints[j]), false, false, false);
+				Component->UpdateInstanceTransform(k, FTransform(GeneratedPoints[j]), false, false, true);
 			}
 			else
 			{
@@ -347,6 +349,27 @@ void ADecoratorVolume::UpdateInstMeshComps()
 	}
 }
 
+void ADecoratorVolume::RunLineTraces()
+{
+	LineTracedLocations.Empty();
+	for (FVector CurrPoint : GeneratedPoints)
+	{
+		FVector ActorLocation = this->GetActorLocation();
+		FVector ZOffset = FVector(0, 0, Size.Y / 2);
+		FVector Start = (CurrPoint + ActorLocation) + ZOffset;
+		FVector End = (CurrPoint + ActorLocation) - ZOffset;
+		FHitResult HitResult;
+		FCollisionQueryParams TraceParams;
+		GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_WorldStatic, TraceParams);
+
+		if (HitResult.bBlockingHit)
+		{
+			UE_LOG(LogTemp, Display, TEXT("Hit Result: %s"), *HitResult.ImpactPoint.ToString());
+			LineTracedLocations.Add(HitResult.ImpactPoint);
+		}
+	}
+}
+
 void ADecoratorVolume::DrawDebugLines()
 {
 	FlushPersistentDebugLines(GetWorld());
@@ -354,9 +377,9 @@ void ADecoratorVolume::DrawDebugLines()
 	{
 		FVector ActorLocation = this->GetActorLocation();
 		FVector ZOffset = FVector(0, 0, Size.Y / 2);
-		FVector LineStart = (CurrPoint + ActorLocation) + ZOffset;
-		FVector LineEnd = (CurrPoint + ActorLocation) - ZOffset;
-		DrawDebugLine(GetWorld(), LineStart, LineEnd, FColor::Red, false, 1, 0, 1.5);
+		FVector Start = (CurrPoint + ActorLocation) + ZOffset;
+		FVector End = (CurrPoint + ActorLocation) - ZOffset;
+		DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 1, 0, 1.5);
 	}
 }
 
