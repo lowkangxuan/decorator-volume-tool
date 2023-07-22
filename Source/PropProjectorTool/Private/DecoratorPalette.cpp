@@ -29,7 +29,7 @@ int32 UDecoratorPalette::GetTotalDensity()
 	return TotalDensity;
 }
 
-int32 UDecoratorPalette::GetNumberOfInstances()
+int32 UDecoratorPalette::GetNumberOfInstances() const
 {
 	return Instances.Num();
 }

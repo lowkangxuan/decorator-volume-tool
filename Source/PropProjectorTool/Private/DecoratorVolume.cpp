@@ -267,6 +267,13 @@ void ADecoratorVolume::RegeneratePoints()
 */
 void ADecoratorVolume::TriggerRegeneration(bool NewSeed = false)
 {
+	// We do not want to call all the functions below if the parameters are kept default
+	if (Count == 0 || Palette == nullptr || Palette->GetNumberOfInstances() == 0)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Decorator Volume: Please ensure to populate the Count, Palette, and Palette Instances parameters!"));
+		return;
+	}
+	
 	if (NewSeed) RandomizeSeed(); // Randomize a new seed if NewSeed param is true
 	RegeneratePoints();
 	DeleteInstMeshComps();  
@@ -287,7 +294,7 @@ void ADecoratorVolume::AddInstMeshComps()
 		InstMeshComp->CreationMethod = EComponentCreationMethod::Instance;
 		InstMeshComp->AttachToComponent(this->RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 		InstMeshComp->SetRelativeLocation(FVector(0)); // Ensure that the component is at the center of the actor
-		InstMeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		//InstMeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		InstMeshComp->RegisterComponent();
 		AddInstanceComponent(InstMeshComp);
 	}
@@ -340,9 +347,9 @@ void ADecoratorVolume::UpdateInstMeshComps()
 			}
 
 			++k;
-			UE_LOG(LogTemp, Display, TEXT("%d"), k);
+			//UE_LOG(LogTemp, Display, TEXT("%d"), k);
 		}
-		UE_LOG(LogTemp, Display, TEXT("CurrCount: %f, PrevCount: %d, Instance Density: %f"), CurrCount, PrevCount, Palette->GetInstanceDensity(i));
+		//UE_LOG(LogTemp, Display, TEXT("CurrCount: %f, PrevCount: %d, Instance Density: %f"), CurrCount, PrevCount, Palette->GetInstanceDensity(i));
 		PrevCount = CurrCount;
 		
 		++i; // Increment "index"
@@ -360,8 +367,9 @@ void ADecoratorVolume::RunLineTraces()
 		FVector End = (CurrPoint + ActorLocation) - ZOffset;
 		FHitResult HitResult;
 		FCollisionQueryParams TraceParams;
+		TraceParams.AddIgnoredActor(this);
 		GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_WorldStatic, TraceParams);
-
+		
 		if (HitResult.bBlockingHit)
 		{
 			UE_LOG(LogTemp, Display, TEXT("Hit Result: %s"), *HitResult.ImpactPoint.ToString());

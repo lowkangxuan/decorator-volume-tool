@@ -9,7 +9,7 @@
  * 
  */
 USTRUCT(BlueprintType)
-struct PROPPLACEMENTTOOL_API FDecoratorPaletteGroupStruct
+struct PROPPROJECTORTOOL_API FDecoratorPaletteGroupStruct
 {
 	GENERATED_BODY()
 

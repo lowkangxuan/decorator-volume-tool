@@ -2,9 +2,9 @@
 
 using UnrealBuildTool;
 
-public class PropPlacementTool : ModuleRules
+public class PropProjectorTool : ModuleRules
 {
-	public PropPlacementTool(ReadOnlyTargetRules Target) : base(Target)
+	public PropProjectorTool(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	

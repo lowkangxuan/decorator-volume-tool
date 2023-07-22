@@ -3,13 +3,13 @@
 using UnrealBuildTool;
 using System.Collections.Generic;
 
-public class PropPlacementToolEditorTarget : TargetRules
+public class PropProjectorToolEditorTarget : TargetRules
 {
-	public PropPlacementToolEditorTarget(TargetInfo Target) : base(Target)
+	public PropProjectorToolEditorTarget(TargetInfo Target) : base(Target)
 	{
 		Type = TargetType.Editor;
 		DefaultBuildSettings = BuildSettingsVersion.V2;
 
-		ExtraModuleNames.AddRange( new string[] { "PropPlacementTool" } );
+		ExtraModuleNames.AddRange( new string[] { "PropProjectorTool" } );
 	}
 }

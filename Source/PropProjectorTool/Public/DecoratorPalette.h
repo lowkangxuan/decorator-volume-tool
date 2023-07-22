@@ -11,7 +11,7 @@
  * 
  */
 UCLASS(Abstract, Blueprintable, BlueprintType, CollapseCategories, DefaultToInstanced, EditInlineNew)
-class PROPPLACEMENTTOOL_API UDecoratorPalette : public UObject
+class PROPPROJECTORTOOL_API UDecoratorPalette : public UObject
 {
 	GENERATED_BODY()
 	
@@ -28,6 +28,6 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	int32 GetTotalDensity();
 
-	int32 GetNumberOfInstances();
+	int32 GetNumberOfInstances() const;
 	float GetInstanceDensity(int32 index);
 };

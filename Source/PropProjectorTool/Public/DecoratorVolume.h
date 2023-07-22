@@ -15,7 +15,7 @@ enum VolumeShape
 };
 
 UCLASS(Abstract, Blueprintable, HideCategories=(Collision, HLOD, Physics, Networking, Input))
-class PROPPLACEMENTTOOL_API ADecoratorVolume : public AActor
+class PROPPROJECTORTOOL_API ADecoratorVolume : public AActor
 {
 	GENERATED_BODY()
 	
@@ -37,6 +37,7 @@ private:
 
 	UPROPERTY(EditAnywhere/*, meta = (MakeEditWidget)*/)
 	TArray<FVector> GeneratedPoints;
+	UPROPERTY(VisibleInstanceOnly)
 	TArray<FVector> LineTracedLocations;
 	TArray<FVector> LineTracedRotations;
 
