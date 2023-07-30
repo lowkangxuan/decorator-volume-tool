@@ -10,7 +10,7 @@
  * 
  */
 USTRUCT(BlueprintType)
-struct PROPPLACEMENTTOOL_API FLootDropStruct
+struct PROPPROJECTORTOOL_API FLootDropStruct
 {
 public:
 	GENERATED_BODY()

@@ -18,7 +18,7 @@ enum class ELootType : uint8
 };
 
 UCLASS(Abstract, DefaultToInstanced, Blueprintable, EditInlineNew)
-class PROPPLACEMENTTOOL_API ULootObject : public UObject
+class PROPPROJECTORTOOL_API ULootObject : public UObject
 {
 	GENERATED_BODY()
 	
