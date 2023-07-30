@@ -8,6 +8,7 @@
 
 #include "Engine/Selection.h"
 #include "GeometryCollection/GeometryCollectionSimulationTypes.h"
+#include "Kismet/KismetMathLibrary.h"
 
 // Sets default values
 ADecoratorVolume::ADecoratorVolume(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
@@ -187,7 +188,7 @@ void ADecoratorVolume::PostEditChangeProperty(FPropertyChangedEvent& e)
 	{
 		UpdateMeshScale();
 		RegeneratePoints();
-		UpdateInstMeshComps();
+		RunLineTrace();
 	}
 }
 #endif
@@ -276,14 +277,14 @@ void ADecoratorVolume::TriggerRegeneration(bool NewSeed = false)
 	
 	if (NewSeed) RandomizeSeed(); // Randomize a new seed if NewSeed param is true
 	RegeneratePoints();
-	DeleteInstMeshComps();  
-	AddInstMeshComps();     
-	UpdateInstMeshComps();
+	DeleteInstMeshComponents();  
+	AddInstMeshComponents();
 	DrawDebugLines(); //For debugging "line rays" for each point generated
+	RunLineTrace();
 }
 
 // Add Instance Mesh Component
-void ADecoratorVolume::AddInstMeshComps()
+void ADecoratorVolume::AddInstMeshComponents()
 {
 	for (int i = 0; i < (Palette->GetNumberOfInstances()); ++i)
 	{
@@ -300,50 +301,51 @@ void ADecoratorVolume::AddInstMeshComps()
 	}
 }
 
-// Get all existing Instance Mesh Component in the actor and delete thems
-void ADecoratorVolume::DeleteInstMeshComps()
+// Get all existing Instanced Mesh Component in the actor and delete thems
+void ADecoratorVolume::DeleteInstMeshComponents()
 {
-	TArray<UInstancedStaticMeshComponent*> InstMeshComps;
-	this->GetComponents<UInstancedStaticMeshComponent>(InstMeshComps);
+	TArray<UInstancedStaticMeshComponent*> InstMeshComponents;
+	this->GetComponents<UInstancedStaticMeshComponent>(InstMeshComponents);
 	
-	if (InstMeshComps.Num() == 0) return; // Exit the function if no Instance Mesh Component exist
-	for (UActorComponent* Components : InstMeshComps)
+	if (InstMeshComponents.Num() == 0) return; // Exit the function if no Instance Mesh Component exist
+	for (UActorComponent* Components : InstMeshComponents)
 	{
 		Components->UnregisterComponent();
 		Components->DestroyComponent();
 	}
 }
 
-// Add or Update instances in the InstancedMeshComponent(s)
-void ADecoratorVolume::UpdateInstMeshComps()
+// Add or Update instances Transform in the InstancedMeshComponent(s)
+void ADecoratorVolume::UpdateInstMeshComponents()
 {
-	TArray<UInstancedStaticMeshComponent*> InstMeshComps;
-	this->GetComponents<UInstancedStaticMeshComponent>(InstMeshComps);
-	unsigned int  i = 0; // Fake "index" for the for-loop below
-	unsigned int PrevCount = 0; // Sort of a "range" for the nested loop
+	TArray<UInstancedStaticMeshComponent*> InstMeshComponents;
+	this->GetComponents<UInstancedStaticMeshComponent>(InstMeshComponents);
+	unsigned int PrevCount = 0; // Sort of a "clamp" for the nested loop
 	
 	/*
-	 * Number of elements in InstMeshComps is equivalent to the number of instances in the Palette
-	 * InstMeshComps.Num() == Palette->GetNumberOfInstances()
+	 * Number of elements in InstMeshComponents is equivalent to the number of instances in the Palette
+	 * InstMeshComponents.Num() == Palette->GetNumberOfInstances()
 	*/
-	for (UInstancedStaticMeshComponent* Component : InstMeshComps)
+	for (int Index = 0; Index < InstMeshComponents.Num(); ++Index)
 	{
-		Component->SetStaticMesh(Palette->Instances[i].Mesh); // Set instance mesh to the current palette index mesh
+		UInstancedStaticMeshComponent* CurrComponent = InstMeshComponents[Index];
+		CurrComponent->SetStaticMesh(Palette->Instances[Index].Mesh); // Set instance mesh to the current palette index mesh
 		unsigned int k = 0;
 		
-		float CurrCount = FMath::RoundHalfFromZero((Count * (Palette->GetInstanceDensity(i))) + PrevCount);
-		CurrCount = FMath::Clamp(CurrCount, 0, GeneratedPoints.Num()); // Ensure that the value falls within the range of the array elements
+		float CurrCount = FMath::RoundHalfFromZero((Count * (Palette->GetInstanceDensity(Index))) + PrevCount);
+		CurrCount = FMath::Clamp(CurrCount, 0, LineTracedLocations.Num()); // CLamp value within the number of array elements
 		for (int j = PrevCount; j < CurrCount; ++j)
 		{
+			FTransform InstanceTransform = FTransform(LineTracedRotations[j], LineTracedLocations[j], FVector::OneVector);
 			// If the number of instances is equivalent to the desired count, then update the instance Transform
 			// else, add a new instance Transform
-			if (Component->GetInstanceCount() == (CurrCount - PrevCount))
+			if (CurrComponent->GetInstanceCount() == (CurrCount - PrevCount))
 			{
-				Component->UpdateInstanceTransform(k, FTransform(GeneratedPoints[j]), false, false, true);
+				CurrComponent->UpdateInstanceTransform(k, InstanceTransform, true, true, true);
 			}
 			else
 			{
-				Component->AddInstance(FTransform(GeneratedPoints[j]));
+				CurrComponent->AddInstance(InstanceTransform, true);
 			}
 
 			++k;
@@ -351,14 +353,13 @@ void ADecoratorVolume::UpdateInstMeshComps()
 		}
 		//UE_LOG(LogTemp, Display, TEXT("CurrCount: %f, PrevCount: %d, Instance Density: %f"), CurrCount, PrevCount, Palette->GetInstanceDensity(i));
 		PrevCount = CurrCount;
-		
-		++i; // Increment "index"
 	}
 }
 
-void ADecoratorVolume::RunLineTraces()
+void ADecoratorVolume::RunLineTrace()
 {
 	LineTracedLocations.Empty();
+	LineTracedRotations.Empty();
 	for (FVector CurrPoint : GeneratedPoints)
 	{
 		FVector ActorLocation = this->GetActorLocation();
@@ -372,10 +373,13 @@ void ADecoratorVolume::RunLineTraces()
 		
 		if (HitResult.bBlockingHit)
 		{
-			UE_LOG(LogTemp, Display, TEXT("Hit Result: %s"), *HitResult.ImpactPoint.ToString());
+			UE_LOG(LogTemp, Display, TEXT("Impact Point: %s, Impact Normal: %s"), *HitResult.ImpactPoint.ToString(), *HitResult.ImpactNormal.ToString());
 			LineTracedLocations.Add(HitResult.ImpactPoint);
+			LineTracedRotations.Add(UKismetMathLibrary::MakeRotFromZ(HitResult.ImpactNormal)); // Creating rotation from surface normal
 		}
 	}
+	
+	UpdateInstMeshComponents();
 }
 
 void ADecoratorVolume::DrawDebugLines()

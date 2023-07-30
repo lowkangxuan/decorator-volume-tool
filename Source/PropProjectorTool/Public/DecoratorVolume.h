@@ -39,7 +39,8 @@ private:
 	TArray<FVector> GeneratedPoints;
 	UPROPERTY(VisibleInstanceOnly)
 	TArray<FVector> LineTracedLocations;
-	TArray<FVector> LineTracedRotations;
+	UPROPERTY(VisibleInstanceOnly)
+	TArray<FRotator> LineTracedRotations;
 
 	UPROPERTY(EditAnywhere, meta = (ClampMin = 0))
 	int32 Count = 0;
@@ -59,6 +60,9 @@ public:
 
 	UPROPERTY(EditAnywhere, meta = (ClampMin = -999999, ClampMax = 999999))
 	int32 Seed = 0;
+
+	UPROPERTY(EditAnywhere)
+	bool AlignToSurface = true;
 	
 	UPROPERTY(BlueprintReadOnly)
 	FRandomStream RandStream = FRandomStream();
@@ -90,12 +94,12 @@ private:
 	void Regenerate();
 	void TriggerRegeneration(bool NewSeed);
 	void RegeneratePoints();
-	
-	void AddInstMeshComps();
-	void DeleteInstMeshComps();
-	void UpdateInstMeshComps();
 	UFUNCTION(CallInEditor, Category="DecoratorVolume")
-	void RunLineTraces();
+	void RunLineTrace();
+	
+	void AddInstMeshComponents();
+	void DeleteInstMeshComponents();
+	void UpdateInstMeshComponents();
 	
 	void UpdateMeshScale();
 
