@@ -132,6 +132,7 @@ void ADecoratorVolume::BeginDestroy()
 	OnSelectionChangedHandle.Reset();
 }
 
+
 #if WITH_EDITOR
 void ADecoratorVolume::PostInitProperties()
 {
@@ -144,7 +145,7 @@ void ADecoratorVolume::PostEditChangeProperty(FPropertyChangedEvent& e)
 {
 	Super::PostEditChangeProperty(e);
 
-	const FName PropertyName = (e.Property != NULL ? e.GetPropertyName() : NAME_None);
+	const FName PropertyName = (e.Property != NULL ? e.MemberProperty->GetFName() : NAME_None);
 	UE_LOG(LogTemp, Display, TEXT("Decorator Volume: %s"), *FString(PropertyName.ToString()));
 	
 	// Generate new points when these properties are edited
@@ -184,7 +185,7 @@ void ADecoratorVolume::PostEditChangeProperty(FPropertyChangedEvent& e)
 	}
 
 	// Call UpdateMeshScale() function when the Size property is edited
-	if (PropertyName == "X" || PropertyName == "Y")
+	if (PropertyName == "Size")
 	{
 		UpdateMeshScale();
 		RegeneratePoints();
@@ -213,6 +214,10 @@ void ADecoratorVolume::RandomizeSeed()
 void ADecoratorVolume::InitNewStreamSeed()
 {
 	RandStream.Initialize(Seed);
+}
+
+void ADecoratorVolume::Repaint()
+{
 }
 
 // Function button that can be pressed in the Editor to trigger points regeneration
@@ -316,6 +321,7 @@ void ADecoratorVolume::DeleteInstMeshComponents()
 }
 
 // Add or Update instances Transform in the InstancedMeshComponent(s)
+// Modifies the instance Mesh and Material as well
 void ADecoratorVolume::UpdateInstMeshComponents()
 {
 	TArray<UInstancedStaticMeshComponent*> InstMeshComponents;
@@ -329,9 +335,11 @@ void ADecoratorVolume::UpdateInstMeshComponents()
 	for (int Index = 0; Index < InstMeshComponents.Num(); ++Index)
 	{
 		UInstancedStaticMeshComponent* CurrComponent = InstMeshComponents[Index];
-		CurrComponent->SetStaticMesh(Palette->Instances[Index].Mesh); // Set instance mesh to the current palette index mesh
-		unsigned int k = 0;
+		CurrComponent->SetStaticMesh(Palette->Instances[Index].Mesh); // Set instance mesh from the current palette index mesh
+		CurrComponent->SetMaterial(0, Palette->Instances[Index].Mat); // Set instance material to the current palette index material
 		
+		unsigned int k = 0;
+
 		float CurrCount = FMath::RoundHalfFromZero((Count * (Palette->GetInstanceDensity(Index))) + PrevCount);
 		CurrCount = FMath::Clamp(CurrCount, 0, LineTracedLocations.Num()); // CLamp value within the number of array elements
 		for (int j = PrevCount; j < CurrCount; ++j)
@@ -349,11 +357,19 @@ void ADecoratorVolume::UpdateInstMeshComponents()
 			}
 
 			++k;
-			//UE_LOG(LogTemp, Display, TEXT("%d"), k);
+			UE_LOG(LogTemp, Display, TEXT("K: %d"), k);
 		}
 		//UE_LOG(LogTemp, Display, TEXT("CurrCount: %f, PrevCount: %d, Instance Density: %f"), CurrCount, PrevCount, Palette->GetInstanceDensity(i));
 		PrevCount = CurrCount;
 	}
+}
+
+void ADecoratorVolume::UpdateInstanceTransform()
+{
+}
+
+void ADecoratorVolume::UpdateInstanceMeshMaterial()
+{
 }
 
 void ADecoratorVolume::RunLineTrace()
@@ -373,7 +389,7 @@ void ADecoratorVolume::RunLineTrace()
 		
 		if (HitResult.bBlockingHit)
 		{
-			UE_LOG(LogTemp, Display, TEXT("Impact Point: %s, Impact Normal: %s"), *HitResult.ImpactPoint.ToString(), *HitResult.ImpactNormal.ToString());
+			//UE_LOG(LogTemp, Display, TEXT("Impact Point: %s, Impact Normal: %s"), *HitResult.ImpactPoint.ToString(), *HitResult.ImpactNormal.ToString());
 			LineTracedLocations.Add(HitResult.ImpactPoint);
 			LineTracedRotations.Add(UKismetMathLibrary::MakeRotFromZ(HitResult.ImpactNormal)); // Creating rotation from surface normal
 		}

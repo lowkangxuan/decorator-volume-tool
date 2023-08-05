@@ -94,12 +94,18 @@ private:
 	void Regenerate();
 	void TriggerRegeneration(bool NewSeed);
 	void RegeneratePoints();
+	
+	UFUNCTION(CallInEditor, Category="DecoratorVolume")
+	void Repaint();
+
 	UFUNCTION(CallInEditor, Category="DecoratorVolume")
 	void RunLineTrace();
 	
 	void AddInstMeshComponents();
 	void DeleteInstMeshComponents();
 	void UpdateInstMeshComponents();
+	void UpdateInstanceTransform();
+	void UpdateInstanceMeshMaterial();
 	
 	void UpdateMeshScale();
 
