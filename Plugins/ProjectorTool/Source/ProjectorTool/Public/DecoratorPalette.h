@@ -4,14 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
-#include "NewDecoratorPaletteGroupStruct.h"
-#include "NewDecoratorPalette.generated.h"
+#include "DecoratorPaletteGroupStruct.h"
+#include "DecoratorPalette.generated.h"
 
 /**
  * 
  */
 UCLASS(Abstract, Blueprintable, BlueprintType, CollapseCategories, DefaultToInstanced, EditInlineNew)
-class PROJECTORTOOL_API UNewDecoratorPalette : public UObject
+class PROJECTORTOOL_API UDecoratorPalette : public UObject
 {
 	GENERATED_BODY()
 	
@@ -20,7 +20,7 @@ public:
 	int32 TotalDensity;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (TitleProperty="Density: {Density}"))
-	TArray<FNewDecoratorPaletteGroupStruct> Instances;
+	TArray<FDecoratorPaletteGroupStruct> Instances;
 
 public:
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& e) override;
@@ -29,5 +29,6 @@ public:
 	int32 GetTotalDensity();
 
 	int32 GetNumberOfInstances() const;
-	float GetInstanceDensity(int32 index);
+	float GetDensityRatioAtIndex(int32 index);
+	FVector GetScaleAtIndex(int32 index);
 };

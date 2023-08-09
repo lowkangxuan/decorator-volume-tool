@@ -4,18 +4,18 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "NewDecoratorPalette.h"
-#include "NewDecoratorVolume.generated.h"
+#include "DecoratorPalette.h"
+#include "DecoratorVolume.generated.h"
 
 UENUM()
-enum NewVolumeShape
+enum ProjectionShape
 {
 	Cylinder,
 	Cube
 };
 
 UCLASS(Abstract, Blueprintable, HideCategories=(Collision, HLOD, Physics, Networking, Input))
-class PROJECTORTOOL_API ANewDecoratorVolume : public AActor
+class PROJECTORTOOL_API ADecoratorVolume : public AActor
 {
 	GENERATED_BODY()
 	
@@ -35,11 +35,8 @@ private:
 	UPROPERTY(BlueprintReadOnly, VisibleDefaultsOnly, meta = (AllowPrivateAccess = true))
 	UStaticMeshComponent* DebugMesh = nullptr;
 
-	UPROPERTY(EditAnywhere/*, meta = (MakeEditWidget)*/)
 	TArray<FVector> GeneratedPoints;
-	UPROPERTY(VisibleInstanceOnly)
 	TArray<FVector> LineTracedLocations;
-	UPROPERTY(VisibleInstanceOnly)
 	TArray<FRotator> LineTracedRotations;
 
 	UPROPERTY(EditAnywhere, meta = (ClampMin = 0))
@@ -47,13 +44,13 @@ private:
 
 public:	
 	// Sets default values for this actor's properties
-	ANewDecoratorVolume(const class FObjectInitializer& ObjectInitializer);
+	ADecoratorVolume(const class FObjectInitializer& ObjectInitializer);
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Instanced, meta = (DisplayPriority = 0))
-	UNewDecoratorPalette* Palette = nullptr;
+	UPROPERTY(EditAnywhere, meta = (DisplayPriority = 0))
+	TSubclassOf<UDecoratorPalette> Palette = nullptr;
 
 	UPROPERTY(EditAnywhere, meta = (DisplayPriority = 1))
-	TEnumAsByte<NewVolumeShape> Shape = NewVolumeShape::Cylinder;
+	TEnumAsByte<ProjectionShape> Shape = ProjectionShape::Cylinder;
 
 	UPROPERTY(BlueprintReadOnly, EditAnywhere)
 	FVector2D Size = FVector2D(100, 100);
@@ -94,21 +91,22 @@ private:
 	void Regenerate();
 	void TriggerRegeneration(bool NewSeed);
 	void RegeneratePoints();
+	void RunLineTrace();
 	
 	UFUNCTION(CallInEditor, Category="DecoratorVolume")
-	void Repaint();
-
+	void RepaintTransform();
+	
 	UFUNCTION(CallInEditor, Category="DecoratorVolume")
-	void RunLineTrace();
+	void RepaintMeshMaterial();
 	
 	void AddInstMeshComponents();
 	void DeleteInstMeshComponents();
-	void UpdateInstMeshComponents();
-	void UpdateInstanceTransform();
 	void UpdateInstanceMeshMaterial();
+	void UpdateInstanceTransform();
 	
 	void UpdateMeshScale();
 
+	// Seed Stuff
 	void InitNewStreamSeed();
 	void RandomizeSeed();
 
