@@ -34,14 +34,15 @@ private:
 
 	UPROPERTY(BlueprintReadOnly, VisibleDefaultsOnly, meta = (AllowPrivateAccess = true))
 	UStaticMeshComponent* DebugMesh = nullptr;
+	
+	FRandomStream RandStream = FRandomStream();
+	
+	UPROPERTY(EditAnywhere, meta = (ClampMin = 0))
+	int32 Count = 0;
 
 	TArray<FVector> GeneratedPoints;
 	TArray<FVector> LineTracedLocations;
 	TArray<FRotator> LineTracedRotations;
-
-	UPROPERTY(EditAnywhere, meta = (ClampMin = 0))
-	int32 Count = 0;
-	FRandomStream RandStream = FRandomStream();
 	
 public:	
 	// Sets default values for this actor's properties

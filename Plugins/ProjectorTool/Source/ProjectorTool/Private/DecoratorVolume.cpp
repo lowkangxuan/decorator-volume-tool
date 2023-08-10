@@ -17,6 +17,8 @@ ADecoratorVolume::ADecoratorVolume(const FObjectInitializer& ObjectInitializer) 
 	PrimaryActorTick.bCanEverTick = false;
 	SetCanBeDamaged(false);
 
+	InitNewStreamSeed(); //To initialize stream with current seed value when placed in Level
+
 #pragma region Setting Debug Meshes
 	ConstructorHelpers::FObjectFinder<UStaticMesh> DebugCylinder(TEXT("StaticMesh'/Game/DecoratorVolume/Meshes/SM_DebugCylinderMesh.SM_DebugCylinderMesh'"));
 	ConstructorHelpers::FObjectFinder<UStaticMesh> DebugCube(TEXT("StaticMesh'/Game/DecoratorVolume/Meshes/SM_DebugCubeMesh.SM_DebugCubeMesh'"));
@@ -129,8 +131,6 @@ void ADecoratorVolume::BeginDestroy()
 void ADecoratorVolume::PostInitProperties()
 {
 	Super::PostInitProperties();
-
-	InitNewStreamSeed(); //To initialize stream with current seed value when placed in Level
 }
 
 void ADecoratorVolume::PostEditChangeProperty(FPropertyChangedEvent& e)
@@ -181,7 +181,18 @@ void ADecoratorVolume::PostEditChangeProperty(FPropertyChangedEvent& e)
 	{
 		UpdateMeshScale();
 		RegeneratePoints();
-		//RepaintTransform();
+		RepaintTransform();
+	}
+
+	if (PropertyName == "AlignToSurface")
+	{
+		RunLineTrace();
+		RepaintTransform();
+	}
+
+	if (PropertyName == "DrawProjectionVisualizer")
+	{
+		
 	}
 }
 #endif
@@ -195,17 +206,17 @@ void ADecoratorVolume::UpdateMeshScale()
 	DebugMesh->SetWorldScale3D(FVector(length, height));
 }
 
+// Initialize RandStream with Seed
+void ADecoratorVolume::InitNewStreamSeed()
+{
+	RandStream.Initialize(Seed);
+}
+
 // Set a random int value to Seed and calling SetNewStreamSeed() function
 void ADecoratorVolume::RandomizeSeed()
 {
 	Seed = FMath::RandRange(MinClamp, MaxClamp);
 	InitNewStreamSeed();
-}
-
-// Initialize RandStream with Seed
-void ADecoratorVolume::InitNewStreamSeed()
-{
-	RandStream.Initialize(Seed);
 }
 
 void ADecoratorVolume::RepaintTransform()
@@ -225,26 +236,25 @@ void ADecoratorVolume::Regenerate()
 	TriggerRegeneration((true));
 }
 
-// Regenerate points using Maths and based on the number of Counts and Shape of the volume
+// Regenerate points using Maths and based on the number of Counts and Shape
 void ADecoratorVolume::RegeneratePoints()
 {
 	GeneratedPoints.Empty(); // Clear array first before generating new points
 	
 	for (int i = 0; i < Count; i++)
 	{
-		//UE_LOG(LogTemp, Display, TEXT("Count: %d"), i);
-		float RandFloat = RandStream.FRand();
-		float x;
-		float y;
+		const float RandFloat = RandStream.FRand();
+		float x = 0;
+		float y = 0;
 		FVector NewPoint;
 
 		switch (Shape)
 		{
 			case Cylinder:
 			{
-				float Radius = Size.X / 2;
-				float R = Radius * FMath::Sqrt(RandFloat);
-				float Theta = 200 * PI * RandFloat;
+				const float Radius = Size.X / 2;
+				const float R = Radius * FMath::Sqrt(RandFloat);
+				const float Theta = 200 * PI * RandFloat;
 				x = R * FMath::Cos(Theta);
 				y = R * FMath::Sin(Theta);
 				break;
@@ -261,6 +271,8 @@ void ADecoratorVolume::RegeneratePoints()
 		NewPoint = FVector(x, y, 0);
 		GeneratedPoints.Add(NewPoint);
 	}
+
+	RandStream.Reset(); // Resets the Stream to get back original RANDOM values
 }
 
 void ADecoratorVolume::RunLineTrace()
@@ -386,9 +398,8 @@ void ADecoratorVolume::UpdateInstanceTransform()
 			FTransform InstanceTransform = FTransform(AlignToSurface ? LineTracedRotations[j] : FRotator::ZeroRotator, LineTracedLocations[j], GetPalette()->GetScaleAtIndex(Index));
 			CurrComponent->AddInstance(InstanceTransform, true);
 			++k;
-			UE_LOG(LogTemp, Display, TEXT("K: %d, Inst Count: %d, Value: %f"), k, CurrComponent->GetInstanceCount(), CurrCount - PrevCount);
 		}
-		//UE_LOG(LogTemp, Display, TEXT("CurrCount: %f, PrevCount: %d, Instance Density: %f"), CurrCount, PrevCount, Palette->GetInstanceDensity(i));
+		
 		PrevCount = CurrCount;
 	}
 }
