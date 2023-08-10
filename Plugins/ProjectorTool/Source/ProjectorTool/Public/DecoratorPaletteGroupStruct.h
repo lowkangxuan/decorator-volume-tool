@@ -24,8 +24,8 @@ public:
 	UMaterial* Mat;
 
 	UPROPERTY(EditAnywhere)
-	FCollisionProfileName CollisionPreset = FCollisionProfileName("BlockAll");
-
+	FCollisionProfileName CollisionPreset = UCollisionProfile::BlockAll_ProfileName;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(ClampMin = 0))
 	int32 Density = 1; // Default density set to 1
 

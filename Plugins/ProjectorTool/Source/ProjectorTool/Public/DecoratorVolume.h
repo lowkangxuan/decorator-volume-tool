@@ -41,7 +41,8 @@ private:
 
 	UPROPERTY(EditAnywhere, meta = (ClampMin = 0))
 	int32 Count = 0;
-
+	FRandomStream RandStream = FRandomStream();
+	
 public:	
 	// Sets default values for this actor's properties
 	ADecoratorVolume(const class FObjectInitializer& ObjectInitializer);
@@ -58,11 +59,11 @@ public:
 	UPROPERTY(EditAnywhere, meta = (ClampMin = -999999, ClampMax = 999999))
 	int32 Seed = 0;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, AdvancedDisplay)
 	bool AlignToSurface = true;
-	
-	UPROPERTY(BlueprintReadOnly)
-	FRandomStream RandStream = FRandomStream();
+
+	UPROPERTY(EditAnywhere, AdvancedDisplay)
+	bool DrawProjectionVisualizer = true;
 
 protected:
 	// Called when the game starts or when spawneds
@@ -74,7 +75,6 @@ protected:
 	
 	// Function called once a property has been edited in the Details Panel
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& e) override;
-	void OnSelectionChanged(UObject* NewSelection);
 #endif
 
 public:	
@@ -113,4 +113,6 @@ private:
 	// Overloads for DrawDebugLines
 	void DrawDebugLines();
 	void DrawDebugLines(FVector Start, FVector End);
+
+	UDecoratorPalette* GetPalette() const;
 };

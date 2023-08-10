@@ -181,7 +181,7 @@ void ADecoratorVolume::PostEditChangeProperty(FPropertyChangedEvent& e)
 	{
 		UpdateMeshScale();
 		RegeneratePoints();
-		RepaintTransform();
+		//RepaintTransform();
 	}
 }
 #endif
@@ -289,10 +289,8 @@ void ADecoratorVolume::RunLineTrace()
 
 void ADecoratorVolume::TriggerRegeneration(bool NewSeed = false)
 {
-	const UDecoratorPalette* PaletteObj = Palette.GetDefaultObject();
-	
 	// We do not want to call all the functions below if the parameters are kept default
-	if (Count == 0 || PaletteObj == nullptr || PaletteObj->GetNumberOfInstances() == 0)
+	if (Count == 0 || GetPalette() == nullptr || GetPalette()->GetNumberOfInstances() == 0)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Decorator Volume: Please ensure to populate the Count, Palette, and Palette Instances parameters!"));
 		return;
@@ -312,20 +310,26 @@ void ADecoratorVolume::TriggerRegeneration(bool NewSeed = false)
 // Add Instance Mesh Component
 void ADecoratorVolume::AddInstMeshComponents()
 {
-	const UDecoratorPalette* PaletteObj = Palette.GetDefaultObject();
+	TArray<UInstancedStaticMeshComponent*> TempArray;
 	
-	for (int i = 0; i < (PaletteObj->GetNumberOfInstances()); ++i)
+	for (int i = 0; i < GetPalette()->GetNumberOfInstances(); ++i)
 	{
-		UInstancedStaticMeshComponent* InstMeshComp = NewObject<UInstancedStaticMeshComponent>(this, TEXT(""));
+		UInstancedStaticMeshComponent* InstMeshComp = NewObject<UInstancedStaticMeshComponent>(this, UInstancedStaticMeshComponent::StaticClass());
 		if (!InstMeshComp) return; // Exit the function if for some reason the component is not created
-		
+		UE_LOG(LogTemp, Display, TEXT("%s"), *InstMeshComp->GetName());
 		InstMeshComp->OnComponentCreated();
 		InstMeshComp->CreationMethod = EComponentCreationMethod::Instance;
 		InstMeshComp->AttachToComponent(this->RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 		InstMeshComp->SetRelativeLocation(FVector(0)); // Ensure that the component is at the center of the actor
-		//InstMeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		InstMeshComp->RegisterComponent();
 		AddInstanceComponent(InstMeshComp);
+		TempArray.Add(InstMeshComp);
+	}
+
+	Algo::Reverse(TempArray); // Reverse array as GetComponents gets all components in reverse order
+	for (int i = 0; i < TempArray.Num(); ++i)
+	{
+		TempArray[i]->SetCollisionProfileName(GetPalette()->Instances[i].CollisionPreset.Name);
 	}
 }
 
@@ -351,10 +355,9 @@ void ADecoratorVolume::UpdateInstanceMeshMaterial()
 	for (int Index = 0; Index < InstMeshComponents.Num(); ++Index)
 	{
 		UInstancedStaticMeshComponent* CurrComponent = InstMeshComponents[Index];
-		const UDecoratorPalette* PaletteObj = Palette.GetDefaultObject();
-		
-		CurrComponent->SetStaticMesh(PaletteObj->Instances[Index].Mesh); // Set instance mesh from the current palette index mesh
-		CurrComponent->SetMaterial(0, PaletteObj->Instances[Index].Mat); // Set instance material to the current palette index material
+		UE_LOG(LogTemp, Display, TEXT("%s"), *CurrComponent->GetName());
+		CurrComponent->SetStaticMesh(GetPalette()->Instances[Index].Mesh); // Set instance mesh from the current palette index mesh
+		CurrComponent->SetMaterial(0, GetPalette()->Instances[Index].Mat); // Set instance material to the current palette index material
 	}
 }
 
@@ -362,7 +365,6 @@ void ADecoratorVolume::UpdateInstanceTransform()
 {
 	TArray<UInstancedStaticMeshComponent*> InstMeshComponents;
 	this->GetComponents<UInstancedStaticMeshComponent>(InstMeshComponents);
-	UDecoratorPalette* PaletteObj = Palette.GetDefaultObject();
 	
 	unsigned int PrevCount = 0; // Sort of a "clamp" for the nested loop
 	
@@ -377,11 +379,11 @@ void ADecoratorVolume::UpdateInstanceTransform()
 		}
 		
 		unsigned int k = 0;
-		float CurrCount = FMath::RoundHalfFromZero((Count * (PaletteObj->GetDensityRatioAtIndex(Index))) + PrevCount);
+		float CurrCount = FMath::RoundHalfFromZero((Count * (GetPalette()->GetDensityRatioAtIndex(Index))) + PrevCount);
 		CurrCount = FMath::Clamp(CurrCount, 0, LineTracedLocations.Num()); // CLamp value within the number of array elements
 		for (int j = PrevCount; j < CurrCount; ++j)
 		{
-			FTransform InstanceTransform = FTransform(AlignToSurface ? LineTracedRotations[j] : FVector::Zero(), LineTracedLocations[j], PaletteObj->GetScaleAtIndex(Index));
+			FTransform InstanceTransform = FTransform(AlignToSurface ? LineTracedRotations[j] : FRotator::ZeroRotator, LineTracedLocations[j], GetPalette()->GetScaleAtIndex(Index));
 			CurrComponent->AddInstance(InstanceTransform, true);
 			++k;
 			UE_LOG(LogTemp, Display, TEXT("K: %d, Inst Count: %d, Value: %f"), k, CurrComponent->GetInstanceCount(), CurrCount - PrevCount);
@@ -407,4 +409,9 @@ void ADecoratorVolume::DrawDebugLines()
 void ADecoratorVolume::DrawDebugLines(FVector Start, FVector End)
 {
 	DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 1, 0, 1.5);
+}
+
+UDecoratorPalette* ADecoratorVolume::GetPalette() const
+{
+	return Palette.GetDefaultObject();
 }
