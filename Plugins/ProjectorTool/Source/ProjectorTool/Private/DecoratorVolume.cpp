@@ -169,7 +169,7 @@ void ADecoratorVolume::PostEditChangeProperty(FPropertyChangedEvent& e)
 		}
 
 		RegeneratePoints();
-		RepaintTransform();
+		Regenerate();
 	}
 
 	if (PropertyName == "Count")
@@ -179,31 +179,31 @@ void ADecoratorVolume::PostEditChangeProperty(FPropertyChangedEvent& e)
 	
 	if (PropertyName == "Size")
 	{
-		UpdateMeshScale();
+		UpdateVisualization();
 		RegeneratePoints();
-		RepaintTransform();
+		Regenerate();
 	}
 
 	if (PropertyName == "AlignToSurface")
 	{
 		RunLineTrace();
-		RepaintTransform();
+		Regenerate();
 	}
 
 	if (PropertyName == "DrawProjectionVisualizer")
 	{
-		
+		DebugMesh->SetVisibility(DrawProjectionVisualizer);
 	}
 }
 #endif
 
 // Scale DebugMesh based on Size.x and Size.y values
-void ADecoratorVolume::UpdateMeshScale()
+void ADecoratorVolume::UpdateVisualization()
 {
-	const FVector2D length = FVector2D(Size.X / 100); //Scale of the mesh's XY
-	const float height = Size.Y / 100; //Scale of the mesh's Z
+	const FVector2D Length = FVector2D(Size.X / 100); //Scale of the mesh's XY
+	const float Height = Size.Y / 100; //Scale of the mesh's Z
 
-	DebugMesh->SetWorldScale3D(FVector(length, height));
+	DebugMesh->SetWorldScale3D(FVector(Length, Height));
 }
 
 // Initialize RandStream with Seed
@@ -219,21 +219,38 @@ void ADecoratorVolume::RandomizeSeed()
 	InitNewStreamSeed();
 }
 
-void ADecoratorVolume::RepaintTransform()
+// Regenerate instances transform, mesh, material, collision, etc
+void ADecoratorVolume::Regenerate()
 {
 	RunLineTrace();
+	UpdateInstanceMeshMaterial();
 	UpdateInstanceTransform();
 }
 
-void ADecoratorVolume::RepaintMeshMaterial()
+// Regenerate instances with new Seed
+void ADecoratorVolume::RegenerateNewSeed()
 {
-	UpdateInstanceMeshMaterial();
+	TriggerRegeneration(true);
 }
 
-// Function button that can be pressed in the Editor to trigger points regeneration
-void ADecoratorVolume::Regenerate()
+void ADecoratorVolume::TriggerRegeneration(bool NewSeed = false)
 {
-	TriggerRegeneration((true));
+	// We do not want to call all the functions below if the parameters are kept default
+	if (Count == 0 || GetPalette() == nullptr || GetPalette()->GetNumberOfInstances() == 0)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Decorator Volume: Please ensure to populate the Count, Palette, and Palette Instances parameters!"));
+		return;
+	}
+	
+	if (NewSeed) RandomizeSeed(); // Randomize a new seed if NewSeed param is true
+	RegeneratePoints();
+	RunLineTrace();
+	DeleteInstMeshComponents();  
+	AddInstMeshComponents();
+	UpdateInstanceMeshMaterial();
+	UpdateInstanceTransform();
+	
+	DrawDebugLines(); //For debugging "line rays" for each point generated
 }
 
 // Regenerate points using Maths and based on the number of Counts and Shape
@@ -275,6 +292,7 @@ void ADecoratorVolume::RegeneratePoints()
 	RandStream.Reset(); // Resets the Stream to get back original RANDOM values
 }
 
+// Run a set of line traces to gather location and rotation (from hit normal) using generated points and projector size
 void ADecoratorVolume::RunLineTrace()
 {
 	LineTracedLocations.Empty();
@@ -299,26 +317,6 @@ void ADecoratorVolume::RunLineTrace()
 	}
 }
 
-void ADecoratorVolume::TriggerRegeneration(bool NewSeed = false)
-{
-	// We do not want to call all the functions below if the parameters are kept default
-	if (Count == 0 || GetPalette() == nullptr || GetPalette()->GetNumberOfInstances() == 0)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Decorator Volume: Please ensure to populate the Count, Palette, and Palette Instances parameters!"));
-		return;
-	}
-	
-	if (NewSeed) RandomizeSeed(); // Randomize a new seed if NewSeed param is true
-	RegeneratePoints();
-	RunLineTrace();
-	DeleteInstMeshComponents();  
-	AddInstMeshComponents();
-	UpdateInstanceMeshMaterial();
-	UpdateInstanceTransform();
-	
-	DrawDebugLines(); //For debugging "line rays" for each point generated
-}
-
 // Add Instance Mesh Component
 void ADecoratorVolume::AddInstMeshComponents()
 {
@@ -328,7 +326,7 @@ void ADecoratorVolume::AddInstMeshComponents()
 	{
 		UInstancedStaticMeshComponent* InstMeshComp = NewObject<UInstancedStaticMeshComponent>(this, UInstancedStaticMeshComponent::StaticClass());
 		if (!InstMeshComp) return; // Exit the function if for some reason the component is not created
-		UE_LOG(LogTemp, Display, TEXT("%s"), *InstMeshComp->GetName());
+
 		InstMeshComp->OnComponentCreated();
 		InstMeshComp->CreationMethod = EComponentCreationMethod::Instance;
 		InstMeshComp->AttachToComponent(this->RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
@@ -341,7 +339,8 @@ void ADecoratorVolume::AddInstMeshComponents()
 	Algo::Reverse(TempArray); // Reverse array as GetComponents gets all components in reverse order
 	for (int i = 0; i < TempArray.Num(); ++i)
 	{
-		TempArray[i]->SetCollisionProfileName(GetPalette()->Instances[i].CollisionPreset.Name);
+		// Setting each instance a collision profile from their respective palette instance
+		TempArray[i]->SetCollisionProfileName(GetPalette()->Instances[i].CollisionProfile.Name);
 	}
 }
 
@@ -367,7 +366,6 @@ void ADecoratorVolume::UpdateInstanceMeshMaterial()
 	for (int Index = 0; Index < InstMeshComponents.Num(); ++Index)
 	{
 		UInstancedStaticMeshComponent* CurrComponent = InstMeshComponents[Index];
-		UE_LOG(LogTemp, Display, TEXT("%s"), *CurrComponent->GetName());
 		CurrComponent->SetStaticMesh(GetPalette()->Instances[Index].Mesh); // Set instance mesh from the current palette index mesh
 		CurrComponent->SetMaterial(0, GetPalette()->Instances[Index].Mat); // Set instance material to the current palette index material
 	}

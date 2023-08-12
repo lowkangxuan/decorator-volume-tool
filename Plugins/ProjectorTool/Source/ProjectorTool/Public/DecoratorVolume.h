@@ -40,6 +40,7 @@ private:
 	UPROPERTY(EditAnywhere, meta = (ClampMin = 0))
 	int32 Count = 0;
 
+	UPROPERTY(VisibleAnywhere)
 	TArray<FVector> GeneratedPoints;
 	TArray<FVector> LineTracedLocations;
 	TArray<FRotator> LineTracedRotations;
@@ -90,22 +91,20 @@ public:
 private:
 	UFUNCTION(CallInEditor, Category="DecoratorVolume")
 	void Regenerate();
+	
+	UFUNCTION(CallInEditor, Category="DecoratorVolume")
+	void RegenerateNewSeed();
+	
 	void TriggerRegeneration(bool NewSeed);
 	void RegeneratePoints();
 	void RunLineTrace();
-	
-	UFUNCTION(CallInEditor, Category="DecoratorVolume")
-	void RepaintTransform();
-	
-	UFUNCTION(CallInEditor, Category="DecoratorVolume")
-	void RepaintMeshMaterial();
 	
 	void AddInstMeshComponents();
 	void DeleteInstMeshComponents();
 	void UpdateInstanceMeshMaterial();
 	void UpdateInstanceTransform();
 	
-	void UpdateMeshScale();
+	void UpdateVisualization();
 
 	// Seed Stuff
 	void InitNewStreamSeed();
