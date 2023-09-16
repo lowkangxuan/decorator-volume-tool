@@ -4,18 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "ToolEnums.h"
 #include "DecoratorPalette.h"
+#include "DecoratorVolumeVisualizerComponent.h"
 #include "DecoratorVolume.generated.h"
 
-UENUM()
-enum ProjectionShape
-{
-	Cylinder,
-	Cube
-};
-
 UCLASS(Abstract, Blueprintable, HideCategories=(Collision, HLOD, Physics, Networking, Input))
-class PROJECTORTOOL_API ADecoratorVolume : public AActor
+class PROJECTORTOOLRUNTIME_API ADecoratorVolume : public AActor
 {
 	GENERATED_BODY()
 	
@@ -23,6 +18,8 @@ private:
 	// Min Max clamps for Seed value
 	const int32 MinClamp = -999999;
 	const int32 MaxClamp = 999999;
+
+	bool IsStreamInitialized = false;
 	
 	UBillboardComponent* SpriteComponent;
 	UStaticMesh* DebugCylinderMesh;
@@ -31,7 +28,8 @@ private:
 
 	UPROPERTY(VisibleDefaultsOnly)
 	USceneComponent* DefaultRoot = nullptr;
-
+	UDecoratorVolumeVisualizerComponent* VisualizerComponent = nullptr;
+	
 	UPROPERTY(BlueprintReadOnly, VisibleDefaultsOnly, meta = (AllowPrivateAccess = true))
 	UStaticMeshComponent* DebugMesh = nullptr;
 	
@@ -53,13 +51,13 @@ public:
 	TSubclassOf<UDecoratorPalette> Palette = nullptr;
 
 	UPROPERTY(EditAnywhere, meta = (DisplayPriority = 1))
-	TEnumAsByte<ProjectionShape> Shape = ProjectionShape::Cylinder;
+	EProjectionShape Shape = EProjectionShape::Cylinder;
 
 	UPROPERTY(BlueprintReadOnly, EditAnywhere)
 	FVector2D Size = FVector2D(100, 100);
 
 	UPROPERTY(EditAnywhere, meta = (ClampMin = -999999, ClampMax = 999999))
-	int32 Seed = 0;
+	int32 Seed;
 
 	UPROPERTY(EditAnywhere, AdvancedDisplay)
 	bool AlignToSurface = true;
@@ -89,6 +87,12 @@ public:
 	virtual void BeginDestroy() override;
 
 private:
+	void UpdateVisualization();
+
+	// Seed Stuff
+	void InitNewStreamSeed();
+	void RandomizeSeed();
+	
 	UFUNCTION(CallInEditor, Category="DecoratorVolume")
 	void Regenerate();
 	
@@ -100,16 +104,13 @@ private:
 	void RunLineTrace();
 	
 	void AddInstMeshComponents();
-	void DeleteInstMeshComponents();
+	void RemoveInstMeshComponents();
 	void UpdateInstanceMeshMaterial();
 	void UpdateInstanceTransform();
+
+	FRotator RandomizeRotator(FRotator Min, FRotator Max);
+	FVector RandomizeScale(FVector Min, FVector Max);
 	
-	void UpdateVisualization();
-
-	// Seed Stuff
-	void InitNewStreamSeed();
-	void RandomizeSeed();
-
 	// Overloads for DrawDebugLines
 	void DrawDebugLines();
 	void DrawDebugLines(FVector Start, FVector End);

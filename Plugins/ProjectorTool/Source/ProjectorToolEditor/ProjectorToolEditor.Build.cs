@@ -9,14 +9,16 @@ public class ProjectorToolEditor : ModuleRules
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 		
 		PublicIncludePaths.AddRange(
-			new string[] {
+			new string[] 
+			{
 				// ... add public include paths required here ...
 			}
 			);
 				
 		
 		PrivateIncludePaths.AddRange(
-			new string[] {
+			new string[] 
+			{
 				// ... add other private include paths required here ...
 			}
 			);
@@ -27,6 +29,7 @@ public class ProjectorToolEditor : ModuleRules
 			{
 				"Core",
 				// ... add other public dependencies that you statically link with here ...
+				"ProjectorToolRuntime"
 			}
 			);
 			
@@ -38,6 +41,8 @@ public class ProjectorToolEditor : ModuleRules
 				"Engine",
 				"Slate",
 				"SlateCore",
+				"UnrealEd",
+				"ComponentVisualizers"
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);

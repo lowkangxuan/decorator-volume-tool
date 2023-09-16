@@ -17,8 +17,9 @@ ADecoratorVolume::ADecoratorVolume(const FObjectInitializer& ObjectInitializer) 
 	PrimaryActorTick.bCanEverTick = false;
 	SetCanBeDamaged(false);
 
-	InitNewStreamSeed(); //To initialize stream with current seed value when placed in Level
-
+	VisualizerComponent = CreateDefaultSubobject<UDecoratorVolumeVisualizerComponent>(TEXT("Visualizer"));
+	VisualizerComponent->RegisterComponent();
+	
 #pragma region Setting Debug Meshes
 	ConstructorHelpers::FObjectFinder<UStaticMesh> DebugCylinder(TEXT("StaticMesh'/Game/DecoratorVolume/Meshes/SM_DebugCylinderMesh.SM_DebugCylinderMesh'"));
 	ConstructorHelpers::FObjectFinder<UStaticMesh> DebugCube(TEXT("StaticMesh'/Game/DecoratorVolume/Meshes/SM_DebugCubeMesh.SM_DebugCubeMesh'"));
@@ -89,7 +90,6 @@ ADecoratorVolume::ADecoratorVolume(const FObjectInitializer& ObjectInitializer) 
 
 	if (SpriteComponent)
 	{
-		UE_LOG(LogTemp, Display, TEXT("Test"));
 		SpriteComponent->Sprite = ConstructorStatics.EmptyActorTextureObject.Get();
 		SpriteComponent->SpriteInfo.Category = ConstructorStatics.ID_Actor;		// Assign sprite category name
 		SpriteComponent->SpriteInfo.DisplayName = ConstructorStatics.NAME_Actor;	// Assign sprite display name
@@ -105,6 +105,14 @@ ADecoratorVolume::ADecoratorVolume(const FObjectInitializer& ObjectInitializer) 
 void ADecoratorVolume::OnConstruction(const FTransform& Transform)
 {
 	DrawDebugLines();
+
+	// Trying to initialize stream when constructed in Level
+	// Also ensure that we are initializing the proper Seed value instead of a default '0'
+	if (!IsStreamInitialized)
+	{
+		InitNewStreamSeed();
+		IsStreamInitialized = true;
+	}
 }
 
 // Called when the game starts or when spawned
@@ -126,17 +134,17 @@ void ADecoratorVolume::BeginDestroy()
 	//UE_LOG(LogTemp, Display, TEXT("Destroyed"));
 }
 
-
 #if WITH_EDITOR
 void ADecoratorVolume::PostInitProperties()
 {
 	Super::PostInitProperties();
+	//InitNewStreamSeed(); //To initialize stream with current seed value when all properties are initialized
 }
 
 void ADecoratorVolume::PostEditChangeProperty(FPropertyChangedEvent& e)
 {
 	Super::PostEditChangeProperty(e);
-
+	
 	const FName PropertyName = (e.Property != NULL ? e.MemberProperty->GetFName() : NAME_None);
 	UE_LOG(LogTemp, Display, TEXT("Decorator Volume: %s"), *FString(PropertyName.ToString()));
 	
@@ -154,18 +162,20 @@ void ADecoratorVolume::PostEditChangeProperty(FPropertyChangedEvent& e)
 		{
 			switch (Shape)
 			{
-				case (Cylinder):
+				case (EProjectionShape::Cylinder):
 					{
 						DebugMesh->SetStaticMesh(DebugCylinderMesh);
 						break;
 					}
 
-				case (Cube):
+				case (EProjectionShape::Cube):
 				{
 					DebugMesh->SetStaticMesh(DebugCubeMesh);
 					break;
 				}
 			}
+
+			VisualizerComponent->UpdateShape(Shape);
 		}
 
 		RegeneratePoints();
@@ -182,11 +192,12 @@ void ADecoratorVolume::PostEditChangeProperty(FPropertyChangedEvent& e)
 		UpdateVisualization();
 		RegeneratePoints();
 		Regenerate();
+
+		VisualizerComponent->UpdateSize(FVector(Size.X, Size.X, Size.Y));
 	}
 
 	if (PropertyName == "AlignToSurface")
 	{
-		RunLineTrace();
 		Regenerate();
 	}
 
@@ -245,7 +256,7 @@ void ADecoratorVolume::TriggerRegeneration(bool NewSeed = false)
 	if (NewSeed) RandomizeSeed(); // Randomize a new seed if NewSeed param is true
 	RegeneratePoints();
 	RunLineTrace();
-	DeleteInstMeshComponents();  
+	RemoveInstMeshComponents();  
 	AddInstMeshComponents();
 	UpdateInstanceMeshMaterial();
 	UpdateInstanceTransform();
@@ -257,6 +268,7 @@ void ADecoratorVolume::TriggerRegeneration(bool NewSeed = false)
 void ADecoratorVolume::RegeneratePoints()
 {
 	GeneratedPoints.Empty(); // Clear array first before generating new points
+	GeneratedPoints.Reserve(Count);
 	
 	for (int i = 0; i < Count; i++)
 	{
@@ -267,7 +279,7 @@ void ADecoratorVolume::RegeneratePoints()
 
 		switch (Shape)
 		{
-			case Cylinder:
+			case EProjectionShape::Cylinder:
 			{
 				const float Radius = Size.X / 2;
 				const float R = Radius * FMath::Sqrt(RandFloat);
@@ -277,7 +289,7 @@ void ADecoratorVolume::RegeneratePoints()
 				break;
 			}
 
-			case Cube:
+			case EProjectionShape::Cube:
 			{
 				x = RandStream.FRandRange(-50, 50) * (Size.X / 100);
 				y = RandStream.FRandRange(-50, 50) * (Size.X / 100);
@@ -345,7 +357,7 @@ void ADecoratorVolume::AddInstMeshComponents()
 }
 
 // Get all existing Instanced Mesh Component in the actor and delete thems
-void ADecoratorVolume::DeleteInstMeshComponents()
+void ADecoratorVolume::RemoveInstMeshComponents()
 {
 	TArray<UInstancedStaticMeshComponent*> InstMeshComponents;
 	this->GetComponents<UInstancedStaticMeshComponent>(InstMeshComponents);
@@ -358,6 +370,7 @@ void ADecoratorVolume::DeleteInstMeshComponents()
 	}
 }
 
+// Gets all existing Instanced Static Mesh Component in the actor and update its mesh and material based on the corresponding palette index
 void ADecoratorVolume::UpdateInstanceMeshMaterial()
 {
 	TArray<UInstancedStaticMeshComponent*> InstMeshComponents;
@@ -371,6 +384,7 @@ void ADecoratorVolume::UpdateInstanceMeshMaterial()
 	}
 }
 
+// Delete and Re-adds all instances in each Instanced Static Mesh Component, "updating" each instance with a new set of Transform
 void ADecoratorVolume::UpdateInstanceTransform()
 {
 	TArray<UInstancedStaticMeshComponent*> InstMeshComponents;
@@ -388,18 +402,30 @@ void ADecoratorVolume::UpdateInstanceTransform()
 			CurrComponent->ClearInstances();
 		}
 		
-		unsigned int k = 0;
 		float CurrCount = FMath::RoundHalfFromZero((Count * (GetPalette()->GetDensityRatioAtIndex(Index))) + PrevCount);
 		CurrCount = FMath::Clamp(CurrCount, 0, LineTracedLocations.Num()); // CLamp value within the number of array elements
 		for (int j = PrevCount; j < CurrCount; ++j)
 		{
-			FTransform InstanceTransform = FTransform(AlignToSurface ? LineTracedRotations[j] : FRotator::ZeroRotator, LineTracedLocations[j], GetPalette()->GetScaleAtIndex(Index));
+			FRotator Rotation = (AlignToSurface ? LineTracedRotations[j] : FRotator::ZeroRotator) /*+ GetPalette()->GetRotationAtIndex(Index)*/;
+			FVector Location = LineTracedLocations[j];
+			FVector Scale = GetPalette()->GetScaleAtIndex(Index);
+			
+			FTransform InstanceTransform = FTransform(Rotation, Location, Scale);
 			CurrComponent->AddInstance(InstanceTransform, true);
-			++k;
 		}
 		
 		PrevCount = CurrCount;
 	}
+}
+
+FRotator ADecoratorVolume::RandomizeRotator(FRotator Min, FRotator Max)
+{
+	return FRotator::ZeroRotator;
+}
+
+FVector ADecoratorVolume::RandomizeScale(FVector Min, FVector Max)
+{
+	return FVector(RandStream.FRandRange(Min.X, Max.X), RandStream.FRandRange(Min.Y, Max.Y), RandStream.FRandRange(Min.Z, Max.Z));
 }
 
 void ADecoratorVolume::DrawDebugLines()

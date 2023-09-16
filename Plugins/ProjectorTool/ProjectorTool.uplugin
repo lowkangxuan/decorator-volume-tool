@@ -16,14 +16,14 @@
 	"Installed": false,
 	"Modules": [
 		{
-			"Name": "ProjectorTool",
+			"Name": "ProjectorToolRuntime",
 			"Type": "Runtime",
 			"LoadingPhase": "Default"
 		},
 		{
 			"Name": "ProjectorToolEditor",
 			"Type": "Editor",
-			"LoadingPhase": "Default"
+			"LoadingPhase": "PostEngineInit"
 		}
 	]
 }

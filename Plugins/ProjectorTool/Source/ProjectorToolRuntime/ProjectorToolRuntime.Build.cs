@@ -2,9 +2,9 @@
 
 using UnrealBuildTool;
 
-public class ProjectorTool : ModuleRules
+public class ProjectorToolRuntime : ModuleRules
 {
-	public ProjectorTool(ReadOnlyTargetRules Target) : base(Target)
+	public ProjectorToolRuntime(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 		
@@ -38,7 +38,7 @@ public class ProjectorTool : ModuleRules
 				"Engine",
 				"Slate",
 				"SlateCore",
-				// ... add private dependencies that you statically link with here ...	
+				// ... add private dependencies that you statically link with here ...
 			}
 			);
 		
