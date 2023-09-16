@@ -19,29 +19,8 @@ ADecoratorVolume::ADecoratorVolume(const FObjectInitializer& ObjectInitializer) 
 
 	VisualizerComponent = CreateDefaultSubobject<UDecoratorVolumeVisualizerComponent>(TEXT("Visualizer"));
 	VisualizerComponent->RegisterComponent();
-	
-#pragma region Setting Debug Meshes
-	ConstructorHelpers::FObjectFinder<UStaticMesh> DebugCylinder(TEXT("StaticMesh'/Game/DecoratorVolume/Meshes/SM_DebugCylinderMesh.SM_DebugCylinderMesh'"));
-	ConstructorHelpers::FObjectFinder<UStaticMesh> DebugCube(TEXT("StaticMesh'/Game/DecoratorVolume/Meshes/SM_DebugCubeMesh.SM_DebugCubeMesh'"));
-	if (DebugCylinder.Succeeded())
-	{
-		DebugCylinderMesh = DebugCylinder.Object;
-	}
-
-	if (DebugCube.Succeeded())
-	{
-		DebugCubeMesh = DebugCube.Object;
-	}
-#pragma endregion Setting Debug Meshes
-
-#pragma region Setting Debug Mesh Material
-	// Setting Debug Mesh Material from existing material in project
-	ConstructorHelpers::FObjectFinder<UMaterialInterface> MeshMat(TEXT("MaterialInterface'/Game/DecoratorVolume/Materials/MM_EditorWireframe.MM_EditorWireframe'"));
-	if (MeshMat.Succeeded())
-	{
-		DebugMeshMat = MeshMat.Object;
-	}
-#pragma endregion Setting Debug Mesh Material 
+	VisualizerComponent->UpdateSize(FVector(Size.X, Size.X, Size.Y));
+	VisualizerComponent->UpdateShape(Shape);
 
 #pragma region Setting RootComponent
 	// Setting up SceneComponent as default RootComponent
@@ -49,22 +28,7 @@ ADecoratorVolume::ADecoratorVolume(const FObjectInitializer& ObjectInitializer) 
 	SetRootComponent(DefaultRoot);
 	RootComponent->SetMobility(EComponentMobility::Static);
 #pragma endregion Setting RootComponent
-
-#pragma region Setting up DebugMesh parameters
-	// Setting up DebugMesh
-	DebugMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("DebugMesh"));
-	DebugMesh->bAffectDistanceFieldLighting = false;
-	DebugMesh->bIsEditorOnly = true;
-	DebugMesh->SetMobility(EComponentMobility::Static);
-	DebugMesh->SetLightingChannels(false, false, false);
-	DebugMesh->SetHiddenInGame(true);
-	DebugMesh->SetCastShadow(false);
-	DebugMesh->SetComponentTickEnabled(false);
-	DebugMesh->SetCollisionProfileName("NoCollision", false);
-	DebugMesh->SetStaticMesh(DebugCylinderMesh);
-	DebugMesh->SetMaterial(0, DebugMeshMat);
-	DebugMesh->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepWorldTransform);
-#pragma endregion Setting up DebugMesh parameters
+	
 
 	// Structure to hold one-time initialization
 	struct FConstructorStatics
@@ -104,8 +68,6 @@ ADecoratorVolume::ADecoratorVolume(const FObjectInitializer& ObjectInitializer) 
 
 void ADecoratorVolume::OnConstruction(const FTransform& Transform)
 {
-	DrawDebugLines();
-
 	// Trying to initialize stream when constructed in Level
 	// Also ensure that we are initializing the proper Seed value instead of a default '0'
 	if (!IsStreamInitialized)
@@ -157,24 +119,9 @@ void ADecoratorVolume::PostEditChangeProperty(FPropertyChangedEvent& e)
 			InitNewStreamSeed();
 		}
 
-		// Swap the mesh of DebugMesh when the Shape enum is edited
+		// Update Visualizer Shape
 		if (PropertyName == "Shape")
 		{
-			switch (Shape)
-			{
-				case (EProjectionShape::Cylinder):
-					{
-						DebugMesh->SetStaticMesh(DebugCylinderMesh);
-						break;
-					}
-
-				case (EProjectionShape::Cube):
-				{
-					DebugMesh->SetStaticMesh(DebugCubeMesh);
-					break;
-				}
-			}
-
 			VisualizerComponent->UpdateShape(Shape);
 		}
 
@@ -186,14 +133,13 @@ void ADecoratorVolume::PostEditChangeProperty(FPropertyChangedEvent& e)
 	{
 		TriggerRegeneration(false);
 	}
-	
+
+	// Regenerate the instanced meshes Location and update Visualizer Size
 	if (PropertyName == "Size")
 	{
-		UpdateVisualization();
+		VisualizerComponent->UpdateSize(FVector(Size.X, Size.X, Size.Y));
 		RegeneratePoints();
 		Regenerate();
-
-		VisualizerComponent->UpdateSize(FVector(Size.X, Size.X, Size.Y));
 	}
 
 	if (PropertyName == "AlignToSurface")
@@ -201,21 +147,17 @@ void ADecoratorVolume::PostEditChangeProperty(FPropertyChangedEvent& e)
 		Regenerate();
 	}
 
-	if (PropertyName == "DrawProjectionVisualizer")
+	if (PropertyName == "ShowRaycastLines")
 	{
-		DebugMesh->SetVisibility(DrawProjectionVisualizer);
+		VisualizerComponent->DrawRaycastLines(ShowRaycastLines);
+
+		if (ShowRaycastLines)
+		{
+			VisualizerComponent->UpdateStartPoints(GeneratedPoints);
+		}
 	}
 }
 #endif
-
-// Scale DebugMesh based on Size.x and Size.y values
-void ADecoratorVolume::UpdateVisualization()
-{
-	const FVector2D Length = FVector2D(Size.X / 100); //Scale of the mesh's XY
-	const float Height = Size.Y / 100; //Scale of the mesh's Z
-
-	DebugMesh->SetWorldScale3D(FVector(Length, Height));
-}
 
 // Initialize RandStream with Seed
 void ADecoratorVolume::InitNewStreamSeed()
@@ -260,8 +202,6 @@ void ADecoratorVolume::TriggerRegeneration(bool NewSeed = false)
 	AddInstMeshComponents();
 	UpdateInstanceMeshMaterial();
 	UpdateInstanceTransform();
-	
-	DrawDebugLines(); //For debugging "line rays" for each point generated
 }
 
 // Regenerate points using Maths and based on the number of Counts and Shape
@@ -426,24 +366,6 @@ FRotator ADecoratorVolume::RandomizeRotator(FRotator Min, FRotator Max)
 FVector ADecoratorVolume::RandomizeScale(FVector Min, FVector Max)
 {
 	return FVector(RandStream.FRandRange(Min.X, Max.X), RandStream.FRandRange(Min.Y, Max.Y), RandStream.FRandRange(Min.Z, Max.Z));
-}
-
-void ADecoratorVolume::DrawDebugLines()
-{
-	FlushPersistentDebugLines(GetWorld());
-	for (FVector CurrPoint : GeneratedPoints)
-	{
-		FVector ActorLocation = this->GetActorLocation();
-		FVector ZOffset = FVector(0, 0, Size.Y / 2);
-		FVector Start = (CurrPoint + ActorLocation) + ZOffset;
-		FVector End = (CurrPoint + ActorLocation) - ZOffset;
-		DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 1, 0, 1.5);
-	}
-}
-
-void ADecoratorVolume::DrawDebugLines(FVector Start, FVector End)
-{
-	DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 1, 0, 1.5);
 }
 
 UDecoratorPalette* ADecoratorVolume::GetPalette() const

@@ -41,9 +41,9 @@ public class ProjectorToolEditor : ModuleRules
 				"Engine",
 				"Slate",
 				"SlateCore",
+				// ... add private dependencies that you statically link with here ...	
 				"UnrealEd",
 				"ComponentVisualizers"
-				// ... add private dependencies that you statically link with here ...	
 			}
 			);
 		

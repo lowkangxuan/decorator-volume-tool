@@ -3,6 +3,7 @@
 #include "ProjectorToolEditor.h"
 
 #include "DecoratorVolumeVisualizer.h"
+#include "DecoratorVolumeVisualizerComponent.h"
 #include "UnrealEdGlobals.h"
 #include "Editor/UnrealEdEngine.h"
 
@@ -18,7 +19,7 @@ void FProjectorToolModule::StartupModule()
 
 		if (Visualizer.IsValid())
 		{
-			//GUnrealEd->RegisterComponentVisualizer(UDecoratorVolumeVisualizerComponent::StaticClass()->GetFName(), Visualizer);
+			GUnrealEd->RegisterComponentVisualizer(UDecoratorVolumeVisualizerComponent::StaticClass()->GetFName(), Visualizer);
 			Visualizer->OnRegister();
 		}
 	}
@@ -31,10 +32,10 @@ void FProjectorToolModule::ShutdownModule()
 
 	if (GUnrealEd != nullptr)
 	{
-		//GUnrealEd->UnregisterComponentVisualizer(UDecoratorVolumeVisualizerComponent::StaticClass()->GetFName());
+		GUnrealEd->UnregisterComponentVisualizer(UDecoratorVolumeVisualizerComponent::StaticClass()->GetFName());
 	}
 }
 
 #undef LOCTEXT_NAMESPACE
 	
-IMPLEMENT_MODULE(FProjectorToolModule, ProjectorTool)
+IMPLEMENT_MODULE(FProjectorToolModule, ProjectorToolEditor)

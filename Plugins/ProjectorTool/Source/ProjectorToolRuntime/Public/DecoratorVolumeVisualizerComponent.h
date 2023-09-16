@@ -18,8 +18,17 @@ public:
 	UDecoratorVolumeVisualizerComponent();
 
 private:
+	UPROPERTY(VisibleInstanceOnly)
 	FVector Size = FVector::One();
-	EProjectionShape Shape;
+	
+	UPROPERTY(VisibleInstanceOnly)
+	EProjectionShape Shape = EProjectionShape::Cylinder;
+
+	UPROPERTY(VisibleInstanceOnly)
+	bool bDrawRaycastLines = false;
+
+	UPROPERTY(VisibleInstanceOnly)
+	TArray<FVector> RaycastStartPoints = TArray<FVector>();
 	
 protected:
 	// Called when the game starts
@@ -32,7 +41,12 @@ public:
 	// Getters
 	FVector GetSize() const;
 	EProjectionShape GetShape() const;
-	
+	bool CanDrawRaycastLines() const;
+	TArray<FVector> GetPoints() const;
+
+	// Setters
 	void UpdateSize(FVector NewSize);
 	void UpdateShape(EProjectionShape Shape);
+	void UpdateStartPoints(TArray<FVector> Points);
+	void DrawRaycastLines(bool Flag);
 };

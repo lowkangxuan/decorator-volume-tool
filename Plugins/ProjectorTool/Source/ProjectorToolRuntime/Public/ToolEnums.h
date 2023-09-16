@@ -3,7 +3,7 @@
 #include "CoreMinimal.h"
 
 UENUM()
-enum class EProjectionShape
+enum class EProjectionShape : uint8
 {
 	Cylinder,
 	Cube,
@@ -11,7 +11,7 @@ enum class EProjectionShape
 };
 
 UENUM()
-enum class ETestEnum
+enum class ETestEnum : uint8
 {
 	Cylinder,
 	Cube,

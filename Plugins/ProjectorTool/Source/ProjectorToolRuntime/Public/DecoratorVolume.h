@@ -22,16 +22,12 @@ private:
 	bool IsStreamInitialized = false;
 	
 	UBillboardComponent* SpriteComponent;
-	UStaticMesh* DebugCylinderMesh;
-	UStaticMesh* DebugCubeMesh;
-	UMaterialInterface* DebugMeshMat;
 
 	UPROPERTY(VisibleDefaultsOnly)
 	USceneComponent* DefaultRoot = nullptr;
+
+	UPROPERTY(VisibleInstanceOnly)
 	UDecoratorVolumeVisualizerComponent* VisualizerComponent = nullptr;
-	
-	UPROPERTY(BlueprintReadOnly, VisibleDefaultsOnly, meta = (AllowPrivateAccess = true))
-	UStaticMeshComponent* DebugMesh = nullptr;
 	
 	FRandomStream RandStream = FRandomStream();
 	
@@ -63,7 +59,10 @@ public:
 	bool AlignToSurface = true;
 
 	UPROPERTY(EditAnywhere, AdvancedDisplay)
-	bool DrawProjectionVisualizer = true;
+	bool ShowRaycastLines = false;
+
+	UPROPERTY(EditAnywhere, AdvancedDisplay)
+	bool ShowInstanceIndex = false;
 
 protected:
 	// Called when the game starts or when spawneds
@@ -87,8 +86,6 @@ public:
 	virtual void BeginDestroy() override;
 
 private:
-	void UpdateVisualization();
-
 	// Seed Stuff
 	void InitNewStreamSeed();
 	void RandomizeSeed();
@@ -110,10 +107,6 @@ private:
 
 	FRotator RandomizeRotator(FRotator Min, FRotator Max);
 	FVector RandomizeScale(FVector Min, FVector Max);
-	
-	// Overloads for DrawDebugLines
-	void DrawDebugLines();
-	void DrawDebugLines(FVector Start, FVector End);
 
 	UDecoratorPalette* GetPalette() const;
 };
