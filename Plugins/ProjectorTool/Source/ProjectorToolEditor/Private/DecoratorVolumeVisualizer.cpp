@@ -4,6 +4,17 @@
 #include "DecoratorVolumeVisualizer.h"
 #include "DecoratorVolumeVisualizerComponent.h"
 
+// Rewrote this function for Unreal's DrawDirectionalArrow function (https://github.com/EpicGames/UnrealEngine/blob/a3cb3d8fdec1fc32f071ae7d22250f33f80b21c4/Engine/Source/Runtime/Engine/Private/PrimitiveDrawingUtils.cpp#L1385)
+// As the Unreal's version defaults to X axis, this function will default it to the -Z axis for the tool usecase
+void FDecoratorVolumeVisualizer::DrawDirectionalArrowNegZ(FPrimitiveDrawInterface* PDI,const FMatrix& ArrowToWorld,const FLinearColor& InColor,float Length,float ArrowSize,uint8 DepthPriority,float Thickness)
+{
+	PDI->DrawLine(ArrowToWorld.TransformPosition(FVector(0,0,-Length)),ArrowToWorld.TransformPosition(FVector::ZeroVector),InColor,DepthPriority,Thickness);
+	PDI->DrawLine(ArrowToWorld.TransformPosition(FVector(0,0,-Length)),ArrowToWorld.TransformPosition(FVector(+ArrowSize,         0,-Length+ArrowSize)), InColor, DepthPriority, Thickness); // Front
+	PDI->DrawLine(ArrowToWorld.TransformPosition(FVector(0,0,-Length)),ArrowToWorld.TransformPosition(FVector(-ArrowSize,         0,-Length+ArrowSize)), InColor, DepthPriority, Thickness); // Back
+	PDI->DrawLine(ArrowToWorld.TransformPosition(FVector(0,0,-Length)),ArrowToWorld.TransformPosition(FVector(		  0,+ArrowSize,-Length+ArrowSize)), InColor, DepthPriority, Thickness); // Right
+	PDI->DrawLine(ArrowToWorld.TransformPosition(FVector(0,0,-Length)),ArrowToWorld.TransformPosition(FVector(		  0,-ArrowSize,-Length+ArrowSize)), InColor, DepthPriority, Thickness); // Left
+}
+
 void FDecoratorVolumeVisualizer::DrawVisualization(const UActorComponent* Component, const FSceneView* View, FPrimitiveDrawInterface* PDI)
 {
 	const UDecoratorVolumeVisualizerComponent* VisualizerComponent = Cast<UDecoratorVolumeVisualizerComponent>(Component);
@@ -11,35 +22,44 @@ void FDecoratorVolumeVisualizer::DrawVisualization(const UActorComponent* Compon
 	
 	const EProjectionShape Shape = VisualizerComponent->GetShape();
 	const FVector ActorLocation = VisualizerComponent->GetOwner()->GetActorLocation();
-	const FRotationMatrix ActorRotation = FRotationMatrix(VisualizerComponent->GetOwner()->GetActorRotation());
+	const FRotator ActorRotation = VisualizerComponent->GetOwner()->GetActorRotation();
+	const FRotationMatrix ActorRotationMatrix = FRotationMatrix(VisualizerComponent->GetOwner()->GetActorRotation());
 	const FLinearColor Color = FLinearColor::Yellow;
-	const float HalfWidth = VisualizerComponent->GetSize().X / 2; // AKA radius
-	const float HalfHeight = VisualizerComponent->GetSize().Z / 2;
+	const float MaxHeight = (Shape == EProjectionShape::Cuboid ? VisualizerComponent->GetCuboidSize().Z : VisualizerComponent->GetSize().Y);
+	const float HalfHeight = (Shape == EProjectionShape::Cuboid ? VisualizerComponent->GetCuboidSize().Z / 2 : VisualizerComponent->GetSize().Y / 2);
+	const float HalfLength = (Shape == EProjectionShape::Cuboid ? VisualizerComponent->GetCuboidSize().X / 2 : VisualizerComponent->GetSize().X / 2); // AKA radius for Cylinder shape
+	const float HalfBreadth = VisualizerComponent->GetCuboidSize().Y / 2;
 	constexpr int32 Sides = 32;
 	constexpr uint8 DepthPriority = 0;
 	constexpr float Thickness = 2;
 	constexpr float DepthBias = 0;
 	constexpr bool ScreenSpace = false;
+
+	const FRotationTranslationMatrix Matrix = FRotationTranslationMatrix(
+		VisualizerComponent->GetOwner()->GetActorRotation(),
+		ActorLocation); // Rotation and Translation Matrix
 	
 	switch (Shape)
 	{
 		case (EProjectionShape::Cylinder):
 			{	
-				DrawWireCylinder(PDI, ActorLocation, ActorRotation.GetScaledAxis(EAxis::X), ActorRotation.GetScaledAxis(EAxis::Y), ActorRotation.GetScaledAxis(EAxis::Z), Color, HalfWidth, HalfHeight, Sides, DepthPriority, Thickness, DepthBias, ScreenSpace);
+				DrawWireCylinder(PDI, ActorLocation, ActorRotationMatrix.GetScaledAxis(EAxis::X), ActorRotationMatrix.GetScaledAxis(EAxis::Y), ActorRotationMatrix.GetScaledAxis(EAxis::Z), Color, HalfLength, HalfHeight, Sides, DepthPriority, Thickness, DepthBias, ScreenSpace);
 				break;
 			}
 
 		case (EProjectionShape::Cube):
 			{
-				const FBox Box = FBox::BuildAABB(FVector::Zero(), FVector(HalfWidth, HalfWidth, HalfHeight));
-				const FRotationTranslationMatrix Matrix = FRotationTranslationMatrix(VisualizerComponent->GetOwner()->GetActorRotation(), ActorLocation); // Rotation and Translation Matrix for the box to rotate together with the Actor
+				const FBox CubeShape = FBox::BuildAABB(FVector::Zero(), FVector(HalfLength, HalfLength, HalfHeight));
 				
-				DrawWireBox(PDI, Matrix, Box, Color, DepthPriority, Thickness, DepthBias, ScreenSpace);
+				DrawWireBox(PDI, Matrix, CubeShape, Color, DepthPriority, Thickness, DepthBias, ScreenSpace);
 				break;
 			}
 
-		case (EProjectionShape::FreeCube):
+		case (EProjectionShape::Cuboid):
 			{
+				const FBox CuboidShape = FBox::BuildAABB(FVector::Zero(), FVector(HalfLength, HalfBreadth, HalfHeight));
+				
+				DrawWireBox(PDI, Matrix, CuboidShape, Color, DepthPriority, Thickness, DepthBias, ScreenSpace);
 				break;
 			}
 	}
@@ -50,14 +70,14 @@ void FDecoratorVolumeVisualizer::DrawVisualization(const UActorComponent* Compon
 		
 		for (FVector Point : Points)
 		{
-			FVector Start = Point + ActorLocation + FVector(0, 0, HalfHeight);
-			FMatrix Matrix = FScaleRotationTranslationMatrix(
+			FVector Start = ActorRotation.RotateVector(Point + FVector(0, 0, HalfHeight)) + ActorLocation;
+			FMatrix LineMatrix = FScaleRotationTranslationMatrix(
 				FVector::One(),
-				VisualizerComponent->GetOwner()->GetActorRotation() - FRotator(90, 0, 0),
+				ActorRotation,
 				Start
 			);
 
-			DrawDirectionalArrow(PDI, Matrix, FLinearColor::Red, VisualizerComponent->GetSize().Z, 5, DepthPriority, Thickness);
+			DrawDirectionalArrowNegZ(PDI, LineMatrix, FLinearColor::Red, MaxHeight, 15, DepthPriority, Thickness);
 		}
 	}
 }

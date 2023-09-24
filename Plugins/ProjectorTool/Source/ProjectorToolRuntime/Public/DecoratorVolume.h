@@ -36,7 +36,9 @@ private:
 
 	UPROPERTY(VisibleAnywhere)
 	TArray<FVector> GeneratedPoints;
+	UPROPERTY(VisibleAnywhere)
 	TArray<FVector> LineTracedLocations;
+	UPROPERTY(VisibleAnywhere)
 	TArray<FRotator> LineTracedRotations;
 	
 public:	
@@ -49,12 +51,18 @@ public:
 	UPROPERTY(EditAnywhere, meta = (DisplayPriority = 1))
 	EProjectionShape Shape = EProjectionShape::Cylinder;
 
-	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+	UPROPERTY(EditAnywhere, meta=(EditCondition = "Shape!=EProjectionShape::Cuboid", EditConditionHides))
 	FVector2D Size = FVector2D(100, 100);
+
+	UPROPERTY(EditAnywhere, meta=(EditCondition = "Shape==EProjectionShape::Cuboid", EditConditionHides, DisplayName="Size"))
+	FVector CuboidSize = FVector(100, 100, 100);
 
 	UPROPERTY(EditAnywhere, meta = (ClampMin = -999999, ClampMax = 999999))
 	int32 Seed;
 
+	UPROPERTY(EditAnywhere, AdvancedDisplay)
+	bool RegenerateOnDetailsEdited = true;
+	
 	UPROPERTY(EditAnywhere, AdvancedDisplay)
 	bool AlignToSurface = true;
 
@@ -95,6 +103,12 @@ private:
 	
 	UFUNCTION(CallInEditor, Category="DecoratorVolume")
 	void RegenerateNewSeed();
+
+	UFUNCTION(CallInEditor, Category="DecoratorVolume")
+	void RegenerateNoMesh();
+
+	UFUNCTION(CallInEditor, Category="DecoratorVolume")
+	void Clear();
 	
 	void TriggerRegeneration(bool NewSeed);
 	void RegeneratePoints();
@@ -109,4 +123,5 @@ private:
 	FVector RandomizeScale(FVector Min, FVector Max);
 
 	UDecoratorPalette* GetPalette() const;
+	TArray<UInstancedStaticMeshComponent*> GetAllInstMeshComponents() const;
 };

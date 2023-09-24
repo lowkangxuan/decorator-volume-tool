@@ -19,7 +19,10 @@ public:
 
 private:
 	UPROPERTY(VisibleInstanceOnly)
-	FVector Size = FVector::One();
+	FVector2D Size = FVector2D::One();
+
+	UPROPERTY(VisibleInstanceOnly)
+	FVector CuboidSize = FVector::One();
 	
 	UPROPERTY(VisibleInstanceOnly)
 	EProjectionShape Shape = EProjectionShape::Cylinder;
@@ -39,14 +42,16 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	// Getters
-	FVector GetSize() const;
-	EProjectionShape GetShape() const;
-	bool CanDrawRaycastLines() const;
-	TArray<FVector> GetPoints() const;
+	FVector2D GetSize() const { return Size; };
+	FVector GetCuboidSize() const { return CuboidSize; };
+	EProjectionShape GetShape() const { return Shape; };
+	bool CanDrawRaycastLines() const { return bDrawRaycastLines; };
+	TArray<FVector> GetPoints() const { return RaycastStartPoints; };
 
 	// Setters
-	void UpdateSize(FVector NewSize);
-	void UpdateShape(EProjectionShape Shape);
-	void UpdateStartPoints(TArray<FVector> Points);
-	void DrawRaycastLines(bool Flag);
+	void UpdateSize(FVector2D NewSize) { Size = NewSize; };
+	void UpdateCuboidSize(FVector NewSize) { CuboidSize = CuboidSize; };
+	void UpdateShape(EProjectionShape NewShape) { Shape = NewShape; };
+	void UpdateStartPoints(TArray<FVector> Points) { RaycastStartPoints = Points; };
+	void DrawRaycastLines(bool Flag) { bDrawRaycastLines = Flag; };
 };

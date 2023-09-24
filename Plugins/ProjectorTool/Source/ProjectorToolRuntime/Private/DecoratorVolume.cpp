@@ -1,6 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "..\Public\DecoratorVolume.h"
+
+#include <functional>
+
 #include "UObject/ConstructorHelpers.h"
 #include "Components/BillboardComponent.h"
 #include "Components/InstancedStaticMeshComponent.h"
@@ -19,7 +22,8 @@ ADecoratorVolume::ADecoratorVolume(const FObjectInitializer& ObjectInitializer) 
 
 	VisualizerComponent = CreateDefaultSubobject<UDecoratorVolumeVisualizerComponent>(TEXT("Visualizer"));
 	VisualizerComponent->RegisterComponent();
-	VisualizerComponent->UpdateSize(FVector(Size.X, Size.X, Size.Y));
+	VisualizerComponent->UpdateSize(Size);
+	VisualizerComponent->UpdateCuboidSize(CuboidSize);
 	VisualizerComponent->UpdateShape(Shape);
 
 #pragma region Setting RootComponent
@@ -134,10 +138,20 @@ void ADecoratorVolume::PostEditChangeProperty(FPropertyChangedEvent& e)
 		TriggerRegeneration(false);
 	}
 
-	// Regenerate the instanced meshes Location and update Visualizer Size
-	if (PropertyName == "Size")
+	//  Update Visualizer Size and regenerate the instanced meshes Location
+	if (PropertyName == "Size" || PropertyName == "CuboidSize")
 	{
-		VisualizerComponent->UpdateSize(FVector(Size.X, Size.X, Size.Y));
+		// If current shape is Cuboid, pass in the Vector CuboidSize into the visualizer
+		// else, just pass in the default Vector2D Size
+		if (Shape == EProjectionShape::Cuboid)
+		{
+			VisualizerComponent->UpdateCuboidSize(CuboidSize);
+		}
+		else
+		{
+			VisualizerComponent->UpdateSize(Size);
+		}
+		
 		RegeneratePoints();
 		Regenerate();
 	}
@@ -184,6 +198,22 @@ void ADecoratorVolume::Regenerate()
 void ADecoratorVolume::RegenerateNewSeed()
 {
 	TriggerRegeneration(true);
+	VisualizerComponent->UpdateStartPoints(GeneratedPoints);
+}
+
+void ADecoratorVolume::RegenerateNoMesh()
+{
+	
+}
+
+void ADecoratorVolume::Clear()
+{
+	TArray<UInstancedStaticMeshComponent*> InstMeshComponents = GetAllInstMeshComponents();
+
+	for (UInstancedStaticMeshComponent* CurrComponent : InstMeshComponents)
+	{
+		CurrComponent->ClearInstances();
+	}
 }
 
 void ADecoratorVolume::TriggerRegeneration(bool NewSeed = false)
@@ -220,21 +250,28 @@ void ADecoratorVolume::RegeneratePoints()
 		switch (Shape)
 		{
 			case EProjectionShape::Cylinder:
-			{
-				const float Radius = Size.X / 2;
-				const float R = Radius * FMath::Sqrt(RandFloat);
-				const float Theta = 200 * PI * RandFloat;
-				x = R * FMath::Cos(Theta);
-				y = R * FMath::Sin(Theta);
-				break;
-			}
+				{
+					const float Radius = Size.X / 2;
+					const float R = Radius * FMath::Sqrt(RandFloat);
+					const float Theta = 200 * PI * RandFloat;
+					x = R * FMath::Cos(Theta);
+					y = R * FMath::Sin(Theta);
+					break;
+				}
 
 			case EProjectionShape::Cube:
-			{
-				x = RandStream.FRandRange(-50, 50) * (Size.X / 100);
-				y = RandStream.FRandRange(-50, 50) * (Size.X / 100);
-				break;
-			}
+				{
+					x = RandStream.FRandRange(-50, 50) * (Size.X / 100);
+					y = RandStream.FRandRange(-50, 50) * (Size.X / 100);
+					break;
+				}
+
+			case EProjectionShape::Cuboid:
+				{
+					x = RandStream.FRandRange(-50, 50) * (CuboidSize.X / 100);
+					y = RandStream.FRandRange(-50, 50) * (CuboidSize.Y / 100);
+					break;
+				}
 		}
 
 		NewPoint = FVector(x, y, 0);
@@ -249,12 +286,16 @@ void ADecoratorVolume::RunLineTrace()
 {
 	LineTracedLocations.Empty();
 	LineTracedRotations.Empty();
+	
+	FVector ActorLocation = this->GetActorLocation();
+	float Z = Shape == EProjectionShape::Cuboid ? CuboidSize.Z : Size.Y; // Uses Vector2D Y value if shape is Cylinder or Cube, else it is using the Vector Z value for Cuboid
+	FVector HalfZOffset = FVector(0, 0, Z / 2);
+	
 	for (FVector CurrPoint : GeneratedPoints)
 	{
-		FVector ActorLocation = this->GetActorLocation();
-		FVector ZOffset = FVector(0, 0, Size.Y / 2);
-		FVector Start = (CurrPoint + ActorLocation) + ZOffset;
-		FVector End = (CurrPoint + ActorLocation) - ZOffset;
+		// Local -> World Position == CurrPoint + ActorLocation
+		FVector Start =  this->GetActorRotation().RotateVector(CurrPoint + HalfZOffset) + ActorLocation;
+		FVector End = Start + (-this->GetActorUpVector() * Z);
 		FHitResult HitResult;
 		FCollisionQueryParams TraceParams;
 		TraceParams.AddIgnoredActor(this);
@@ -371,4 +412,12 @@ FVector ADecoratorVolume::RandomizeScale(FVector Min, FVector Max)
 UDecoratorPalette* ADecoratorVolume::GetPalette() const
 {
 	return Palette.GetDefaultObject();
+}
+
+TArray<UInstancedStaticMeshComponent*> ADecoratorVolume::GetAllInstMeshComponents() const
+{
+	TArray<UInstancedStaticMeshComponent*> ComponentsArray;
+	this->GetComponents<UInstancedStaticMeshComponent*>(ComponentsArray);
+
+	return ComponentsArray;
 }
