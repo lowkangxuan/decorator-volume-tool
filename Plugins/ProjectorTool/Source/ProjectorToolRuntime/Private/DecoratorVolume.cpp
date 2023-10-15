@@ -112,8 +112,7 @@ void ADecoratorVolume::PostEditChangeProperty(FPropertyChangedEvent& e)
 	Super::PostEditChangeProperty(e);
 	
 	const FName PropertyName = (e.Property != NULL ? e.MemberProperty->GetFName() : NAME_None);
-	//UE_LOG(LogTemp, Display, TEXT("Decorator Volume: %s"), *FString(PropertyName.ToString()));
-	UE_LOG(LogTemp, Display, TEXT("Decorator Volume: %s"), *(e.Property->GetNameCPP()));
+	//UE_LOG(LogTemp, Display, TEXT("Decorator Volume: %s"), *(e.Property->GetNameCPP()));
 	
 	// Generate new points when these properties are edited
 	if (PropertyName == "Seed" || PropertyName == "Shape")
@@ -130,13 +129,14 @@ void ADecoratorVolume::PostEditChangeProperty(FPropertyChangedEvent& e)
 			VisualizerComponent->UpdateShape(Shape);
 		}
 
-		RegeneratePoints();
+		PointsGeneration();
 		Regenerate();
 	}
 
 	if (PropertyName == "Count")
 	{
 		TriggerGeneration();
+		VisualizerComponent->UpdateStartPoints(GeneratedPoints);
 	}
 
 	if (PropertyName == "Palette")
@@ -159,8 +159,9 @@ void ADecoratorVolume::PostEditChangeProperty(FPropertyChangedEvent& e)
 			VisualizerComponent->UpdateSize(Size);
 		}
 		
-		RegeneratePoints();
+		PointsGeneration();
 		Regenerate();
+		VisualizerComponent->UpdateStartPoints(GeneratedPoints);
 	}
 
 	if (PropertyName == "AlignToSurface")
@@ -234,7 +235,7 @@ void ADecoratorVolume::TriggerGeneration(bool NewSeed, bool WithMesh)
 	
 	if (NewSeed) RandomizeSeed(); // Randomize a new seed if NewSeed param is true
 	
-	RegeneratePoints();
+	PointsGeneration();
 	RunLineTrace();
 
 	// Reregister Instanced Static Mesh Components and its individual instance Material and Transform
@@ -253,7 +254,7 @@ void ADecoratorVolume::TriggerGeneration(bool NewSeed, bool WithMesh)
 }
 
 // Regenerate points using Maths and based on the number of Counts and Shape
-void ADecoratorVolume::RegeneratePoints()
+void ADecoratorVolume::PointsGeneration()
 {
 	GeneratedPoints.Empty(); // Clear array first before generating new points
 	GeneratedPoints.Reserve(Count);

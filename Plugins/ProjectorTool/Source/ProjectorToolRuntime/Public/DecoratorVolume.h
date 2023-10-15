@@ -112,7 +112,7 @@ private:
 	void Clear();
 	
 	void TriggerGeneration(bool NewSeed = false, bool WithMesh = true);
-	void RegeneratePoints();
+	void PointsGeneration();
 	void RunLineTrace();
 	
 	void AddInstMeshComponents();
