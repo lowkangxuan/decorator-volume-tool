@@ -19,7 +19,8 @@ private:
 	const int32 MinClamp = -999999;
 	const int32 MaxClamp = 999999;
 
-	bool IsStreamInitialized = false;
+	bool bIsStreamInitialized = false;
+	bool bFlushComponents = false;
 	
 	UBillboardComponent* SpriteComponent;
 
@@ -102,15 +103,15 @@ private:
 	void Regenerate();
 	
 	UFUNCTION(CallInEditor, Category="DecoratorVolume")
-	void RegenerateNewSeed();
+	void GenerateNewSeed();
 
 	UFUNCTION(CallInEditor, Category="DecoratorVolume")
-	void RegenerateNoMesh();
+	void GenerateNoMesh();
 
 	UFUNCTION(CallInEditor, Category="DecoratorVolume")
 	void Clear();
 	
-	void TriggerRegeneration(bool NewSeed);
+	void TriggerGeneration(bool NewSeed = false, bool WithMesh = true);
 	void RegeneratePoints();
 	void RunLineTrace();
 	

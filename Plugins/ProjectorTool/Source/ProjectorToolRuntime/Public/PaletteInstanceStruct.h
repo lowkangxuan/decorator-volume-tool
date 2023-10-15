@@ -46,4 +46,10 @@ public:
 	
 	UPROPERTY(EditAnywhere, meta=(AllowPreserveRatio, EditCondition="RandomRotation", EditConditionHides))
 	FRotator Rotation = FRotator::ZeroRotator;
+
+	UPROPERTY(EditAnywhere, meta=(AllowPreserveRatio, EditCondition="RandomRotation", EditConditionHides))
+	FRotator MinRotation = FRotator::ZeroRotator;
+
+	UPROPERTY(EditAnywhere, meta=(AllowPreserveRatio, EditCondition="RandomRotation", EditConditionHides))
+	FRotator MaxRotation = FRotator::ZeroRotator;
 };

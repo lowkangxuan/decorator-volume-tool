@@ -74,10 +74,10 @@ void ADecoratorVolume::OnConstruction(const FTransform& Transform)
 {
 	// Trying to initialize stream when constructed in Level
 	// Also ensure that we are initializing the proper Seed value instead of a default '0'
-	if (!IsStreamInitialized)
+	if (!bIsStreamInitialized)
 	{
 		InitNewStreamSeed();
-		IsStreamInitialized = true;
+		bIsStreamInitialized = true;
 	}
 }
 
@@ -112,7 +112,8 @@ void ADecoratorVolume::PostEditChangeProperty(FPropertyChangedEvent& e)
 	Super::PostEditChangeProperty(e);
 	
 	const FName PropertyName = (e.Property != NULL ? e.MemberProperty->GetFName() : NAME_None);
-	UE_LOG(LogTemp, Display, TEXT("Decorator Volume: %s"), *FString(PropertyName.ToString()));
+	//UE_LOG(LogTemp, Display, TEXT("Decorator Volume: %s"), *FString(PropertyName.ToString()));
+	UE_LOG(LogTemp, Display, TEXT("Decorator Volume: %s"), *(e.Property->GetNameCPP()));
 	
 	// Generate new points when these properties are edited
 	if (PropertyName == "Seed" || PropertyName == "Shape")
@@ -135,9 +136,15 @@ void ADecoratorVolume::PostEditChangeProperty(FPropertyChangedEvent& e)
 
 	if (PropertyName == "Count")
 	{
-		TriggerRegeneration(false);
+		TriggerGeneration();
 	}
 
+	if (PropertyName == "Palette")
+	{
+		bFlushComponents = true;
+		TriggerGeneration();
+	}
+	
 	//  Update Visualizer Size and regenerate the instanced meshes Location
 	if (PropertyName == "Size" || PropertyName == "CuboidSize")
 	{
@@ -195,15 +202,15 @@ void ADecoratorVolume::Regenerate()
 }
 
 // Regenerate instances with new Seed
-void ADecoratorVolume::RegenerateNewSeed()
+void ADecoratorVolume::GenerateNewSeed()
 {
-	TriggerRegeneration(true);
+	TriggerGeneration(true);
 	VisualizerComponent->UpdateStartPoints(GeneratedPoints);
 }
 
-void ADecoratorVolume::RegenerateNoMesh()
+void ADecoratorVolume::GenerateNoMesh()
 {
-	
+	TriggerGeneration(true, false);
 }
 
 void ADecoratorVolume::Clear()
@@ -216,7 +223,7 @@ void ADecoratorVolume::Clear()
 	}
 }
 
-void ADecoratorVolume::TriggerRegeneration(bool NewSeed = false)
+void ADecoratorVolume::TriggerGeneration(bool NewSeed, bool WithMesh)
 {
 	// We do not want to call all the functions below if the parameters are kept default
 	if (Count == 0 || GetPalette() == nullptr || GetPalette()->GetNumberOfInstances() == 0)
@@ -226,12 +233,23 @@ void ADecoratorVolume::TriggerRegeneration(bool NewSeed = false)
 	}
 	
 	if (NewSeed) RandomizeSeed(); // Randomize a new seed if NewSeed param is true
+	
 	RegeneratePoints();
 	RunLineTrace();
-	RemoveInstMeshComponents();  
-	AddInstMeshComponents();
-	UpdateInstanceMeshMaterial();
-	UpdateInstanceTransform();
+
+	// Reregister Instanced Static Mesh Components and its individual instance Material and Transform
+	if (WithMesh)
+	{
+		if (bFlushComponents) // Re-add instanced static mesh components if bFlushComponents is true
+		{
+			RemoveInstMeshComponents();  
+			AddInstMeshComponents();
+			bFlushComponents = false;
+		}
+		
+		UpdateInstanceMeshMaterial();
+		UpdateInstanceTransform();
+	}
 }
 
 // Regenerate points using Maths and based on the number of Counts and Shape
@@ -318,12 +336,10 @@ void ADecoratorVolume::AddInstMeshComponents()
 	for (int i = 0; i < GetPalette()->GetNumberOfInstances(); ++i)
 	{
 		UInstancedStaticMeshComponent* InstMeshComp = NewObject<UInstancedStaticMeshComponent>(this, UInstancedStaticMeshComponent::StaticClass());
-		if (!InstMeshComp) return; // Exit the function if for some reason the component is not created
 
 		InstMeshComp->OnComponentCreated();
 		InstMeshComp->CreationMethod = EComponentCreationMethod::Instance;
 		InstMeshComp->AttachToComponent(this->RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
-		InstMeshComp->SetRelativeLocation(FVector(0)); // Ensure that the component is at the center of the actor
 		InstMeshComp->RegisterComponent();
 		AddInstanceComponent(InstMeshComp);
 		TempArray.Add(InstMeshComp);
@@ -354,8 +370,7 @@ void ADecoratorVolume::RemoveInstMeshComponents()
 // Gets all existing Instanced Static Mesh Component in the actor and update its mesh and material based on the corresponding palette index
 void ADecoratorVolume::UpdateInstanceMeshMaterial()
 {
-	TArray<UInstancedStaticMeshComponent*> InstMeshComponents;
-	this->GetComponents<UInstancedStaticMeshComponent>(InstMeshComponents);
+	TArray<UInstancedStaticMeshComponent*> InstMeshComponents = GetAllInstMeshComponents();
 	
 	for (int Index = 0; Index < InstMeshComponents.Num(); ++Index)
 	{
@@ -416,8 +431,8 @@ UDecoratorPalette* ADecoratorVolume::GetPalette() const
 
 TArray<UInstancedStaticMeshComponent*> ADecoratorVolume::GetAllInstMeshComponents() const
 {
-	TArray<UInstancedStaticMeshComponent*> ComponentsArray;
-	this->GetComponents<UInstancedStaticMeshComponent*>(ComponentsArray);
+	TArray<UInstancedStaticMeshComponent*> Components;
+	this->GetComponents<UInstancedStaticMeshComponent*>(Components);
 
-	return ComponentsArray;
+	return Components;
 }
