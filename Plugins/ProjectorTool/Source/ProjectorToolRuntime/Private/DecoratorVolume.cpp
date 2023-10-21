@@ -22,8 +22,8 @@ ADecoratorVolume::ADecoratorVolume(const FObjectInitializer& ObjectInitializer) 
 
 	VisualizerComponent = CreateDefaultSubobject<UDecoratorVolumeVisualizerComponent>(TEXT("Visualizer"));
 	VisualizerComponent->RegisterComponent();
-	VisualizerComponent->UpdateSize(Size);
-	VisualizerComponent->UpdateCuboidSize(CuboidSize);
+	VisualizerComponent->UpdateSize2D(Size2D);
+	VisualizerComponent->UpdateSize3D(Size3D);
 	VisualizerComponent->UpdateShape(Shape);
 
 #pragma region Setting RootComponent
@@ -127,6 +127,7 @@ void ADecoratorVolume::PostEditChangeProperty(FPropertyChangedEvent& e)
 		if (PropertyName == "Shape")
 		{
 			VisualizerComponent->UpdateShape(Shape);
+			VisualizerComponent->UpdateStartPoints(GeneratedPoints);
 		}
 
 		PointsGeneration();
@@ -146,17 +147,17 @@ void ADecoratorVolume::PostEditChangeProperty(FPropertyChangedEvent& e)
 	}
 	
 	//  Update Visualizer Size and regenerate the instanced meshes Location
-	if (PropertyName == "Size" || PropertyName == "CuboidSize")
+	if (PropertyName == "Size2D" || PropertyName == "Size3D")
 	{
 		// If current shape is Cuboid, pass in the Vector CuboidSize into the visualizer
 		// else, just pass in the default Vector2D Size
 		if (Shape == EProjectionShape::Cuboid)
 		{
-			VisualizerComponent->UpdateCuboidSize(CuboidSize);
+			VisualizerComponent->UpdateSize3D(Size3D);
 		}
 		else
 		{
-			VisualizerComponent->UpdateSize(Size);
+			VisualizerComponent->UpdateSize2D(Size2D);
 		}
 		
 		PointsGeneration();
@@ -164,16 +165,44 @@ void ADecoratorVolume::PostEditChangeProperty(FPropertyChangedEvent& e)
 		VisualizerComponent->UpdateStartPoints(GeneratedPoints);
 	}
 
-	if (PropertyName == "AlignToSurface")
+	if (PropertyName == "DrawCutoutZone")
+	{
+		VisualizerComponent->DrawCutout(DrawCutoutZone);
+	}
+
+	if (PropertyName == "CutoutSizeF" || PropertyName == "CutoutSize2D")
+	{
+		if (Shape == EProjectionShape::Cuboid)
+		{
+			FMath::Clamp(CutoutSize2D.X, 0, Size3D.X);
+			FMath::Clamp(CutoutSize2D.Y, 0, Size3D.Y);
+			VisualizerComponent->UpdateCutoutSize2D(CutoutSize2D);
+		}
+		else
+		{
+			if (CutoutSizeF > Size2D.X)
+			{
+				CutoutSizeF = Size2D.X;
+			}
+			else if(CutoutSizeF < 0)
+			{
+				CutoutSizeF = 0;
+			}
+			
+			VisualizerComponent->UpdateCutoutSizeF(CutoutSizeF);
+		}
+	}
+	
+	if (PropertyName == "Alignment")
 	{
 		Regenerate();
 	}
 
-	if (PropertyName == "ShowRaycastLines")
+	if (PropertyName == "DrawRaycastLines")
 	{
-		VisualizerComponent->DrawRaycastLines(ShowRaycastLines);
+		VisualizerComponent->DrawRaycastLines(DrawRaycastLines);
 
-		if (ShowRaycastLines)
+		if (DrawRaycastLines)
 		{
 			VisualizerComponent->UpdateStartPoints(GeneratedPoints);
 		}
@@ -270,7 +299,7 @@ void ADecoratorVolume::PointsGeneration()
 		{
 			case EProjectionShape::Cylinder:
 				{
-					const float Radius = Size.X / 2;
+					const float Radius = Size2D.X / 2;
 					const float R = Radius * FMath::Sqrt(RandFloat);
 					const float Theta = 200 * PI * RandFloat;
 					x = R * FMath::Cos(Theta);
@@ -280,15 +309,15 @@ void ADecoratorVolume::PointsGeneration()
 
 			case EProjectionShape::Cube:
 				{
-					x = RandStream.FRandRange(-50, 50) * (Size.X / 100);
-					y = RandStream.FRandRange(-50, 50) * (Size.X / 100);
+					x = RandStream.FRandRange(-50, 50) * (Size2D.X / 100);
+					y = RandStream.FRandRange(-50, 50) * (Size2D.X / 100);
 					break;
 				}
 
 			case EProjectionShape::Cuboid:
 				{
-					x = RandStream.FRandRange(-50, 50) * (CuboidSize.X / 100);
-					y = RandStream.FRandRange(-50, 50) * (CuboidSize.Y / 100);
+					x = RandStream.FRandRange(-50, 50) * (Size3D.X / 100);
+					y = RandStream.FRandRange(-50, 50) * (Size3D.Y / 100);
 					break;
 				}
 		}
@@ -307,7 +336,7 @@ void ADecoratorVolume::RunLineTrace()
 	LineTracedRotations.Empty();
 	
 	FVector ActorLocation = this->GetActorLocation();
-	float Z = Shape == EProjectionShape::Cuboid ? CuboidSize.Z : Size.Y; // Uses Vector2D Y value if shape is Cylinder or Cube, else it is using the Vector Z value for Cuboid
+	float Z = Shape == EProjectionShape::Cuboid ? Size3D.Z : Size2D.Y; // Uses Vector2D Y value if shape is Cylinder or Cube, else it is using the Vector Z value for Cuboid
 	FVector HalfZOffset = FVector(0, 0, Z / 2);
 	
 	for (FVector CurrPoint : GeneratedPoints)
@@ -357,11 +386,8 @@ void ADecoratorVolume::AddInstMeshComponents()
 // Get all existing Instanced Mesh Component in the actor and delete thems
 void ADecoratorVolume::RemoveInstMeshComponents()
 {
-	TArray<UInstancedStaticMeshComponent*> InstMeshComponents;
-	this->GetComponents<UInstancedStaticMeshComponent>(InstMeshComponents);
-	
-	if (InstMeshComponents.Num() == 0) return; // Exit the function if no Instance Mesh Component exist
-	for (UActorComponent* Components : InstMeshComponents)
+	if (GetAllInstMeshComponents().Num() == 0) return; // Exit the function if no Instance Mesh Component exist
+	for (UActorComponent* Components : GetAllInstMeshComponents())
 	{
 		Components->UnregisterComponent();
 		Components->DestroyComponent();
@@ -384,14 +410,13 @@ void ADecoratorVolume::UpdateInstanceMeshMaterial()
 // Delete and Re-adds all instances in each Instanced Static Mesh Component, "updating" each instance with a new set of Transform
 void ADecoratorVolume::UpdateInstanceTransform()
 {
-	TArray<UInstancedStaticMeshComponent*> InstMeshComponents;
-	this->GetComponents<UInstancedStaticMeshComponent>(InstMeshComponents);
-	
+	const bool UseSurfaceNormal = (Alignment == EMeshAlignment::SurfaceNormal);
+	const bool UseObjectReference = (Alignment == EMeshAlignment::ObjectReference);
 	unsigned int PrevCount = 0; // Sort of a "clamp" for the nested loop
 	
-	for (int Index = 0; Index < InstMeshComponents.Num(); ++Index)
+	for (int Index = 0; Index < GetAllInstMeshComponents().Num(); ++Index)
 	{
-		UInstancedStaticMeshComponent* CurrComponent = InstMeshComponents[Index];
+		UInstancedStaticMeshComponent* CurrComponent = GetAllInstMeshComponents()[Index];
 		
 		// Delete all existing instances
 		if (CurrComponent->GetInstanceCount() > 0)
@@ -403,7 +428,7 @@ void ADecoratorVolume::UpdateInstanceTransform()
 		CurrCount = FMath::Clamp(CurrCount, 0, LineTracedLocations.Num()); // CLamp value within the number of array elements
 		for (int j = PrevCount; j < CurrCount; ++j)
 		{
-			FRotator Rotation = (AlignToSurface ? LineTracedRotations[j] : FRotator::ZeroRotator) /*+ GetPalette()->GetRotationAtIndex(Index)*/;
+			FRotator Rotation = UseSurfaceNormal ? LineTracedRotations[j] : UseObjectReference ? FRotator::ZeroRotator : FRotator::ZeroRotator /*+ GetPalette()->GetRotationAtIndex(Index)*/;
 			FVector Location = LineTracedLocations[j];
 			FVector Scale = GetPalette()->GetScaleAtIndex(Index);
 			

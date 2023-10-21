@@ -35,11 +35,11 @@ private:
 	UPROPERTY(EditAnywhere, meta = (ClampMin = 0))
 	int32 Count = 0;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category="Debug")
 	TArray<FVector> GeneratedPoints;
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category="Debug")
 	TArray<FVector> LineTracedLocations;
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category="Debug")
 	TArray<FRotator> LineTracedRotations;
 	
 public:	
@@ -52,25 +52,31 @@ public:
 	UPROPERTY(EditAnywhere, meta = (DisplayPriority = 1))
 	EProjectionShape Shape = EProjectionShape::Cylinder;
 
-	UPROPERTY(EditAnywhere, meta=(EditCondition = "Shape!=EProjectionShape::Cuboid", EditConditionHides))
-	FVector2D Size = FVector2D(100, 100);
+	UPROPERTY(EditAnywhere, meta = (DisplayPriority = 2))
+	EMeshAlignment Alignment = EMeshAlignment::SurfaceNormal;
+
+	UPROPERTY(EditAnywhere, meta=(EditCondition = "Shape!=EProjectionShape::Cuboid", EditConditionHides, DisplayName="Size"))
+	FVector2D Size2D = FVector2D(200, 100);
 
 	UPROPERTY(EditAnywhere, meta=(EditCondition = "Shape==EProjectionShape::Cuboid", EditConditionHides, DisplayName="Size"))
-	FVector CuboidSize = FVector(100, 100, 100);
+	FVector Size3D = FVector(200, 200, 100);
 
 	UPROPERTY(EditAnywhere, meta = (ClampMin = -999999, ClampMax = 999999))
 	int32 Seed;
 
-	UPROPERTY(EditAnywhere, AdvancedDisplay)
-	bool RegenerateOnDetailsEdited = true;
+	UPROPERTY(EditAnywhere)
+	bool DrawCutoutZone = false;
+
+	UPROPERTY(EditAnywhere, meta=(EditCondition = "DrawCutoutZone && Shape!=EProjectionShape::Cuboid", EditConditionHides, DisplayName="CutoutSize"))
+	float CutoutSizeF = 100;
+
+	UPROPERTY(EditAnywhere, meta=(EditCondition = "DrawCutoutZone && Shape==EProjectionShape::Cuboid", EditConditionHides, DisplayName="CutoutSize"))
+	FVector2D CutoutSize2D = FVector2D(100, 100);
 	
-	UPROPERTY(EditAnywhere, AdvancedDisplay)
-	bool AlignToSurface = true;
+	UPROPERTY(EditAnywhere, Category="Debug")
+	bool DrawRaycastLines = false;
 
-	UPROPERTY(EditAnywhere, AdvancedDisplay)
-	bool ShowRaycastLines = false;
-
-	UPROPERTY(EditAnywhere, AdvancedDisplay)
+	UPROPERTY(EditAnywhere, Category="Debug")
 	bool ShowInstanceIndex = false;
 
 protected:

@@ -19,16 +19,25 @@ public:
 
 private:
 	UPROPERTY(VisibleInstanceOnly)
-	FVector2D Size = FVector2D::One();
+	FVector2D Size2D = FVector2D::One();
 
 	UPROPERTY(VisibleInstanceOnly)
-	FVector CuboidSize = FVector::One();
+	FVector Size3D = FVector::One();
+
+	UPROPERTY(VisibleInstanceOnly)
+	float CutoutSizeF = 100;
+
+	UPROPERTY(VisibleInstanceOnly)
+	FVector2D CutoutSize2D = FVector2D(100, 100);
 	
 	UPROPERTY(VisibleInstanceOnly)
 	EProjectionShape Shape = EProjectionShape::Cylinder;
 
 	UPROPERTY(VisibleInstanceOnly)
 	bool bDrawRaycastLines = false;
+
+	UPROPERTY(VisibleInstanceOnly)
+	bool bDrawCutout = false;
 
 	UPROPERTY(VisibleInstanceOnly)
 	TArray<FVector> RaycastStartPoints = TArray<FVector>();
@@ -42,16 +51,24 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	// Getters
-	FVector2D GetSize() const { return Size; };
-	FVector GetCuboidSize() const { return CuboidSize; };
-	EProjectionShape GetShape() const { return Shape; };
-	bool CanDrawRaycastLines() const { return bDrawRaycastLines; };
-	TArray<FVector> GetPoints() const { return RaycastStartPoints; };
+	FVector2D GetSize2D() const { return Size2D; }
+	FVector GetSize3D() const { return Size3D; }
+	float GetCutoutSizeF() const { return CutoutSizeF; }
+	FVector2d GetCutoutSize2D() const { return CutoutSize2D; }
+	
+	EProjectionShape GetShape() const { return Shape; }
+	bool CanDrawCutout() const { return bDrawCutout; }
+	bool CanDrawRaycastLines() const { return bDrawRaycastLines; }
+	TArray<FVector> GetPoints() const { return RaycastStartPoints; }
 
 	// Setters
-	void UpdateSize(FVector2D NewSize) { Size = NewSize; };
-	void UpdateCuboidSize(FVector NewSize) { CuboidSize = CuboidSize; };
-	void UpdateShape(EProjectionShape NewShape) { Shape = NewShape; };
-	void UpdateStartPoints(TArray<FVector> Points) { RaycastStartPoints = Points; };
-	void DrawRaycastLines(bool Flag) { bDrawRaycastLines = Flag; };
+	void UpdateSize2D(FVector2D NewSize) { Size2D = NewSize; }
+	void UpdateSize3D(FVector NewSize) { Size3D = NewSize; }
+	void UpdateCutoutSizeF(float NewSize) { CutoutSizeF = NewSize; }
+	void UpdateCutoutSize2D(FVector2D NewSize) { CutoutSize2D = NewSize; }
+	
+	void UpdateShape(EProjectionShape NewShape) { Shape = NewShape; }
+	void DrawCutout(bool Flag) { bDrawCutout = Flag; }
+	void DrawRaycastLines(bool Flag) { bDrawRaycastLines = Flag; }
+	void UpdateStartPoints(TArray<FVector> Points) { RaycastStartPoints = Points; }
 };

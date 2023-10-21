@@ -9,3 +9,11 @@ enum class EProjectionShape : uint8
 	Cube,
 	Cuboid
 };
+
+UENUM()
+enum class EMeshAlignment : uint8
+{
+	Default,
+	SurfaceNormal,
+	ObjectReference
+};
