@@ -8,9 +8,6 @@
 #include "Components/BillboardComponent.h"
 #include "Components/InstancedStaticMeshComponent.h"
 #include "Math/UnrealMathUtility.h"
-
-#include "Engine/Selection.h"
-#include "GeometryCollection/GeometryCollectionSimulationTypes.h"
 #include "Kismet/KismetMathLibrary.h"
 
 // Sets default values
@@ -127,17 +124,14 @@ void ADecoratorVolume::PostEditChangeProperty(FPropertyChangedEvent& e)
 		if (PropertyName == "Shape")
 		{
 			VisualizerComponent->UpdateShape(Shape);
-			VisualizerComponent->UpdateStartPoints(GeneratedPoints);
 		}
 
-		PointsGeneration();
 		Regenerate();
 	}
 
 	if (PropertyName == "Count")
 	{
 		TriggerGeneration();
-		VisualizerComponent->UpdateStartPoints(GeneratedPoints);
 	}
 
 	if (PropertyName == "Palette")
@@ -160,13 +154,12 @@ void ADecoratorVolume::PostEditChangeProperty(FPropertyChangedEvent& e)
 			VisualizerComponent->UpdateSize2D(Size2D);
 		}
 		
-		PointsGeneration();
 		Regenerate();
-		VisualizerComponent->UpdateStartPoints(GeneratedPoints);
 	}
 
 	if (PropertyName == "DrawCutoutZone")
 	{
+		TriggerGeneration();
 		VisualizerComponent->DrawCutout(DrawCutoutZone);
 	}
 
@@ -174,23 +167,17 @@ void ADecoratorVolume::PostEditChangeProperty(FPropertyChangedEvent& e)
 	{
 		if (Shape == EProjectionShape::Cuboid)
 		{
-			FMath::Clamp(CutoutSize2D.X, 0, Size3D.X);
-			FMath::Clamp(CutoutSize2D.Y, 0, Size3D.Y);
+			CutoutSize2D.X = FMath::Clamp(CutoutSize2D.X, 0, Size3D.X - 100);
+			CutoutSize2D.Y = FMath::Clamp(CutoutSize2D.Y, 0, Size3D.Y - 100);
 			VisualizerComponent->UpdateCutoutSize2D(CutoutSize2D);
 		}
 		else
 		{
-			if (CutoutSizeF > Size2D.X)
-			{
-				CutoutSizeF = Size2D.X;
-			}
-			else if(CutoutSizeF < 0)
-			{
-				CutoutSizeF = 0;
-			}
-			
+			CutoutSizeF = FMath::Clamp(CutoutSizeF, 0, Size2D.X - 100);
 			VisualizerComponent->UpdateCutoutSizeF(CutoutSizeF);
 		}
+
+		TriggerGeneration();
 	}
 	
 	if (PropertyName == "Alignment")
@@ -201,11 +188,11 @@ void ADecoratorVolume::PostEditChangeProperty(FPropertyChangedEvent& e)
 	if (PropertyName == "DrawRaycastLines")
 	{
 		VisualizerComponent->DrawRaycastLines(DrawRaycastLines);
+	}
 
-		if (DrawRaycastLines)
-		{
-			VisualizerComponent->UpdateStartPoints(GeneratedPoints);
-		}
+	if (DrawRaycastLines)
+	{
+		VisualizerComponent->UpdateStartPoints(GeneratedPoints);
 	}
 }
 #endif
@@ -226,9 +213,7 @@ void ADecoratorVolume::RandomizeSeed()
 // Regenerate instances transform, mesh, material, collision, etc
 void ADecoratorVolume::Regenerate()
 {
-	RunLineTrace();
-	UpdateInstanceMeshMaterial();
-	UpdateInstanceTransform();
+	TriggerGeneration();
 }
 
 // Regenerate instances with new Seed
@@ -263,7 +248,8 @@ void ADecoratorVolume::TriggerGeneration(bool NewSeed, bool WithMesh)
 	}
 	
 	if (NewSeed) RandomizeSeed(); // Randomize a new seed if NewSeed param is true
-	
+
+	RandStream.Reset(); // Resets the Stream to get back original RANDOM values
 	PointsGeneration();
 	RunLineTrace();
 
@@ -286,35 +272,34 @@ void ADecoratorVolume::TriggerGeneration(bool NewSeed, bool WithMesh)
 void ADecoratorVolume::PointsGeneration()
 {
 	GeneratedPoints.Empty(); // Clear array first before generating new points
-	GeneratedPoints.Reserve(Count);
-	
-	for (int i = 0; i < Count; i++)
+	FVector NewPoint;
+
+	while (GeneratedPoints.Num() < Count)
 	{
 		const float RandFloat = RandStream.FRand();
 		float x = 0;
 		float y = 0;
-		FVector NewPoint;
 
 		switch (Shape)
 		{
-			case EProjectionShape::Cylinder:
+			case EProjectionShape::Cylinder :
 				{
 					const float Radius = Size2D.X / 2;
-					const float R = Radius * FMath::Sqrt(RandFloat);
-					const float Theta = 200 * PI * RandFloat;
+					const float R = DrawCutoutZone ? RandStream.FRandRange(CutoutSizeF/2, Radius) : Radius * FMath::Sqrt(RandFloat) ;
+					const float Theta = DrawCutoutZone ? RandStream.FRandRange(0, 200 * PI) : 200 * PI * RandFloat;
 					x = R * FMath::Cos(Theta);
 					y = R * FMath::Sin(Theta);
 					break;
 				}
 
-			case EProjectionShape::Cube:
+			case EProjectionShape::Cube :
 				{
 					x = RandStream.FRandRange(-50, 50) * (Size2D.X / 100);
 					y = RandStream.FRandRange(-50, 50) * (Size2D.X / 100);
 					break;
 				}
 
-			case EProjectionShape::Cuboid:
+			case EProjectionShape::Cuboid :
 				{
 					x = RandStream.FRandRange(-50, 50) * (Size3D.X / 100);
 					y = RandStream.FRandRange(-50, 50) * (Size3D.Y / 100);
@@ -322,11 +307,20 @@ void ADecoratorVolume::PointsGeneration()
 				}
 		}
 
+		if (DrawCutoutZone && (Shape != EProjectionShape::Cylinder))
+		{
+			float xThreshold = (Shape == EProjectionShape::Cuboid) ? CutoutSize2D.X / 2 : CutoutSizeF / 2;
+			float yThreshold = (Shape == EProjectionShape::Cuboid) ? CutoutSize2D.Y / 2 : CutoutSizeF / 2;
+
+			if (-xThreshold <= x && x <= xThreshold  && -yThreshold  <= y && y <= yThreshold)
+			{
+				continue;
+			}
+		}
+		
 		NewPoint = FVector(x, y, 0);
 		GeneratedPoints.Add(NewPoint);
 	}
-
-	RandStream.Reset(); // Resets the Stream to get back original RANDOM values
 }
 
 // Run a set of line traces to gather location and rotation (from hit normal) using generated points and projector size

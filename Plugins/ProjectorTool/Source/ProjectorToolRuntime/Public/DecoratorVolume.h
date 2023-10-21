@@ -55,9 +55,13 @@ public:
 	UPROPERTY(EditAnywhere, meta = (DisplayPriority = 2))
 	EMeshAlignment Alignment = EMeshAlignment::SurfaceNormal;
 
+	// Size for shapes that requires/needs the same X and Y value (e.g. Cube and Cylinder)
+	// X is the Length and Breadth, while the Y is the Height
 	UPROPERTY(EditAnywhere, meta=(EditCondition = "Shape!=EProjectionShape::Cuboid", EditConditionHides, DisplayName="Size"))
 	FVector2D Size2D = FVector2D(200, 100);
 
+	// Size for shapes that can be fully manipulated in any axis (e.g. Cuboid)
+	// X is the Length, Y is the Breadth, Z is the Height
 	UPROPERTY(EditAnywhere, meta=(EditCondition = "Shape==EProjectionShape::Cuboid", EditConditionHides, DisplayName="Size"))
 	FVector Size3D = FVector(200, 200, 100);
 
@@ -66,10 +70,13 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	bool DrawCutoutZone = false;
-
+	
+	// Cutout Size for shapes that uses the same X and Y value (e.g. Cube and Cylinder)
 	UPROPERTY(EditAnywhere, meta=(EditCondition = "DrawCutoutZone && Shape!=EProjectionShape::Cuboid", EditConditionHides, DisplayName="CutoutSize"))
 	float CutoutSizeF = 100;
 
+	// Cutout Size for shapes that have both manipulatable X and Y value (e.g. Cuboid)
+	// X is the Length, Y is the Breadth
 	UPROPERTY(EditAnywhere, meta=(EditCondition = "DrawCutoutZone && Shape==EProjectionShape::Cuboid", EditConditionHides, DisplayName="CutoutSize"))
 	FVector2D CutoutSize2D = FVector2D(100, 100);
 	
