@@ -35,7 +35,7 @@ void FDecoratorVolumeVisualizer::DrawVisualization(const UActorComponent* Compon
 	constexpr float DepthBias = 0;
 	constexpr bool ScreenSpace = false;
 
-	const FLinearColor CutoutColor = FLinearColor::Red;
+	const FLinearColor RedColor = FLinearColor::Red;
 	const float CutoutHalfLength = (Shape == EProjectionShape::Cuboid ? VisualizerComponent->GetCutoutSize2D().X / 2 : VisualizerComponent->GetCutoutSizeF() / 2); // AKA radius for Cylinder shape)
 	const float CutoutHalfBreadth = VisualizerComponent->GetCutoutSize2D().Y / 2;
 
@@ -48,7 +48,6 @@ void FDecoratorVolumeVisualizer::DrawVisualization(const UActorComponent* Compon
 		case (EProjectionShape::Cylinder):
 			{	
 				DrawWireCylinder(PDI, ActorLocation, ActorRotationMatrix.GetScaledAxis(EAxis::X), ActorRotationMatrix.GetScaledAxis(EAxis::Y), ActorRotationMatrix.GetScaledAxis(EAxis::Z), Color, HalfLength, HalfHeight, Sides, DepthPriority, Thickness, DepthBias, ScreenSpace);
-
 				break;
 			}
 
@@ -56,7 +55,6 @@ void FDecoratorVolumeVisualizer::DrawVisualization(const UActorComponent* Compon
 			{
 				const FBox CubeShape = FBox::BuildAABB(FVector::Zero(), FVector(HalfLength, HalfLength, HalfHeight));
 				DrawWireBox(PDI, Matrix, CubeShape, Color, DepthPriority, Thickness, DepthBias, ScreenSpace);
-				
 				break;
 			}
 
@@ -64,40 +62,38 @@ void FDecoratorVolumeVisualizer::DrawVisualization(const UActorComponent* Compon
 			{
 				const FBox CuboidShape = FBox::BuildAABB(FVector::Zero(), FVector(HalfLength, HalfBreadth, HalfHeight));
 				DrawWireBox(PDI, Matrix, CuboidShape, Color, DepthPriority, Thickness, DepthBias, ScreenSpace);
-				
 				break;
 			}
 	}
 
+	// Visualizing the shape and size of the cutout zone
 	if (VisualizerComponent->CanDrawCutout())
 	{
 		switch (Shape)
 		{
 		case (EProjectionShape::Cylinder):
 			{	
-				DrawWireCylinder(PDI, ActorLocation, ActorRotationMatrix.GetScaledAxis(EAxis::X), ActorRotationMatrix.GetScaledAxis(EAxis::Y), ActorRotationMatrix.GetScaledAxis(EAxis::Z), CutoutColor, CutoutHalfLength, HalfHeight, Sides, DepthPriority, Thickness, DepthBias, ScreenSpace);
-
+				DrawWireCylinder(PDI, ActorLocation, ActorRotationMatrix.GetScaledAxis(EAxis::X), ActorRotationMatrix.GetScaledAxis(EAxis::Y), ActorRotationMatrix.GetScaledAxis(EAxis::Z), RedColor, CutoutHalfLength, HalfHeight, Sides, DepthPriority, Thickness, DepthBias, ScreenSpace);
 				break;
 			}
 
 		case (EProjectionShape::Cube):
 			{
 				const FBox CubeShape = FBox::BuildAABB(FVector::Zero(), FVector(CutoutHalfLength, CutoutHalfLength, HalfHeight));
-				DrawWireBox(PDI, Matrix, CubeShape, CutoutColor, DepthPriority, Thickness, DepthBias, ScreenSpace);
-				
+				DrawWireBox(PDI, Matrix, CubeShape, RedColor, DepthPriority, Thickness, DepthBias, ScreenSpace);
 				break;
 			}
 
 		case (EProjectionShape::Cuboid):
 			{
 				const FBox CuboidShape = FBox::BuildAABB(FVector::Zero(), FVector(CutoutHalfLength, CutoutHalfBreadth, HalfHeight));
-					DrawWireBox(PDI, Matrix, CuboidShape, CutoutColor, DepthPriority, Thickness, DepthBias, ScreenSpace);
-				
+				DrawWireBox(PDI, Matrix, CuboidShape, RedColor, DepthPriority, Thickness, DepthBias, ScreenSpace);
 				break;
 			}
 		}
 	}
 
+	// Visualizing raycast lines
 	if (VisualizerComponent->CanDrawRaycastLines())
 	{
 		TArray<FVector> Points = VisualizerComponent->GetPoints();
@@ -111,7 +107,7 @@ void FDecoratorVolumeVisualizer::DrawVisualization(const UActorComponent* Compon
 				Start
 			);
 
-			DrawDirectionalArrowNegZ(PDI, LineMatrix, FLinearColor::Red, MaxHeight, 15, DepthPriority, Thickness);
+			DrawDirectionalArrowNegZ(PDI, LineMatrix, RedColor, MaxHeight, 15, DepthPriority, Thickness);
 		}
 	}
 }

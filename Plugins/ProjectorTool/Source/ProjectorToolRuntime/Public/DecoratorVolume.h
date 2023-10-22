@@ -70,14 +70,17 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	bool DrawCutoutZone = false;
+
+	UPROPERTY(EditAnywhere, meta=(EditCondition = "DrawCutoutZone", EditConditionHides))
+	FVector2D CutoutOrigin = FVector2D::Zero();
 	
 	// Cutout Size for shapes that uses the same X and Y value (e.g. Cube and Cylinder)
-	UPROPERTY(EditAnywhere, meta=(EditCondition = "DrawCutoutZone && Shape!=EProjectionShape::Cuboid", EditConditionHides, DisplayName="CutoutSize"))
+	UPROPERTY(EditAnywhere, meta=(EditCondition = "DrawCutoutZone && Shape!=EProjectionShape::Cuboid", EditConditionHides, DisplayName="Cutout Size"))
 	float CutoutSizeF = 100;
 
 	// Cutout Size for shapes that have both manipulatable X and Y value (e.g. Cuboid)
 	// X is the Length, Y is the Breadth
-	UPROPERTY(EditAnywhere, meta=(EditCondition = "DrawCutoutZone && Shape==EProjectionShape::Cuboid", EditConditionHides, DisplayName="CutoutSize"))
+	UPROPERTY(EditAnywhere, meta=(EditCondition = "DrawCutoutZone && Shape==EProjectionShape::Cuboid", EditConditionHides, DisplayName="Cutout Size"))
 	FVector2D CutoutSize2D = FVector2D(100, 100);
 	
 	UPROPERTY(EditAnywhere, Category="Debug")

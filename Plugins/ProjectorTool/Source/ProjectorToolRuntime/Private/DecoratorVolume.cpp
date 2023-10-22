@@ -154,7 +154,7 @@ void ADecoratorVolume::PostEditChangeProperty(FPropertyChangedEvent& e)
 			VisualizerComponent->UpdateSize2D(Size2D);
 		}
 		
-		Regenerate();
+		//Regenerate();
 	}
 
 	if (PropertyName == "DrawCutoutZone")
@@ -163,6 +163,11 @@ void ADecoratorVolume::PostEditChangeProperty(FPropertyChangedEvent& e)
 		VisualizerComponent->DrawCutout(DrawCutoutZone);
 	}
 
+	if (PropertyName == "CutoutOrigin")
+	{
+		VisualizerComponent->UpdateCutoutOrigin(CutoutOrigin);
+	}
+	
 	if (PropertyName == "CutoutSizeF" || PropertyName == "CutoutSize2D")
 	{
 		if (Shape == EProjectionShape::Cuboid)
@@ -272,7 +277,6 @@ void ADecoratorVolume::TriggerGeneration(bool NewSeed, bool WithMesh)
 void ADecoratorVolume::PointsGeneration()
 {
 	GeneratedPoints.Empty(); // Clear array first before generating new points
-	FVector NewPoint;
 
 	while (GeneratedPoints.Num() < Count)
 	{
@@ -285,8 +289,8 @@ void ADecoratorVolume::PointsGeneration()
 			case EProjectionShape::Cylinder :
 				{
 					const float Radius = Size2D.X / 2;
-					const float R = DrawCutoutZone ? RandStream.FRandRange(CutoutSizeF/2, Radius) : Radius * FMath::Sqrt(RandFloat) ;
-					const float Theta = DrawCutoutZone ? RandStream.FRandRange(0, 200 * PI) : 200 * PI * RandFloat;
+					const float R = Radius * FMath::Sqrt(RandFloat) ;
+					const float Theta = 200 * PI * RandFloat;
 					x = R * FMath::Cos(Theta);
 					y = R * FMath::Sin(Theta);
 					break;
@@ -307,18 +311,43 @@ void ADecoratorVolume::PointsGeneration()
 				}
 		}
 
-		if (DrawCutoutZone && (Shape != EProjectionShape::Cylinder))
+		// When cutout zone is enabled and we do not want the generated points to lie within the zone
+		if (DrawCutoutZone)
 		{
-			float xThreshold = (Shape == EProjectionShape::Cuboid) ? CutoutSize2D.X / 2 : CutoutSizeF / 2;
-			float yThreshold = (Shape == EProjectionShape::Cuboid) ? CutoutSize2D.Y / 2 : CutoutSizeF / 2;
+			float xThreshold, yThreshold = 0;
+			bool bPointIsInCircle = false;
 
-			if (-xThreshold <= x && x <= xThreshold  && -yThreshold  <= y && y <= yThreshold)
+			switch (Shape)
+			{
+				case EProjectionShape::Cylinder :
+					{
+						float DistFromCenter = FMath::Sqrt(x*x + y*y); 
+						bPointIsInCircle = (DistFromCenter <= CutoutSizeF/2);
+						break;
+					}
+
+				case EProjectionShape::Cube :
+					{
+						xThreshold = CutoutSizeF / 2;
+						yThreshold = CutoutSizeF / 2;
+						break;
+					}
+
+				case EProjectionShape::Cuboid :
+					{
+						xThreshold = CutoutSize2D.X / 2;
+						yThreshold = CutoutSize2D.Y / 2;
+						break;
+					}
+			}
+			
+			if ((-xThreshold <= x && x <= xThreshold  && -yThreshold  <= y && y <= yThreshold) || bPointIsInCircle)
 			{
 				continue;
 			}
 		}
 		
-		NewPoint = FVector(x, y, 0);
+		FVector NewPoint = FVector(x, y, 0);
 		GeneratedPoints.Add(NewPoint);
 	}
 }
