@@ -16,13 +16,15 @@ class PROJECTORTOOLRUNTIME_API ADecoratorVolume : public AActor
 	
 private:
 	// Min Max clamps for Seed value
-	const int32 MinClamp = -999999;
-	const int32 MaxClamp = 999999;
+	const int32 MinSeedClamp = -999999;
+	const int32 MaxSeedClamp = 999999;
 
+	const uint32 CutoutSizeMargin = 100;
+	
 	bool bIsStreamInitialized = false;
 	bool bFlushComponents = false;
 	
-	UBillboardComponent* SpriteComponent;
+	UBillboardComponent* SpriteComponent = nullptr;
 
 	UPROPERTY(VisibleDefaultsOnly)
 	USceneComponent* DefaultRoot = nullptr;
@@ -72,7 +74,7 @@ public:
 	bool DrawCutoutZone = false;
 
 	UPROPERTY(EditAnywhere, meta=(EditCondition = "DrawCutoutZone", EditConditionHides))
-	FVector2D CutoutOrigin = FVector2D::Zero();
+	FVector2D CutoutOffset = FVector2D::Zero();
 	
 	// Cutout Size for shapes that uses the same X and Y value (e.g. Cube and Cylinder)
 	UPROPERTY(EditAnywhere, meta=(EditCondition = "DrawCutoutZone && Shape!=EProjectionShape::Cuboid", EditConditionHides, DisplayName="Cutout Size"))

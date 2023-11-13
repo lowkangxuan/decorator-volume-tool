@@ -126,7 +126,7 @@ void ADecoratorVolume::PostEditChangeProperty(FPropertyChangedEvent& e)
 			VisualizerComponent->UpdateShape(Shape);
 		}
 
-		Regenerate();
+		TriggerGeneration();
 	}
 
 	if (PropertyName == "Count")
@@ -153,8 +153,19 @@ void ADecoratorVolume::PostEditChangeProperty(FPropertyChangedEvent& e)
 		{
 			VisualizerComponent->UpdateSize2D(Size2D);
 		}
-		
-		//Regenerate();
+
+		if (Size2D.X <= CutoutSizeF + CutoutSizeMargin)
+		{
+			CutoutSizeF = FMath::Clamp(CutoutSizeF, 0, Size2D.X - CutoutSizeMargin);
+			VisualizerComponent->UpdateCutoutSizeF(CutoutSizeF);
+		}
+
+		if (Size3D.X <= CutoutSize2D.X + CutoutSizeMargin || Size3D.Y <= CutoutSize2D.Y + CutoutSizeMargin)
+		{
+			CutoutSize2D.X = FMath::Clamp(CutoutSize2D.X, 0, Size3D.X - CutoutSizeMargin);
+			CutoutSize2D.Y = FMath::Clamp(CutoutSize2D.Y, 0, Size3D.Y - CutoutSizeMargin);
+			VisualizerComponent->UpdateCutoutSize2D(CutoutSize2D);
+		}
 	}
 
 	if (PropertyName == "DrawCutoutZone")
@@ -163,22 +174,22 @@ void ADecoratorVolume::PostEditChangeProperty(FPropertyChangedEvent& e)
 		VisualizerComponent->DrawCutout(DrawCutoutZone);
 	}
 
-	if (PropertyName == "CutoutOrigin")
+	if (PropertyName == "CutoutOffset")
 	{
-		VisualizerComponent->UpdateCutoutOrigin(CutoutOrigin);
+		VisualizerComponent->UpdateCutoutOffset(CutoutOffset);
 	}
 	
 	if (PropertyName == "CutoutSizeF" || PropertyName == "CutoutSize2D")
 	{
 		if (Shape == EProjectionShape::Cuboid)
 		{
-			CutoutSize2D.X = FMath::Clamp(CutoutSize2D.X, 0, Size3D.X - 100);
-			CutoutSize2D.Y = FMath::Clamp(CutoutSize2D.Y, 0, Size3D.Y - 100);
+			CutoutSize2D.X = FMath::Clamp(CutoutSize2D.X, 0, Size3D.X - CutoutSizeMargin);
+			CutoutSize2D.Y = FMath::Clamp(CutoutSize2D.Y, 0, Size3D.Y - CutoutSizeMargin);
 			VisualizerComponent->UpdateCutoutSize2D(CutoutSize2D);
 		}
 		else
 		{
-			CutoutSizeF = FMath::Clamp(CutoutSizeF, 0, Size2D.X - 100);
+			CutoutSizeF = FMath::Clamp(CutoutSizeF, 0, Size2D.X - CutoutSizeMargin);
 			VisualizerComponent->UpdateCutoutSizeF(CutoutSizeF);
 		}
 
@@ -187,7 +198,7 @@ void ADecoratorVolume::PostEditChangeProperty(FPropertyChangedEvent& e)
 	
 	if (PropertyName == "Alignment")
 	{
-		Regenerate();
+		TriggerGeneration();
 	}
 
 	if (PropertyName == "DrawRaycastLines")
@@ -211,11 +222,12 @@ void ADecoratorVolume::InitNewStreamSeed()
 // Set a random int value to Seed and calling SetNewStreamSeed() function
 void ADecoratorVolume::RandomizeSeed()
 {
-	Seed = FMath::RandRange(MinClamp, MaxClamp);
+	Seed = FMath::RandRange(MinSeedClamp, MaxSeedClamp);
 	InitNewStreamSeed();
 }
 
 // Regenerate instances transform, mesh, material, collision, etc
+// Function that is and only to be called with the Editor button
 void ADecoratorVolume::Regenerate()
 {
 	TriggerGeneration();
@@ -225,7 +237,6 @@ void ADecoratorVolume::Regenerate()
 void ADecoratorVolume::GenerateNewSeed()
 {
 	TriggerGeneration(true);
-	VisualizerComponent->UpdateStartPoints(GeneratedPoints);
 }
 
 void ADecoratorVolume::GenerateNoMesh()
@@ -241,6 +252,8 @@ void ADecoratorVolume::Clear()
 	{
 		CurrComponent->ClearInstances();
 	}
+
+	this->Modify(); // Marks the actor as dirty
 }
 
 void ADecoratorVolume::TriggerGeneration(bool NewSeed, bool WithMesh)
@@ -257,6 +270,7 @@ void ADecoratorVolume::TriggerGeneration(bool NewSeed, bool WithMesh)
 	RandStream.Reset(); // Resets the Stream to get back original RANDOM values
 	PointsGeneration();
 	RunLineTrace();
+	VisualizerComponent->UpdateStartPoints(GeneratedPoints);
 
 	// Reregister Instanced Static Mesh Components and its individual instance Material and Transform
 	if (WithMesh)
@@ -271,6 +285,8 @@ void ADecoratorVolume::TriggerGeneration(bool NewSeed, bool WithMesh)
 		UpdateInstanceMeshMaterial();
 		UpdateInstanceTransform();
 	}
+
+	this->Modify(); // Marks the actor as dirty
 }
 
 // Regenerate points using Maths and based on the number of Counts and Shape
@@ -314,7 +330,7 @@ void ADecoratorVolume::PointsGeneration()
 		// When cutout zone is enabled and we do not want the generated points to lie within the zone
 		if (DrawCutoutZone)
 		{
-			float xThreshold, yThreshold = 0;
+			float xThreshold = 0, yThreshold = 0;
 			bool bPointIsInCircle = false;
 
 			switch (Shape)

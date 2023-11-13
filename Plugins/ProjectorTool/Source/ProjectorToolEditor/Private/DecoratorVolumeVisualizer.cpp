@@ -36,6 +36,7 @@ void FDecoratorVolumeVisualizer::DrawVisualization(const UActorComponent* Compon
 	constexpr bool ScreenSpace = false;
 
 	const FLinearColor RedColor = FLinearColor::Red;
+	const FVector2D CutoutOffset = VisualizerComponent->GetCutoutOffset();
 	const float CutoutHalfLength = (Shape == EProjectionShape::Cuboid ? VisualizerComponent->GetCutoutSize2D().X / 2 : VisualizerComponent->GetCutoutSizeF() / 2); // AKA radius for Cylinder shape)
 	const float CutoutHalfBreadth = VisualizerComponent->GetCutoutSize2D().Y / 2;
 
