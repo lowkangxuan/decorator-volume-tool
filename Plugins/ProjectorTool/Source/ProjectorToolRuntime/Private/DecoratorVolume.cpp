@@ -29,9 +29,11 @@ ADecoratorVolume::ADecoratorVolume(const FObjectInitializer& ObjectInitializer) 
 	SetRootComponent(DefaultRoot);
 	RootComponent->SetMobility(EComponentMobility::Static);
 #pragma endregion Setting RootComponent
-	
 
-	// Structure to hold one-time initialization
+#pragma region Editor Sprite Component Stuff
+#if WITH_EDITORONLY_DATA
+	SpriteComponent = CreateEditorOnlyDefaultSubobject<UBillboardComponent>(TEXT("Sprite"));
+	
 	struct FConstructorStatics
 	{
 		// A helper class object we use to find target UTexture2D object in resource package
@@ -48,11 +50,7 @@ ADecoratorVolume::ADecoratorVolume(const FObjectInitializer& ObjectInitializer) 
 		}
 	};
 	static FConstructorStatics ConstructorStatics;
-
-#pragma region Editor Sprite Component Stuff
-#if WITH_EDITORONLY_DATA
-	SpriteComponent = CreateEditorOnlyDefaultSubobject<UBillboardComponent>(TEXT("Sprite"));
-
+	
 	if (SpriteComponent)
 	{
 		SpriteComponent->Sprite = ConstructorStatics.EmptyActorTextureObject.Get();
