@@ -9,8 +9,18 @@ A "volumetric" tool made in UE that simplifies the placement of decorations, fol
 # Usage
 Using the volume is extremely easy. All you need is to place a "Decorator Volume" into your level and assigning a "Decorator Palette" of your choice.
 
-## Creating a volume
-### Parameters
+## Creating a volume and palette
 
-## Creating a palette
-### Parameters
+# Parameters
+## Volume
+    *Count:
+    *Palette: 
+    *Shape: 
+    *Alignment:
+    *Size:
+    *Seed:
+    *DrawCutoutZone: 
+    *CutoutSize: 
+
+## Palette
+The parameters that determines the instance are stored within a struct `FPaletteInstanceStruct`
