@@ -282,6 +282,7 @@ void ADecoratorVolume::TriggerGeneration(bool NewSeed, bool WithMesh)
 		
 		UpdateInstanceMeshMaterial();
 		UpdateInstanceTransform();
+		UpdateInstanceCollisionProfile();
 	}
 
 	this->Modify(); // Marks the actor as dirty
@@ -411,13 +412,6 @@ void ADecoratorVolume::AddInstMeshComponents()
 		AddInstanceComponent(InstMeshComp);
 		TempArray.Add(InstMeshComp);
 	}
-
-	Algo::Reverse(TempArray); // Reverse array as GetComponents gets all components in reverse order
-	for (int i = 0; i < TempArray.Num(); ++i)
-	{
-		// Setting each instance a collision profile from their respective palette instance
-		TempArray[i]->SetCollisionProfileName(GetPalette()->Instances[i].CollisionProfile.Name);
-	}
 }
 
 // Get all existing Instanced Mesh Component in the actor and delete thems
@@ -456,13 +450,10 @@ void ADecoratorVolume::UpdateInstanceTransform()
 		UInstancedStaticMeshComponent* CurrComponent = GetAllInstMeshComponents()[Index];
 		
 		// Delete all existing instances
-		if (CurrComponent->GetInstanceCount() > 0)
-		{
-			CurrComponent->ClearInstances();
-		}
+		if (CurrComponent->GetInstanceCount() > 0) { CurrComponent->ClearInstances(); }
 		
 		float CurrCount = FMath::RoundHalfFromZero((Count * (GetPalette()->GetDensityRatioAtIndex(Index))) + PrevCount);
-		CurrCount = FMath::Clamp(CurrCount, 0, LineTracedLocations.Num()); // CLamp value within the number of array elements
+		CurrCount = FMath::Clamp(CurrCount, 0, LineTracedLocations.Num()); // Clamp value within the number of array elements
 		for (int j = PrevCount; j < CurrCount; ++j)
 		{
 			FRotator Rotation = UseSurfaceNormal ? LineTracedRotations[j] : UseObjectReference ? FRotator::ZeroRotator : FRotator::ZeroRotator /*+ GetPalette()->GetRotationAtIndex(Index)*/;
@@ -474,6 +465,17 @@ void ADecoratorVolume::UpdateInstanceTransform()
 		}
 		
 		PrevCount = CurrCount;
+	}
+}
+
+void ADecoratorVolume::UpdateInstanceCollisionProfile()
+{
+	TArray<UInstancedStaticMeshComponent*> ComponentsArray = GetAllInstMeshComponents();
+	
+	for (int i = 0; i < ComponentsArray.Num(); ++i)
+	{
+		// Setting each instance a collision profile from their respective palette instance
+		ComponentsArray[i]->SetCollisionProfileName(GetPalette()->Instances[i].CollisionProfile.Name);
 	}
 }
 

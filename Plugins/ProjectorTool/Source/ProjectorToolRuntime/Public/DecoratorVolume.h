@@ -137,6 +137,7 @@ private:
 	void RemoveInstMeshComponents();
 	void UpdateInstanceMeshMaterial();
 	void UpdateInstanceTransform();
+	void UpdateInstanceCollisionProfile();
 
 	FRotator RandomizeRotator(FRotator Min, FRotator Max);
 	FVector RandomizeScale(FVector Min, FVector Max);
