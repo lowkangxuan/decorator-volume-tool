@@ -23,9 +23,6 @@ private:
 
 	UPROPERTY(VisibleInstanceOnly)
 	FVector Size3D = FVector::One();
-
-	UPROPERTY(VisibleInstanceOnly)
-	FVector2D CutoutOrigin = FVector2D::Zero();
 	
 	UPROPERTY(VisibleInstanceOnly)
 	float CutoutSizeF = 100;
@@ -56,7 +53,6 @@ public:
 	// Getters
 	FVector2D GetSize2D() const { return Size2D; }
 	FVector GetSize3D() const { return Size3D; }
-	FVector2D GetCutoutOffset() const { return CutoutOrigin; }
 	float GetCutoutSizeF() const { return CutoutSizeF; }
 	FVector2d GetCutoutSize2D() const { return CutoutSize2D; }
 	
@@ -68,7 +64,6 @@ public:
 	// Setters
 	void UpdateSize2D(FVector2D NewSize) { Size2D = NewSize; }
 	void UpdateSize3D(FVector NewSize) { Size3D = NewSize; }
-	void UpdateCutoutOffset(FVector2D NewOrigin) { CutoutOrigin = NewOrigin; }
 	void UpdateCutoutSizeF(float NewSize) { CutoutSizeF = NewSize; }
 	void UpdateCutoutSize2D(FVector2D NewSize) { CutoutSize2D = NewSize; }
 	

@@ -9,7 +9,7 @@
 #include "DecoratorVolumeVisualizerComponent.h"
 #include "DecoratorVolume.generated.h"
 
-UCLASS(Abstract, Blueprintable, HideCategories=(Collision, HLOD, Physics, Networking, Input))
+UCLASS(Abstract, Blueprintable, BlueprintType, HideCategories=(Collision, HLOD, Physics, Networking, Input))
 class PROJECTORTOOLRUNTIME_API ADecoratorVolume : public AActor
 {
 	GENERATED_BODY()
@@ -25,12 +25,10 @@ private:
 	bool bFlushComponents = false;
 	
 	UBillboardComponent* SpriteComponent = nullptr;
+	UDecoratorVolumeVisualizerComponent* VisualizerComponent = nullptr;
 
 	UPROPERTY(VisibleDefaultsOnly)
 	USceneComponent* DefaultRoot = nullptr;
-
-	UPROPERTY(VisibleInstanceOnly)
-	UDecoratorVolumeVisualizerComponent* VisualizerComponent = nullptr;
 	
 	FRandomStream RandStream = FRandomStream();
 	
@@ -72,9 +70,6 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	bool DrawCutoutZone = false;
-
-	UPROPERTY(EditAnywhere, meta=(EditCondition = "DrawCutoutZone", EditConditionHides))
-	FVector2D CutoutOffset = FVector2D::Zero();
 	
 	// Cutout Size for shapes that uses the same X and Y value (e.g. Cube and Cylinder)
 	UPROPERTY(EditAnywhere, meta=(EditCondition = "DrawCutoutZone && Shape!=EProjectionShape::Cuboid", EditConditionHides, DisplayName="Cutout Size"))

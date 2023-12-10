@@ -14,6 +14,5 @@ UENUM()
 enum class EMeshAlignment : uint8
 {
 	Default,
-	SurfaceNormal,
-	ObjectReference
+	SurfaceNormal
 };

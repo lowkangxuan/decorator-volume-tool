@@ -171,11 +171,6 @@ void ADecoratorVolume::PostEditChangeProperty(FPropertyChangedEvent& e)
 		TriggerGeneration();
 		VisualizerComponent->DrawCutout(DrawCutoutZone);
 	}
-
-	if (PropertyName == "CutoutOffset")
-	{
-		VisualizerComponent->UpdateCutoutOffset(CutoutOffset);
-	}
 	
 	if (PropertyName == "CutoutSizeF" || PropertyName == "CutoutSize2D")
 	{
@@ -373,17 +368,17 @@ void ADecoratorVolume::RunLineTrace()
 	LineTracedLocations.Empty();
 	LineTracedRotations.Empty();
 	
-	FVector ActorLocation = this->GetActorLocation();
-	float Z = Shape == EProjectionShape::Cuboid ? Size3D.Z : Size2D.Y; // Uses Vector2D Y value if shape is Cylinder or Cube, else it is using the Vector Z value for Cuboid
-	FVector HalfZOffset = FVector(0, 0, Z / 2);
+	const FVector ActorLocation = this->GetActorLocation();
+	const float Z = Shape == EProjectionShape::Cuboid ? Size3D.Z : Size2D.Y; // Uses Vector2D Y value if shape is Cylinder or Cube, else it is using the Vector Z value for Cuboid
+	const FVector HalfZOffset = FVector(0, 0, Z / 2);
 	
 	for (FVector CurrPoint : GeneratedPoints)
 	{
-		// Local -> World Position == CurrPoint + ActorLocation
-		FVector Start =  this->GetActorRotation().RotateVector(CurrPoint + HalfZOffset) + ActorLocation;
-		FVector End = Start + (-this->GetActorUpVector() * Z);
+		// Local Position to World Position == CurrPoint + ActorLocation
 		FHitResult HitResult;
 		FCollisionQueryParams TraceParams;
+		FVector Start =  this->GetActorRotation().RotateVector(CurrPoint + HalfZOffset) + ActorLocation;
+		FVector End = Start + (-this->GetActorUpVector() * Z);
 		TraceParams.AddIgnoredActor(this);
 		GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_WorldStatic, TraceParams);
 		
@@ -442,7 +437,6 @@ void ADecoratorVolume::UpdateInstanceMeshMaterial()
 void ADecoratorVolume::UpdateInstanceTransform()
 {
 	const bool UseSurfaceNormal = (Alignment == EMeshAlignment::SurfaceNormal);
-	const bool UseObjectReference = (Alignment == EMeshAlignment::ObjectReference);
 	unsigned int PrevCount = 0; // Sort of a "clamp" for the nested loop
 	
 	for (int Index = 0; Index < GetAllInstMeshComponents().Num(); ++Index)
@@ -456,7 +450,7 @@ void ADecoratorVolume::UpdateInstanceTransform()
 		CurrCount = FMath::Clamp(CurrCount, 0, LineTracedLocations.Num()); // Clamp value within the number of array elements
 		for (int j = PrevCount; j < CurrCount; ++j)
 		{
-			FRotator Rotation = UseSurfaceNormal ? LineTracedRotations[j] : UseObjectReference ? FRotator::ZeroRotator : FRotator::ZeroRotator /*+ GetPalette()->GetRotationAtIndex(Index)*/;
+			FRotator Rotation = UseSurfaceNormal ? LineTracedRotations[j] : FRotator::ZeroRotator /*+ GetPalette()->GetRotationAtIndex(Index)*/;
 			FVector Location = LineTracedLocations[j];
 			FVector Scale = GetPalette()->GetScaleAtIndex(Index);
 			
