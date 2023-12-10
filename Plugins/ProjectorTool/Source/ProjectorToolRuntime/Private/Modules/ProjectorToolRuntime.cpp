@@ -1,6 +1,6 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-#include "ProjectorToolRuntime.h"
+#include "Modules/ProjectorToolRuntime.h"
 
 #define LOCTEXT_NAMESPACE "FProjectorToolModule"
 

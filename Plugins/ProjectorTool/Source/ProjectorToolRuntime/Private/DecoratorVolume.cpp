@@ -371,20 +371,19 @@ void ADecoratorVolume::RunLineTrace()
 	const FVector ActorLocation = this->GetActorLocation();
 	const float Z = Shape == EProjectionShape::Cuboid ? Size3D.Z : Size2D.Y; // Uses Vector2D Y value if shape is Cylinder or Cube, else it is using the Vector Z value for Cuboid
 	const FVector HalfZOffset = FVector(0, 0, Z / 2);
+	FHitResult HitResult;
+	FCollisionQueryParams TraceParams;
+	TraceParams.AddIgnoredActor(this);
 	
 	for (FVector CurrPoint : GeneratedPoints)
 	{
 		// Local Position to World Position == CurrPoint + ActorLocation
-		FHitResult HitResult;
-		FCollisionQueryParams TraceParams;
 		FVector Start =  this->GetActorRotation().RotateVector(CurrPoint + HalfZOffset) + ActorLocation;
 		FVector End = Start + (-this->GetActorUpVector() * Z);
-		TraceParams.AddIgnoredActor(this);
 		GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_WorldStatic, TraceParams);
 		
 		if (HitResult.bBlockingHit)
 		{
-			//UE_LOG(LogTemp, Display, TEXT("Impact Point: %s, Impact Normal: %s"), *HitResult.ImpactPoint.ToString(), *HitResult.ImpactNormal.ToString());
 			LineTracedLocations.Add(HitResult.ImpactPoint);
 			LineTracedRotations.Add(UKismetMathLibrary::MakeRotFromZ(HitResult.ImpactNormal)); // Creating rotation from surface normal
 		}

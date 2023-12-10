@@ -25,6 +25,8 @@ private:
 	bool bFlushComponents = false;
 	
 	UBillboardComponent* SpriteComponent = nullptr;
+
+	UPROPERTY(VisibleDefaultsOnly)
 	UDecoratorVolumeVisualizerComponent* VisualizerComponent = nullptr;
 
 	UPROPERTY(VisibleDefaultsOnly)
@@ -35,11 +37,8 @@ private:
 	UPROPERTY(EditAnywhere, meta = (ClampMin = 0))
 	int32 Count = 0;
 
-	UPROPERTY(VisibleAnywhere, Category="Debug")
 	TArray<FVector> GeneratedPoints;
-	UPROPERTY(VisibleAnywhere, Category="Debug")
 	TArray<FVector> LineTracedLocations;
-	UPROPERTY(VisibleAnywhere, Category="Debug")
 	TArray<FRotator> LineTracedRotations;
 	
 public:	
