@@ -6,8 +6,8 @@
 #if WITH_EDITOR
 	void UDecoratorPalette::PostEditChangeProperty(FPropertyChangedEvent& e)
 	{
-		FName PropertyName = (e.Property != NULL ? e.GetPropertyName() : NAME_None);
-		UE_LOG(LogTemp, Display, TEXT("Decorator Palette: %s"), *FString(PropertyName.ToString()));
+		Super::PostEditChangeProperty(e);
+		const FName PropertyName = (e.Property != NULL ? e.MemberProperty->GetFName() : NAME_None);
 
 		if (PropertyName == "Instances" || PropertyName == "Density")
 		{
@@ -22,6 +22,23 @@
 			TotalDensity = CurrTotalDensity;
 		}
 	}
+
+void UDecoratorPalette::PostEditChangeChainProperty(FPropertyChangedChainEvent& e)
+{
+		Super::PostEditChangeChainProperty(e);
+		const FName ChainPropertyName = (e.Property != NULL ? e.MemberProperty->GetFName() : NAME_None);
+		const int32 InstanceIndex = e.GetArrayIndex(TEXT("Instances"));
+		
+		if (ChainPropertyName == "ScaleMin")
+		{
+			Instances[InstanceIndex].ScaleMin = FMath::Clamp(Instances[InstanceIndex].ScaleMin, 0.0, Instances[InstanceIndex].ScaleMax);
+		}
+
+		if (ChainPropertyName == "ScaleMax")
+		{
+			Instances[InstanceIndex].ScaleMax = FMath::Clamp(Instances[InstanceIndex].ScaleMax, Instances[InstanceIndex].ScaleMin, Instances[InstanceIndex].ScaleMax);
+		}
+}
 #endif
 
 // Return the total density of the palette
@@ -44,14 +61,15 @@ float UDecoratorPalette::GetDensityRatioAtIndex(int32 Index)
 	return CalculatedDensity;
 }
 
+// Returns the scale of the specified instance index
+float UDecoratorPalette::GetScaleAtIndex(int32 Index)
+{
+	return 1;
+}
+
 FRotator UDecoratorPalette::GetRotationAtIndex(int32 Index)
 {
 	return Instances[Index].RandomScale ? Instances[Index].Rotation : FRotator::ZeroRotator;
 }
 
-// Returns the scale of the specified instance index
-FVector UDecoratorPalette::GetScaleAtIndex(int32 Index)
-{
-	return Instances[Index].RandomScale ? Instances[Index].Scale : FVector::One();
-}
 

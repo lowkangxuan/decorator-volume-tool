@@ -25,15 +25,12 @@ struct FPaletteStruct
 	
 	UPROPERTY(EditAnywhere)
 	bool RandomScale = false;
-	
-	UPROPERTY(EditAnywhere, meta=(AllowPreserveRatio, EditCondition="RandomScale", EditConditionHides))
-	FVector Scale = FVector::One(); // Default scale to (1, 1, 1)
 
-	UPROPERTY(EditAnywhere, meta=(AllowPreserveRatio, EditCondition="RandomScale", EditConditionHides))
-	FVector ScaleMin = FVector::One(); // Default to (1, 1, 1)
+	UPROPERTY(EditAnywhere, meta=(EditCondition="RandomScale", EditConditionHides))
+	float ScaleMin = 1.0f;
 
-	UPROPERTY(EditAnywhere, meta=(AllowPreserveRatio, EditCondition="RandomScale", EditConditionHides))
-	FVector ScaleMax = FVector::One(); // Default to (1, 1, 1)
+	UPROPERTY(EditAnywhere, meta=(EditCondition="RandomScale", EditConditionHides))
+	float ScaleMax = 1.0f;
 
 	UPROPERTY(EditAnywhere)
 	bool RandomRotation = false;
@@ -48,7 +45,7 @@ struct FPaletteStruct
 	FRotator MaxRotation = FRotator::ZeroRotator;
 };
 
-UCLASS(Abstract, Blueprintable, BlueprintType, CollapseCategories, DefaultToInstanced, EditInlineNew)
+UCLASS(Blueprintable, BlueprintType, CollapseCategories)
 class PROJECTORTOOLRUNTIME_API UDecoratorPalette : public UObject
 {
 	GENERATED_BODY()
@@ -58,16 +55,17 @@ public:
 	int32 TotalDensity;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (TitleProperty="Density: {Density}"))
-	TArray<FPaletteStruct> Instances;
+	TArray<FPaletteStruct> Instances = TArray<FPaletteStruct>();
 
 public:
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& e) override;
+	virtual void PostEditChangeChainProperty(FPropertyChangedChainEvent& e) override;
 	
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	int32 GetTotalDensity();
 
 	int32 GetNumberOfInstances() const;
 	float GetDensityRatioAtIndex(int32 Index);
+	float GetScaleAtIndex(int32 Index);
 	FRotator GetRotationAtIndex(int32 Index);
-	FVector GetScaleAtIndex(int32 Index);
 };

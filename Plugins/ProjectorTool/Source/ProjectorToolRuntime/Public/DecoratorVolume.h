@@ -19,19 +19,20 @@ private:
 	const int32 MinSeedClamp = -999999;
 	const int32 MaxSeedClamp = 999999;
 
-	const uint32 CutoutSizeMargin = 100;
+	const uint32 HollowPadding = 100;
 	
 	bool bIsStreamInitialized = false;
 	bool bFlushComponents = false;
 	
 	UBillboardComponent* SpriteComponent = nullptr;
 
-	UPROPERTY(VisibleDefaultsOnly)
+	UPROPERTY()
 	UDecoratorVolumeVisualizerComponent* VisualizerComponent = nullptr;
 
 	UPROPERTY(VisibleDefaultsOnly)
 	USceneComponent* DefaultRoot = nullptr;
-	
+
+	UPROPERTY()
 	FRandomStream RandStream = FRandomStream();
 	
 	UPROPERTY(EditAnywhere, meta = (ClampMin = 0))
@@ -46,7 +47,7 @@ public:
 	ADecoratorVolume(const class FObjectInitializer& ObjectInitializer);
 
 	UPROPERTY(EditAnywhere, meta = (DisplayPriority = 0))
-	TSubclassOf<UDecoratorPalette> Palette = nullptr;
+	UDecoratorPalette* Palette = nullptr;
 
 	UPROPERTY(EditAnywhere, meta = (DisplayPriority = 1))
 	EProjectionShape Shape = EProjectionShape::Cylinder;
@@ -68,16 +69,19 @@ public:
 	int32 Seed;
 
 	UPROPERTY(EditAnywhere)
-	bool DrawCutoutZone = false;
+	bool ScaleFromCenter;
 	
-	// Cutout Size for shapes that uses the same X and Y value (e.g. Cube and Cylinder)
-	UPROPERTY(EditAnywhere, meta=(EditCondition = "DrawCutoutZone && Shape!=EProjectionShape::Cuboid", EditConditionHides, DisplayName="Cutout Size"))
-	float CutoutSizeF = 100;
+	UPROPERTY(EditAnywhere)
+	bool Hollow = false;
+	
+	// Hollow Size for shapes that uses the same X and Y value (e.g. Cube and Cylinder)
+	UPROPERTY(EditAnywhere, meta=(EditCondition = "Hollow && Shape!=EProjectionShape::Cuboid", EditConditionHides, DisplayName="Hollow Size"))
+	float HollowSizeF = 100;
 
-	// Cutout Size for shapes that have both manipulatable X and Y value (e.g. Cuboid)
+	// Hollow Size for shapes that have both manipulatable X and Y value (e.g. Cuboid)
 	// X is the Length, Y is the Breadth
-	UPROPERTY(EditAnywhere, meta=(EditCondition = "DrawCutoutZone && Shape==EProjectionShape::Cuboid", EditConditionHides, DisplayName="Cutout Size"))
-	FVector2D CutoutSize2D = FVector2D(100, 100);
+	UPROPERTY(EditAnywhere, meta=(EditCondition = "Hollow && Shape==EProjectionShape::Cuboid", EditConditionHides, DisplayName="Hollow Size"))
+	FVector2D HollowSize2D = FVector2D(100, 100);
 	
 	UPROPERTY(EditAnywhere, Category="Debug")
 	bool DrawRaycastLines = false;

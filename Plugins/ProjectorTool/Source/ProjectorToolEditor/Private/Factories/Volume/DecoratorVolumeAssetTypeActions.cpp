@@ -19,6 +19,11 @@ FText FDecoratorVolumeAssetTypeActions::GetName() const
 	return INVTEXT("Volume");
 }
 
+FText FDecoratorVolumeAssetTypeActions::GetAssetDescription(const FAssetData& AssetData) const
+{
+	return INVTEXT("Test");
+}
+
 FColor FDecoratorVolumeAssetTypeActions::GetTypeColor() const
 {
 	return FColor::Cyan;

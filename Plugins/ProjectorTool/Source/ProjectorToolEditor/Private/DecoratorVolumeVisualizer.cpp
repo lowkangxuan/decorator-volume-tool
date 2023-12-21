@@ -36,8 +36,8 @@ void FDecoratorVolumeVisualizer::DrawVisualization(const UActorComponent* Compon
 	constexpr bool ScreenSpace = false;
 
 	const FLinearColor RedColor = FLinearColor::Red;
-	const float CutoutHalfLength = (Shape == EProjectionShape::Cuboid ? VisualizerComponent->GetCutoutSize2D().X / 2 : VisualizerComponent->GetCutoutSizeF() / 2); // AKA radius for Cylinder shape)
-	const float CutoutHalfBreadth = VisualizerComponent->GetCutoutSize2D().Y / 2;
+	const float HollowHalfHeight = (Shape == EProjectionShape::Cuboid ? VisualizerComponent->GetHollowSize2D().X / 2 : VisualizerComponent->GetHollowSizeF() / 2); // AKA radius for Cylinder shape)
+	const float HollowHalfBreadth = VisualizerComponent->GetHollowSize2D().Y / 2;
 
 	const FRotationTranslationMatrix Matrix = FRotationTranslationMatrix(
 		VisualizerComponent->GetOwner()->GetActorRotation(),
@@ -66,27 +66,27 @@ void FDecoratorVolumeVisualizer::DrawVisualization(const UActorComponent* Compon
 			}
 	}
 
-	// Visualizing the shape and size of the cutout zone
-	if (VisualizerComponent->CanDrawCutout())
+	// Visualizing the shape and hollow size
+	if (VisualizerComponent->CanDrawHollow())
 	{
 		switch (Shape)
 		{
 		case (EProjectionShape::Cylinder):
 			{	
-				DrawWireCylinder(PDI, ActorLocation, ActorRotationMatrix.GetScaledAxis(EAxis::X), ActorRotationMatrix.GetScaledAxis(EAxis::Y), ActorRotationMatrix.GetScaledAxis(EAxis::Z), RedColor, CutoutHalfLength, HalfHeight, Sides, DepthPriority, Thickness, DepthBias, ScreenSpace);
+				DrawWireCylinder(PDI, ActorLocation, ActorRotationMatrix.GetScaledAxis(EAxis::X), ActorRotationMatrix.GetScaledAxis(EAxis::Y), ActorRotationMatrix.GetScaledAxis(EAxis::Z), RedColor, HollowHalfHeight, HalfHeight, Sides, DepthPriority, Thickness, DepthBias, ScreenSpace);
 				break;
 			}
 
 		case (EProjectionShape::Cube):
 			{
-				const FBox CubeShape = FBox::BuildAABB(FVector::Zero(), FVector(CutoutHalfLength, CutoutHalfLength, HalfHeight));
+				const FBox CubeShape = FBox::BuildAABB(FVector::Zero(), FVector(HollowHalfHeight, HollowHalfHeight, HalfHeight));
 				DrawWireBox(PDI, Matrix, CubeShape, RedColor, DepthPriority, Thickness, DepthBias, ScreenSpace);
 				break;
 			}
 
 		case (EProjectionShape::Cuboid):
 			{
-				const FBox CuboidShape = FBox::BuildAABB(FVector::Zero(), FVector(CutoutHalfLength, CutoutHalfBreadth, HalfHeight));
+				const FBox CuboidShape = FBox::BuildAABB(FVector::Zero(), FVector(HollowHalfHeight, HollowHalfBreadth, HalfHeight));
 				DrawWireBox(PDI, Matrix, CuboidShape, RedColor, DepthPriority, Thickness, DepthBias, ScreenSpace);
 				break;
 			}

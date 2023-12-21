@@ -107,7 +107,6 @@ void ADecoratorVolume::PostEditChangeProperty(FPropertyChangedEvent& e)
 	Super::PostEditChangeProperty(e);
 	
 	const FName PropertyName = (e.Property != NULL ? e.MemberProperty->GetFName() : NAME_None);
-	//UE_LOG(LogTemp, Display, TEXT("Decorator Volume: %s"), *(e.Property->GetNameCPP()));
 	
 	// Generate new points when these properties are edited
 	if (PropertyName == "Seed" || PropertyName == "Shape")
@@ -152,38 +151,38 @@ void ADecoratorVolume::PostEditChangeProperty(FPropertyChangedEvent& e)
 			VisualizerComponent->UpdateSize2D(Size2D);
 		}
 
-		if (Size2D.X <= CutoutSizeF + CutoutSizeMargin)
+		if (Size2D.X <= HollowSizeF + HollowPadding)
 		{
-			CutoutSizeF = FMath::Clamp(CutoutSizeF, 0, Size2D.X - CutoutSizeMargin);
-			VisualizerComponent->UpdateCutoutSizeF(CutoutSizeF);
+			HollowSizeF = FMath::Clamp(HollowSizeF, 0, Size2D.X - HollowPadding);
+			VisualizerComponent->UpdateHollowSizeF(HollowSizeF);
 		}
 
-		if (Size3D.X <= CutoutSize2D.X + CutoutSizeMargin || Size3D.Y <= CutoutSize2D.Y + CutoutSizeMargin)
+		if (Size3D.X <= HollowSize2D.X + HollowPadding || Size3D.Y <= HollowSize2D.Y + HollowPadding)
 		{
-			CutoutSize2D.X = FMath::Clamp(CutoutSize2D.X, 0, Size3D.X - CutoutSizeMargin);
-			CutoutSize2D.Y = FMath::Clamp(CutoutSize2D.Y, 0, Size3D.Y - CutoutSizeMargin);
-			VisualizerComponent->UpdateCutoutSize2D(CutoutSize2D);
+			HollowSize2D.X = FMath::Clamp(HollowSize2D.X, 0, Size3D.X - HollowPadding);
+			HollowSize2D.Y = FMath::Clamp(HollowSize2D.Y, 0, Size3D.Y - HollowPadding);
+			VisualizerComponent->UpdateHollowSize2D(HollowSize2D);
 		}
 	}
 
-	if (PropertyName == "DrawCutoutZone")
+	if (PropertyName == "Hollow")
 	{
 		TriggerGeneration();
-		VisualizerComponent->DrawCutout(DrawCutoutZone);
+		VisualizerComponent->DrawHollow(Hollow);
 	}
 	
-	if (PropertyName == "CutoutSizeF" || PropertyName == "CutoutSize2D")
+	if (PropertyName == "HollowSizeF" || PropertyName == "HollowSize2D")
 	{
 		if (Shape == EProjectionShape::Cuboid)
 		{
-			CutoutSize2D.X = FMath::Clamp(CutoutSize2D.X, 0, Size3D.X - CutoutSizeMargin);
-			CutoutSize2D.Y = FMath::Clamp(CutoutSize2D.Y, 0, Size3D.Y - CutoutSizeMargin);
-			VisualizerComponent->UpdateCutoutSize2D(CutoutSize2D);
+			HollowSize2D.X = FMath::Clamp(HollowSize2D.X, 0, Size3D.X - HollowPadding);
+			HollowSize2D.Y = FMath::Clamp(HollowSize2D.Y, 0, Size3D.Y - HollowPadding);
+			VisualizerComponent->UpdateHollowSize2D(HollowSize2D);
 		}
 		else
 		{
-			CutoutSizeF = FMath::Clamp(CutoutSizeF, 0, Size2D.X - CutoutSizeMargin);
-			VisualizerComponent->UpdateCutoutSizeF(CutoutSizeF);
+			HollowSizeF = FMath::Clamp(HollowSizeF, 0, Size2D.X - HollowPadding);
+			VisualizerComponent->UpdateHollowSizeF(HollowSizeF);
 		}
 
 		TriggerGeneration();
@@ -321,8 +320,8 @@ void ADecoratorVolume::PointsGeneration()
 				}
 		}
 
-		// When cutout zone is enabled and we do not want the generated points to lie within the zone
-		if (DrawCutoutZone)
+		// When hollow is enabled and we do not want the generated points to lie within the zone
+		if (Hollow)
 		{
 			float xThreshold = 0, yThreshold = 0;
 			bool bPointIsInCircle = false;
@@ -332,21 +331,21 @@ void ADecoratorVolume::PointsGeneration()
 				case EProjectionShape::Cylinder :
 					{
 						float DistFromCenter = FMath::Sqrt(x*x + y*y); 
-						bPointIsInCircle = (DistFromCenter <= CutoutSizeF/2);
+						bPointIsInCircle = (DistFromCenter <= HollowSizeF/2);
 						break;
 					}
 
 				case EProjectionShape::Cube :
 					{
-						xThreshold = CutoutSizeF / 2;
-						yThreshold = CutoutSizeF / 2;
+						xThreshold = HollowSizeF / 2;
+						yThreshold = HollowSizeF / 2;
 						break;
 					}
 
 				case EProjectionShape::Cuboid :
 					{
-						xThreshold = CutoutSize2D.X / 2;
-						yThreshold = CutoutSize2D.Y / 2;
+						xThreshold = HollowSize2D.X / 2;
+						yThreshold = HollowSize2D.Y / 2;
 						break;
 					}
 			}
@@ -447,11 +446,15 @@ void ADecoratorVolume::UpdateInstanceTransform()
 		
 		float CurrCount = FMath::RoundHalfFromZero((Count * (GetPalette()->GetDensityRatioAtIndex(Index))) + PrevCount);
 		CurrCount = FMath::Clamp(CurrCount, 0, LineTracedLocations.Num()); // Clamp value within the number of array elements
+
+		const float ScaleMin = GetPalette()->Instances[Index].ScaleMin;
+		const float ScaleMax = GetPalette()->Instances[Index].ScaleMax;
+		
 		for (int j = PrevCount; j < CurrCount; ++j)
 		{
 			FRotator Rotation = UseSurfaceNormal ? LineTracedRotations[j] : FRotator::ZeroRotator /*+ GetPalette()->GetRotationAtIndex(Index)*/;
 			FVector Location = LineTracedLocations[j];
-			FVector Scale = GetPalette()->GetScaleAtIndex(Index);
+			FVector Scale = FVector(RandStream.FRandRange(ScaleMin, ScaleMax));
 			
 			FTransform InstanceTransform = FTransform(Rotation, Location, Scale);
 			CurrComponent->AddInstance(InstanceTransform, true);
@@ -484,7 +487,7 @@ FVector ADecoratorVolume::RandomizeScale(FVector Min, FVector Max)
 
 UDecoratorPalette* ADecoratorVolume::GetPalette() const
 {
-	return Palette.GetDefaultObject();
+	return Palette;
 }
 
 TArray<UInstancedStaticMeshComponent*> ADecoratorVolume::GetAllInstMeshComponents() const
