@@ -28,7 +28,7 @@ private:
 
 	UPROPERTY()
 	UDecoratorVolumeVisualizerComponent* VisualizerComponent = nullptr;
-
+	
 	UPROPERTY(VisibleDefaultsOnly)
 	USceneComponent* DefaultRoot = nullptr;
 
@@ -53,7 +53,7 @@ public:
 	EProjectionShape Shape = EProjectionShape::Cylinder;
 
 	UPROPERTY(EditAnywhere, meta = (DisplayPriority = 2))
-	EMeshAlignment Alignment = EMeshAlignment::SurfaceNormal;
+	EInstanceAlignment Alignment = EInstanceAlignment::SurfaceNormal;
 
 	// Size for shapes that requires/needs the same X and Y value (e.g. Cube and Cylinder)
 	// X is the Length and Breadth, while the Y is the Height
@@ -122,9 +122,6 @@ private:
 	void GenerateNewSeed();
 
 	UFUNCTION(CallInEditor, Category="DecoratorVolume")
-	void GenerateNoMesh();
-
-	UFUNCTION(CallInEditor, Category="DecoratorVolume")
 	void Clear();
 	
 	void TriggerGeneration(bool NewSeed = false, bool WithMesh = true);
@@ -137,9 +134,8 @@ private:
 	void UpdateInstanceTransform();
 	void UpdateInstanceCollisionProfile();
 
-	FRotator RandomizeRotator(FRotator Min, FRotator Max);
-	FVector RandomizeScale(FVector Min, FVector Max);
-
+	FVector RandomInstanceScale(int32 InstanceIndex, float ScaleMin, float ScaleMax) const;
 	UDecoratorPalette* GetPalette() const;
+	FVector GetGenericSize() const;
 	TArray<UInstancedStaticMeshComponent*> GetAllInstMeshComponents() const;
 };

@@ -3,7 +3,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "DecoratorVolume.h"
 #include "Components/ActorComponent.h"
 #include "ToolEnums.h"
 #include "VolumeRaycastComponent.generated.h"
@@ -49,16 +48,12 @@ public:
 	FVector2D HollowSize2D = FVector2D(100, 100);
 
 	UPROPERTY(EditAnywhere, AdvancedDisplay)
-	bool VisualizeRaycastLines = false;
+	bool VisualizeRaycast = false;
 
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
 public:
-	void GenerateNewPoints();
 	void RunLineTrace();
-
-private:
-	ADecoratorVolume* GetVolumeOwner();
 };

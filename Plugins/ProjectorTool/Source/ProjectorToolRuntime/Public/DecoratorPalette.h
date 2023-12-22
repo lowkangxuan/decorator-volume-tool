@@ -34,15 +34,12 @@ struct FPaletteStruct
 
 	UPROPERTY(EditAnywhere)
 	bool RandomRotation = false;
-	
-	UPROPERTY(EditAnywhere, meta=(AllowPreserveRatio, EditCondition="RandomRotation", EditConditionHides))
-	FRotator Rotation = FRotator::ZeroRotator;
 
 	UPROPERTY(EditAnywhere, meta=(AllowPreserveRatio, EditCondition="RandomRotation", EditConditionHides))
-	FRotator MinRotation = FRotator::ZeroRotator;
+	FRotator RotationMin = FRotator::ZeroRotator;
 
 	UPROPERTY(EditAnywhere, meta=(AllowPreserveRatio, EditCondition="RandomRotation", EditConditionHides))
-	FRotator MaxRotation = FRotator::ZeroRotator;
+	FRotator RotationMax = FRotator::ZeroRotator;
 };
 
 UCLASS(Blueprintable, BlueprintType, CollapseCategories)

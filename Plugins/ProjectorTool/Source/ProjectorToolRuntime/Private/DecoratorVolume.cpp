@@ -59,7 +59,8 @@ ADecoratorVolume::ADecoratorVolume(const FObjectInitializer& ObjectInitializer) 
 		SpriteComponent->bIsScreenSizeScaled = true;
 		SpriteComponent->Mobility = EComponentMobility::Static;
 		SpriteComponent->SetRelativeScale3D(FVector(0.5f, 0.5f, 0.5f));
-		SpriteComponent->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepWorldTransform);
+		//SpriteComponent->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepWorldTransform);
+		SpriteComponent->SetupAttachment(RootComponent);
 	}
 #endif
 #pragma endregion Editor Sprite Component Stuff
@@ -181,7 +182,7 @@ void ADecoratorVolume::PostEditChangeProperty(FPropertyChangedEvent& e)
 		}
 		else
 		{
-			HollowSizeF = FMath::Clamp(HollowSizeF, 0, Size2D.X - HollowPadding);
+			HollowSizeF = FMath::Clamp(HollowSizeF, 0, GetGenericSize().X - HollowPadding);
 			VisualizerComponent->UpdateHollowSizeF(HollowSizeF);
 		}
 
@@ -231,11 +232,6 @@ void ADecoratorVolume::GenerateNewSeed()
 	TriggerGeneration(true);
 }
 
-void ADecoratorVolume::GenerateNoMesh()
-{
-	TriggerGeneration(true, false);
-}
-
 void ADecoratorVolume::Clear()
 {
 	TArray<UInstancedStaticMeshComponent*> InstMeshComponents = GetAllInstMeshComponents();
@@ -245,7 +241,7 @@ void ADecoratorVolume::Clear()
 		CurrComponent->ClearInstances();
 	}
 
-	this->Modify(); // Marks the actor as dirty
+	Modify(); // Marks the actor as dirty
 }
 
 void ADecoratorVolume::TriggerGeneration(bool NewSeed, bool WithMesh)
@@ -279,7 +275,7 @@ void ADecoratorVolume::TriggerGeneration(bool NewSeed, bool WithMesh)
 		UpdateInstanceCollisionProfile();
 	}
 
-	this->Modify(); // Marks the actor as dirty
+	Modify(); // Marks the actor as dirty
 }
 
 // Regenerate points using Maths and based on the number of Counts and Shape
@@ -297,7 +293,7 @@ void ADecoratorVolume::PointsGeneration()
 		{
 			case EProjectionShape::Cylinder :
 				{
-					const float Radius = Size2D.X / 2;
+					const float Radius = GetGenericSize().X / 2;
 					const float R = Radius * FMath::Sqrt(RandFloat) ;
 					const float Theta = 200 * PI * RandFloat;
 					x = R * FMath::Cos(Theta);
@@ -307,15 +303,15 @@ void ADecoratorVolume::PointsGeneration()
 
 			case EProjectionShape::Cube :
 				{
-					x = RandStream.FRandRange(-50, 50) * (Size2D.X / 100);
-					y = RandStream.FRandRange(-50, 50) * (Size2D.X / 100);
+					x = RandStream.FRandRange(-50, 50) * (GetGenericSize().X / 100);
+					y = RandStream.FRandRange(-50, 50) * (GetGenericSize().X / 100);
 					break;
 				}
 
 			case EProjectionShape::Cuboid :
 				{
-					x = RandStream.FRandRange(-50, 50) * (Size3D.X / 100);
-					y = RandStream.FRandRange(-50, 50) * (Size3D.Y / 100);
+					x = RandStream.FRandRange(-50, 50) * (GetGenericSize().X / 100);
+					y = RandStream.FRandRange(-50, 50) * (GetGenericSize().Y / 100);
 					break;
 				}
 		}
@@ -350,7 +346,7 @@ void ADecoratorVolume::PointsGeneration()
 					}
 			}
 			
-			if ((-xThreshold <= x && x <= xThreshold  && -yThreshold  <= y && y <= yThreshold) || bPointIsInCircle)
+			if ((-xThreshold <= x && x <= xThreshold && -yThreshold <= y && y <= yThreshold) || bPointIsInCircle)
 			{
 				continue;
 			}
@@ -367,8 +363,8 @@ void ADecoratorVolume::RunLineTrace()
 	LineTracedLocations.Empty();
 	LineTracedRotations.Empty();
 	
-	const FVector ActorLocation = this->GetActorLocation();
-	const float Z = Shape == EProjectionShape::Cuboid ? Size3D.Z : Size2D.Y; // Uses Vector2D Y value if shape is Cylinder or Cube, else it is using the Vector Z value for Cuboid
+	const FVector ActorLocation = GetActorLocation();
+	const float Z = GetGenericSize().Z; // Uses Vector2D Y value if shape is Cylinder or Cube, else it is using the Vector Z value for Cuboid
 	const FVector HalfZOffset = FVector(0, 0, Z / 2);
 	FHitResult HitResult;
 	FCollisionQueryParams TraceParams;
@@ -377,8 +373,8 @@ void ADecoratorVolume::RunLineTrace()
 	for (FVector CurrPoint : GeneratedPoints)
 	{
 		// Local Position to World Position == CurrPoint + ActorLocation
-		FVector Start =  this->GetActorRotation().RotateVector(CurrPoint + HalfZOffset) + ActorLocation;
-		FVector End = Start + (-this->GetActorUpVector() * Z);
+		FVector Start =  GetActorRotation().RotateVector(CurrPoint + HalfZOffset) + ActorLocation;
+		FVector End = Start + (GetActorUpVector() * Z) * -1;
 		GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_WorldStatic, TraceParams);
 		
 		if (HitResult.bBlockingHit)
@@ -400,7 +396,7 @@ void ADecoratorVolume::AddInstMeshComponents()
 
 		InstMeshComp->OnComponentCreated();
 		InstMeshComp->CreationMethod = EComponentCreationMethod::Instance;
-		InstMeshComp->AttachToComponent(this->RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+		InstMeshComp->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 		InstMeshComp->RegisterComponent();
 		AddInstanceComponent(InstMeshComp);
 		TempArray.Add(InstMeshComp);
@@ -434,7 +430,7 @@ void ADecoratorVolume::UpdateInstanceMeshMaterial()
 // Delete and Re-adds all instances in each Instanced Static Mesh Component, "updating" each instance with a new set of Transform
 void ADecoratorVolume::UpdateInstanceTransform()
 {
-	const bool UseSurfaceNormal = (Alignment == EMeshAlignment::SurfaceNormal);
+	const bool UseSurfaceNormal = (Alignment == EInstanceAlignment::SurfaceNormal);
 	unsigned int PrevCount = 0; // Sort of a "clamp" for the nested loop
 	
 	for (int Index = 0; Index < GetAllInstMeshComponents().Num(); ++Index)
@@ -449,12 +445,18 @@ void ADecoratorVolume::UpdateInstanceTransform()
 
 		const float ScaleMin = GetPalette()->Instances[Index].ScaleMin;
 		const float ScaleMax = GetPalette()->Instances[Index].ScaleMax;
-		
+		const FRotator RotationMin = GetPalette()->Instances[Index].RotationMin;
+		const FRotator RotationMax = GetPalette()->Instances[Index].RotationMax;
+
 		for (int j = PrevCount; j < CurrCount; ++j)
 		{
-			FRotator Rotation = UseSurfaceNormal ? LineTracedRotations[j] : FRotator::ZeroRotator /*+ GetPalette()->GetRotationAtIndex(Index)*/;
+			FRotator FirstRotation = FRotator(FMath::FRandRange(RotationMin.Pitch, RotationMax.Pitch),
+											 FMath::FRandRange(RotationMin.Yaw, RotationMax.Yaw) + 90,
+											 FMath::FRandRange(RotationMin.Roll, RotationMax.Roll)
+											 );
+			FRotator Rotation = UKismetMathLibrary::ComposeRotators(FirstRotation, UseSurfaceNormal ? LineTracedRotations[j] : FRotator::ZeroRotator);
 			FVector Location = LineTracedLocations[j];
-			FVector Scale = FVector(RandStream.FRandRange(ScaleMin, ScaleMax));
+			FVector Scale = RandomInstanceScale(j, ScaleMin, ScaleMax);
 			
 			FTransform InstanceTransform = FTransform(Rotation, Location, Scale);
 			CurrComponent->AddInstance(InstanceTransform, true);
@@ -475,14 +477,21 @@ void ADecoratorVolume::UpdateInstanceCollisionProfile()
 	}
 }
 
-FRotator ADecoratorVolume::RandomizeRotator(FRotator Min, FRotator Max)
+FVector ADecoratorVolume::RandomInstanceScale(int32 InstanceIndex, float ScaleMin, float ScaleMax) const
 {
-	return FRotator::ZeroRotator;
-}
-
-FVector ADecoratorVolume::RandomizeScale(FVector Min, FVector Max)
-{
-	return FVector(RandStream.FRandRange(Min.X, Max.X), RandStream.FRandRange(Min.Y, Max.Y), RandStream.FRandRange(Min.Z, Max.Z));
+	FVector Scale = FVector::One();
+	
+	if (ScaleFromCenter)
+	{
+		const float DistFromCenter = FMath::Abs(FVector::Distance(FVector::Zero(), GeneratedPoints[InstanceIndex]));
+		Scale = FVector(FMath::Lerp(ScaleMax, ScaleMin, DistFromCenter/(Size2D.X/2)));
+	}
+	else
+	{
+		Scale = FVector(RandStream.FRandRange(ScaleMin, ScaleMax));
+	}
+	
+	return Scale;
 }
 
 UDecoratorPalette* ADecoratorVolume::GetPalette() const
@@ -490,10 +499,22 @@ UDecoratorPalette* ADecoratorVolume::GetPalette() const
 	return Palette;
 }
 
+FVector ADecoratorVolume::GetGenericSize() const
+{
+	if (Shape == EProjectionShape::Cuboid)
+	{
+		return Size3D;
+	}
+	else
+	{
+		return FVector(Size2D.X, Size2D.X, Size2D.Y);
+	}
+}
+
 TArray<UInstancedStaticMeshComponent*> ADecoratorVolume::GetAllInstMeshComponents() const
 {
 	TArray<UInstancedStaticMeshComponent*> Components;
-	this->GetComponents<UInstancedStaticMeshComponent*>(Components);
+	GetComponents<UInstancedStaticMeshComponent*>(Components);
 
 	return Components;
 }

@@ -11,8 +11,16 @@ enum class EProjectionShape : uint8
 };
 
 UENUM()
-enum class EMeshAlignment : uint8
+enum class EInstanceAlignment : uint8
 {
 	Default,
 	SurfaceNormal
+};
+
+UENUM()
+enum class EInstanceScaleType : uint8
+{
+	Default,
+	MinToMax,
+	MaxToMin
 };

@@ -69,7 +69,7 @@ float UDecoratorPalette::GetScaleAtIndex(int32 Index)
 
 FRotator UDecoratorPalette::GetRotationAtIndex(int32 Index)
 {
-	return Instances[Index].RandomScale ? Instances[Index].Rotation : FRotator::ZeroRotator;
+	return FRotator::ZeroRotator;
 }
 
 
