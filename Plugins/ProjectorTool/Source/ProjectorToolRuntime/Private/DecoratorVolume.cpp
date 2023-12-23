@@ -1,9 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "..\Public\DecoratorVolume.h"
-
-#include <functional>
-
+#include "DecoratorVolume.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Components/BillboardComponent.h"
 #include "Components/InstancedStaticMeshComponent.h"
@@ -17,11 +14,6 @@ ADecoratorVolume::ADecoratorVolume(const FObjectInitializer& ObjectInitializer) 
 	PrimaryActorTick.bCanEverTick = false;
 	SetCanBeDamaged(false);
 
-	VisualizerComponent = CreateDefaultSubobject<UDecoratorVolumeVisualizerComponent>(TEXT("Visualizer"));
-	VisualizerComponent->RegisterComponent();
-	VisualizerComponent->UpdateSize2D(Size2D);
-	VisualizerComponent->UpdateSize3D(Size3D);
-	VisualizerComponent->UpdateShape(Shape);
 
 #pragma region Setting RootComponent
 	// Setting up SceneComponent as default RootComponent
@@ -29,6 +21,14 @@ ADecoratorVolume::ADecoratorVolume(const FObjectInitializer& ObjectInitializer) 
 	SetRootComponent(DefaultRoot);
 	RootComponent->SetMobility(EComponentMobility::Static);
 #pragma endregion Setting RootComponent
+
+#pragma region Setting VisualizerComponent
+	VisualizerComponent = CreateDefaultSubobject<UDecoratorVolumeVisualizerComponent>(TEXT("Visualizer"));
+	VisualizerComponent->RegisterComponent();
+	VisualizerComponent->UpdateSize2D(Size2D);
+	VisualizerComponent->UpdateSize3D(Size3D);
+	VisualizerComponent->UpdateShape(Shape);
+#pragma endregion Setting VisualizerComponent
 
 #pragma region Editor Sprite Component Stuff
 #if WITH_EDITORONLY_DATA
@@ -108,6 +108,7 @@ void ADecoratorVolume::PostEditChangeProperty(FPropertyChangedEvent& e)
 	Super::PostEditChangeProperty(e);
 	
 	const FName PropertyName = (e.Property != NULL ? e.MemberProperty->GetFName() : NAME_None);
+	UE_LOG(LogTemp, Display, TEXT("%s"), *PropertyName.ToString());
 	
 	// Generate new points when these properties are edited
 	if (PropertyName == "Seed" || PropertyName == "Shape")
@@ -134,7 +135,7 @@ void ADecoratorVolume::PostEditChangeProperty(FPropertyChangedEvent& e)
 
 	if (PropertyName == "Palette")
 	{
-		bFlushComponents = true;
+		FlushComponents();
 		TriggerGeneration();
 	}
 	
@@ -164,6 +165,11 @@ void ADecoratorVolume::PostEditChangeProperty(FPropertyChangedEvent& e)
 			HollowSize2D.Y = FMath::Clamp(HollowSize2D.Y, 0, Size3D.Y - HollowPadding);
 			VisualizerComponent->UpdateHollowSize2D(HollowSize2D);
 		}
+	}
+
+	if (PropertyName == "ScaleFromCenter" || PropertyName == "ScaleType")
+	{
+		TriggerGeneration();
 	}
 
 	if (PropertyName == "Hollow")
@@ -197,11 +203,11 @@ void ADecoratorVolume::PostEditChangeProperty(FPropertyChangedEvent& e)
 	if (PropertyName == "DrawRaycastLines")
 	{
 		VisualizerComponent->DrawRaycastLines(DrawRaycastLines);
-	}
 
-	if (DrawRaycastLines)
-	{
-		VisualizerComponent->UpdateStartPoints(GeneratedPoints);
+		if (DrawRaycastLines)
+		{
+			VisualizerComponent->UpdateStartPoints(GeneratedPoints);
+		}
 	}
 }
 #endif
@@ -260,16 +266,11 @@ void ADecoratorVolume::TriggerGeneration(bool NewSeed, bool WithMesh)
 	RunLineTrace();
 	VisualizerComponent->UpdateStartPoints(GeneratedPoints);
 
+	
+
 	// Reregister Instanced Static Mesh Components and its individual instance Material and Transform
 	if (WithMesh)
 	{
-		if (bFlushComponents) // Re-add instanced static mesh components if bFlushComponents is true
-		{
-			RemoveInstMeshComponents();  
-			AddInstMeshComponents();
-			bFlushComponents = false;
-		}
-		
 		UpdateInstanceMeshMaterial();
 		UpdateInstanceTransform();
 		UpdateInstanceCollisionProfile();
@@ -385,10 +386,13 @@ void ADecoratorVolume::RunLineTrace()
 	}
 }
 
-// Add Instance Mesh Component
-void ADecoratorVolume::AddInstMeshComponents()
+void ADecoratorVolume::FlushComponents()
 {
-	TArray<UInstancedStaticMeshComponent*> TempArray;
+	for (UActorComponent* Components : GetAllInstMeshComponents())
+	{
+		Components->UnregisterComponent();
+		Components->DestroyComponent();
+	}
 	
 	for (int i = 0; i < GetPalette()->GetNumberOfInstances(); ++i)
 	{
@@ -399,18 +403,6 @@ void ADecoratorVolume::AddInstMeshComponents()
 		InstMeshComp->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 		InstMeshComp->RegisterComponent();
 		AddInstanceComponent(InstMeshComp);
-		TempArray.Add(InstMeshComp);
-	}
-}
-
-// Get all existing Instanced Mesh Component in the actor and delete thems
-void ADecoratorVolume::RemoveInstMeshComponents()
-{
-	if (GetAllInstMeshComponents().Num() == 0) return; // Exit the function if no Instance Mesh Component exist
-	for (UActorComponent* Components : GetAllInstMeshComponents())
-	{
-		Components->UnregisterComponent();
-		Components->DestroyComponent();
 	}
 }
 
@@ -484,7 +476,10 @@ FVector ADecoratorVolume::RandomInstanceScale(int32 InstanceIndex, float ScaleMi
 	if (ScaleFromCenter)
 	{
 		const float DistFromCenter = FMath::Abs(FVector::Distance(FVector::Zero(), GeneratedPoints[InstanceIndex]));
-		Scale = FVector(FMath::Lerp(ScaleMax, ScaleMin, DistFromCenter/(Size2D.X/2)));
+		const float DesiredMin = ScaleType == EInstanceScaleType::MinToMax ? ScaleMin : ScaleMax ;
+		const float DesiredMax = ScaleType == EInstanceScaleType::MinToMax ? ScaleMax : ScaleMin ;
+
+		Scale = FVector(FMath::Lerp(DesiredMin, DesiredMax, DistFromCenter/(GetGenericSize().X/2)));
 	}
 	else
 	{

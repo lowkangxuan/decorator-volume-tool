@@ -20,7 +20,6 @@ enum class EInstanceAlignment : uint8
 UENUM()
 enum class EInstanceScaleType : uint8
 {
-	Default,
 	MinToMax,
 	MaxToMin
 };

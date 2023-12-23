@@ -70,6 +70,9 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	bool ScaleFromCenter;
+
+	UPROPERTY(EditAnywhere, meta=(EditCondition = "ScaleFromCenter", EditConditionHides))
+	EInstanceScaleType ScaleType = EInstanceScaleType::MaxToMin;
 	
 	UPROPERTY(EditAnywhere)
 	bool Hollow = false;
@@ -127,9 +130,8 @@ private:
 	void TriggerGeneration(bool NewSeed = false, bool WithMesh = true);
 	void PointsGeneration();
 	void RunLineTrace();
-	
-	void AddInstMeshComponents();
-	void RemoveInstMeshComponents();
+
+	void FlushComponents();
 	void UpdateInstanceMeshMaterial();
 	void UpdateInstanceTransform();
 	void UpdateInstanceCollisionProfile();
