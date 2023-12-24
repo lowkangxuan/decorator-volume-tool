@@ -8,7 +8,6 @@ A "volumetric" tool made in UE that simplifies the placement of decorations, fol
 🔴 - Deprecated
 🔵 - Untested
 
-## Table
 | Engine Version  | Support       |
 | --------------- | ------------  |
 | 4.x             | 🔵            |
@@ -18,9 +17,7 @@ A "volumetric" tool made in UE that simplifies the placement of decorations, fol
 | 5.3             | 🟢            |
 
 # Installation
-## Plugin only
-
-## Plugin + Example Project
+Head to the [release page](https://github.com/lowkangxuan/decorator-volume-tool/releases) to install the latest version of the tool. You can choose to download the plugin only or the plugin + an example project which I have put together to showcase the tool's capabilities and how you can replicate it within your own game levels.
 
 # Usage
 Using the volume is extremely easy. All you need is to place a "Decorator Volume" into your level and assigning a "Decorator Palette" of your choice.
