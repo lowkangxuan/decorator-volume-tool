@@ -1,5 +1,5 @@
 # Decorator Volume tool
-A "volumetric" tool made in UE that simplifies the placement of decorations, foliage, props, etc.
+A "volumetric" tool made in Unreal Engine 5 that simplifies the placement of decorations, foliage, props, etc.
 
 # Version Support
 ## Legend
