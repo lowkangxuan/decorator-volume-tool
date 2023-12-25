@@ -237,6 +237,7 @@ void ADecoratorVolume::GenerateNewSeed()
 	TriggerGeneration(true);
 }
 
+// Completely remove all instances of each Instanced Static Mesh Component(s) in the actor
 void ADecoratorVolume::Clear()
 {
 	TArray<UInstancedStaticMeshComponent*> InstMeshComponents = GetAllInstMeshComponents();
@@ -249,7 +250,8 @@ void ADecoratorVolume::Clear()
 	Modify(); // Marks the actor as dirty
 }
 
-void ADecoratorVolume::TriggerGeneration(bool NewSeed, bool WithMesh)
+// Main function for the generation
+void ADecoratorVolume::TriggerGeneration(bool NewSeed)
 {
 	// We do not want to call all the functions below if the parameters are kept default
 	if (Count == 0 || GetPalette() == nullptr || GetPalette()->GetNumberOfInstances() == 0)
@@ -273,14 +275,11 @@ void ADecoratorVolume::TriggerGeneration(bool NewSeed, bool WithMesh)
 	VisualizerComponent->UpdateStartPoints(GeneratedPoints);
 
 	// Reregister Instanced Static Mesh Components and its individual instance Material and Transform
-	if (WithMesh)
-	{
-		UpdateInstanceMeshMaterial();
-		UpdateInstanceTransform();
-		UpdateInstanceCollisionProfile();
-	}
+	UpdateInstanceMeshMaterial();
+	UpdateInstanceTransform();
+	UpdateInstanceCollisionProfile();
 
-	Modify(); // Marks the actor as dirty
+	Modify(); // Marks the actor as dirty and require saving
 }
 
 // Regenerate points using Maths and based on the number of Counts and Shape
@@ -294,6 +293,7 @@ void ADecoratorVolume::PointsGeneration()
 		float x = 0;
 		float y = 0;
 
+		// Generating points based on the shape
 		switch (Shape)
 		{
 			case EProjectionShape::Cylinder :
@@ -321,18 +321,18 @@ void ADecoratorVolume::PointsGeneration()
 				}
 		}
 
-		// When hollow is enabled and we do not want the generated points to lie within the zone
+		// When hollow is enabled and we do not want the generated points to lie within the hollowed zone
 		if (Hollow)
 		{
 			float xThreshold = 0, yThreshold = 0;
-			bool bPointIsInCircle = false;
+			bool bPointInHollowCircle = false;
 
 			switch (Shape)
 			{
 				case EProjectionShape::Cylinder :
 					{
 						float DistFromCenter = FMath::Sqrt(x*x + y*y); 
-						bPointIsInCircle = (DistFromCenter <= HollowSizeF/2);
+						bPointInHollowCircle = (DistFromCenter <= HollowSizeF/2);
 						break;
 					}
 
@@ -351,9 +351,9 @@ void ADecoratorVolume::PointsGeneration()
 					}
 			}
 			
-			if ((-xThreshold <= x && x <= xThreshold && -yThreshold <= y && y <= yThreshold) || bPointIsInCircle)
+			if ((-xThreshold <= x && x <= xThreshold && -yThreshold <= y && y <= yThreshold) || bPointInHollowCircle)
 			{
-				continue;
+				continue; //Skip this iteration if the point lies within the hollowed threshold
 			}
 		}
 		
@@ -373,7 +373,10 @@ void ADecoratorVolume::RunLineTrace()
 	const FVector HalfZOffset = FVector(0, 0, Z / 2);
 	FHitResult HitResult;
 	FCollisionQueryParams TraceParams;
-	TraceParams.AddIgnoredActor(this);
+
+	// LineTrace to ignore self and specified array of actors
+	ActorsToIgnore.AddUnique(this);
+	TraceParams.AddIgnoredActors(ActorsToIgnore);
 	
 	for (FVector CurrPoint : GeneratedPoints)
 	{
@@ -393,12 +396,14 @@ void ADecoratorVolume::RunLineTrace()
 // Removing and Adding new Instanced Static Mesh Component(s)
 void ADecoratorVolume::FlushComponents()
 {
+	// Remove all Instanced Static Mesh Components from the actor
 	for (UActorComponent* Components : GetAllInstMeshComponents())
 	{
 		Components->UnregisterComponent();
 		Components->DestroyComponent();
 	}
-	
+
+	// Add Instanced Static Mesh Components based on the number of instances in the assigned palette
 	for (int i = 0; i < GetPalette()->GetNumberOfInstances(); ++i)
 	{
 		UInstancedStaticMeshComponent* InstMeshComp = NewObject<UInstancedStaticMeshComponent>(this, UInstancedStaticMeshComponent::StaticClass());
@@ -411,7 +416,7 @@ void ADecoratorVolume::FlushComponents()
 	}
 }
 
-// Gets all existing Instanced Static Mesh Component in the actor and update its mesh and material based on the corresponding palette index
+// Gets all existing Instanced Static Mesh Component in the actor and update its mesh and material based on the corresponding instance index
 void ADecoratorVolume::UpdateInstanceMeshMaterial()
 {
 	TArray<UInstancedStaticMeshComponent*> InstMeshComponents = GetAllInstMeshComponents();
@@ -448,7 +453,7 @@ void ADecoratorVolume::UpdateInstanceTransform()
 		for (int j = PrevCount; j < CurrCount; ++j)
 		{
 			FRotator FirstRotation = FRotator(FMath::FRandRange(RotationMin.Pitch, RotationMax.Pitch),
-											 FMath::FRandRange(RotationMin.Yaw, RotationMax.Yaw) + 90,
+											 FMath::FRandRange(RotationMin.Yaw, RotationMax.Yaw) + 90, /* +90 to make the meshes face the correct world orientation */
 											 FMath::FRandRange(RotationMin.Roll, RotationMax.Roll)
 											 );
 			FRotator Rotation = UKismetMathLibrary::ComposeRotators(FirstRotation, UseSurfaceNormal ? LineTracedRotations[j] : FRotator::ZeroRotator);
@@ -463,11 +468,12 @@ void ADecoratorVolume::UpdateInstanceTransform()
 	}
 }
 
+// Set the correct collision profile to each mesh instance based on the palette instance
 void ADecoratorVolume::UpdateInstanceCollisionProfile()
 {
 	TArray<UInstancedStaticMeshComponent*> ComponentsArray = GetAllInstMeshComponents();
 	
-	for (int i = 0; i < ComponentsArray.Num(); ++i)
+	for (int i = 0; i < GetAllInstMeshComponents().Num(); ++i)
 	{
 		// Setting each instance a collision profile from their respective palette instance
 		ComponentsArray[i]->SetCollisionProfileName(GetPalette()->Instances[i].CollisionProfile.Name);
@@ -500,6 +506,7 @@ UDecoratorPalette* ADecoratorVolume::GetPalette() const
 	return Palette;
 }
 
+// Returns the size in 3D vector based on the current projection shape
 FVector ADecoratorVolume::GetGenericSize() const
 {
 	if (Shape == EProjectionShape::Cuboid)

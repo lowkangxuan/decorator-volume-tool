@@ -48,13 +48,14 @@ public:
 	// Sets default values for this actor's properties
 	ADecoratorVolume(const class FObjectInitializer& ObjectInitializer);
 
-	UPROPERTY(EditAnywhere, meta = (DisplayPriority = 0))
+	
+	UPROPERTY(EditAnywhere)
 	UDecoratorPalette* Palette = nullptr;
 
-	UPROPERTY(EditAnywhere, meta = (DisplayPriority = 1))
+	UPROPERTY(EditAnywhere)
 	EProjectionShape Shape = EProjectionShape::Cylinder;
 
-	UPROPERTY(EditAnywhere, meta = (DisplayPriority = 2))
+	UPROPERTY(EditAnywhere)
 	EInstanceAlignment Alignment = EInstanceAlignment::SurfaceNormal;
 
 	// Size for shapes that requires/needs the same X and Y value (e.g. Cube and Cylinder)
@@ -70,6 +71,9 @@ public:
 	UPROPERTY(EditAnywhere, meta = (ClampMin = -999999, ClampMax = 999999))
 	int32 Seed;
 
+	UPROPERTY(EditAnywhere)
+	TArray<AActor*> ActorsToIgnore;
+	
 	UPROPERTY(EditAnywhere)
 	bool ScaleFromCenter;
 
@@ -129,7 +133,7 @@ private:
 	UFUNCTION(CallInEditor, Category="DecoratorVolume")
 	void Clear();
 	
-	void TriggerGeneration(bool NewSeed = false, bool WithMesh = true);
+	void TriggerGeneration(bool NewSeed = false);
 	void PointsGeneration();
 	void RunLineTrace();
 
