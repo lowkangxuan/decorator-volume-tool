@@ -2,6 +2,10 @@
 A "volumetric" tool made in Unreal Engine 5 using C++ that simplifies the placement of decorations, foliage, props, etc.
 
 # Version Support
+The tool itself was first developed in UE5.2 and later upgraded to UE5.3. Due to this, the tool have not been tested in both UE5.0 and 5.1, as well as any versions of UE4, so please beware when using the tool in those untested versions.
+
+If you are interested in testing the tool out in the above mentioned versions, please head [here](https://github.com/lowkangxuan/decorator-volume-tool/issues/1) for more information.
+
 ## Legend
 🟢 - Supported
 🟠 - WIP
@@ -11,8 +15,8 @@ A "volumetric" tool made in Unreal Engine 5 using C++ that simplifies the placem
 | Engine Version  | Support       |
 | --------------- | ------------  |
 | 4.x             | 🔵            |
-| 5.0             | 🟢            |
-| 5.1             | 🟢            |
+| 5.0             | 🔵            |
+| 5.1             | 🔵            |
 | 5.2             | 🟢            |
 | 5.3             | 🟢            |
 
@@ -24,3 +28,5 @@ You get the option to install the entire source code that contains an example pr
 To make use of the tool itself, you will have to place a `Decorator Volume` actor into your level, assign a `Decorator Palette` to the volume actor and tweak the parameters available to your ideal look and feel.
 
 ## Creating a volume and palette
+Right click the content browser, go to the "Decorator Volume" category, and you can choose to create either a `Volume` or `Palette`
+![](https://i.imgur.com/O9vLccu.png)
