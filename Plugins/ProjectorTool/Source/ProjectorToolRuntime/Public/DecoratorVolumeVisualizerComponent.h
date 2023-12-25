@@ -18,28 +18,28 @@ public:
 	UDecoratorVolumeVisualizerComponent();
 
 private:
-	UPROPERTY(VisibleInstanceOnly)
+	UPROPERTY()
 	FVector2D Size2D = FVector2D::One();
 
-	UPROPERTY(VisibleInstanceOnly)
+	UPROPERTY()
 	FVector Size3D = FVector::One();
 	
-	UPROPERTY(VisibleInstanceOnly)
+	UPROPERTY()
 	float HollowSizeF = 100;
 
-	UPROPERTY(VisibleInstanceOnly)
+	UPROPERTY()
 	FVector2D HollowSize2D = FVector2D(100, 100);
 	
-	UPROPERTY(VisibleInstanceOnly)
+	UPROPERTY()
 	EProjectionShape Shape = EProjectionShape::Cylinder;
 
-	UPROPERTY(VisibleInstanceOnly)
+	UPROPERTY()
 	bool bDrawRaycastLines = false;
 
-	UPROPERTY(VisibleInstanceOnly)
+	UPROPERTY()
 	bool bDrawHollow = false;
 
-	UPROPERTY(VisibleInstanceOnly)
+	UPROPERTY()
 	TArray<FVector> RaycastStartPoints = TArray<FVector>();
 	
 protected:

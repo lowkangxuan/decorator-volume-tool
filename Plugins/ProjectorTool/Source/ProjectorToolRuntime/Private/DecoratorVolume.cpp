@@ -17,22 +17,22 @@ ADecoratorVolume::ADecoratorVolume(const FObjectInitializer& ObjectInitializer) 
 
 #pragma region Setting RootComponent
 	// Setting up SceneComponent as default RootComponent
-	DefaultRoot = CreateDefaultSubobject<USceneComponent>(TEXT("DefaultRoot"));
+	DefaultRoot = CreateDefaultSubobject<USceneComponent>("DefaultRoot");
 	SetRootComponent(DefaultRoot);
 	RootComponent->SetMobility(EComponentMobility::Static);
 #pragma endregion Setting RootComponent
 
 #pragma region Setting VisualizerComponent
-	VisualizerComponent = CreateDefaultSubobject<UDecoratorVolumeVisualizerComponent>(TEXT("Visualizer"));
-	VisualizerComponent->RegisterComponent();
+	VisualizerComponent = CreateDefaultSubobject<UDecoratorVolumeVisualizerComponent>("Visualizer");
 	VisualizerComponent->UpdateSize2D(Size2D);
 	VisualizerComponent->UpdateSize3D(Size3D);
 	VisualizerComponent->UpdateShape(Shape);
+	
 #pragma endregion Setting VisualizerComponent
 
 #pragma region Editor Sprite Component Stuff
 #if WITH_EDITORONLY_DATA
-	SpriteComponent = CreateEditorOnlyDefaultSubobject<UBillboardComponent>(TEXT("Sprite"));
+	SpriteComponent = CreateEditorOnlyDefaultSubobject<UBillboardComponent>("Sprite");
 	
 	struct FConstructorStatics
 	{
@@ -59,7 +59,6 @@ ADecoratorVolume::ADecoratorVolume(const FObjectInitializer& ObjectInitializer) 
 		SpriteComponent->bIsScreenSizeScaled = true;
 		SpriteComponent->Mobility = EComponentMobility::Static;
 		SpriteComponent->SetRelativeScale3D(FVector(0.5f, 0.5f, 0.5f));
-		//SpriteComponent->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepWorldTransform);
 		SpriteComponent->SetupAttachment(RootComponent);
 	}
 #endif
@@ -258,6 +257,13 @@ void ADecoratorVolume::TriggerGeneration(bool NewSeed, bool WithMesh)
 		UE_LOG(LogTemp, Warning, TEXT("Decorator Volume: Please ensure to populate the Count, Palette, and Palette Instances parameters!"));
 		return;
 	}
+
+	// Prevents editor from crashing due to the exceeding array length
+	if (GetAllInstMeshComponents().Num() != GetPalette()->Instances.Num())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Palette Instance length changed!"));
+		FlushComponents();
+	}
 	
 	if (NewSeed) RandomizeSeed(); // Randomize a new seed if NewSeed param is true
 
@@ -265,8 +271,6 @@ void ADecoratorVolume::TriggerGeneration(bool NewSeed, bool WithMesh)
 	PointsGeneration();
 	RunLineTrace();
 	VisualizerComponent->UpdateStartPoints(GeneratedPoints);
-
-	
 
 	// Reregister Instanced Static Mesh Components and its individual instance Material and Transform
 	if (WithMesh)
@@ -386,6 +390,7 @@ void ADecoratorVolume::RunLineTrace()
 	}
 }
 
+// Removing and Adding new Instanced Static Mesh Component(s)
 void ADecoratorVolume::FlushComponents()
 {
 	for (UActorComponent* Components : GetAllInstMeshComponents())
@@ -469,6 +474,7 @@ void ADecoratorVolume::UpdateInstanceCollisionProfile()
 	}
 }
 
+// Generate random scale based on Min and Max value from the palette
 FVector ADecoratorVolume::RandomInstanceScale(int32 InstanceIndex, float ScaleMin, float ScaleMax) const
 {
 	FVector Scale = FVector::One();
@@ -476,8 +482,8 @@ FVector ADecoratorVolume::RandomInstanceScale(int32 InstanceIndex, float ScaleMi
 	if (ScaleFromCenter)
 	{
 		const float DistFromCenter = FMath::Abs(FVector::Distance(FVector::Zero(), GeneratedPoints[InstanceIndex]));
-		const float DesiredMin = ScaleType == EInstanceScaleType::MinToMax ? ScaleMin : ScaleMax ;
-		const float DesiredMax = ScaleType == EInstanceScaleType::MinToMax ? ScaleMax : ScaleMin ;
+		const float DesiredMin = (ScaleType == EInstanceScaleType::MinToMax ? ScaleMin : ScaleMax);
+		const float DesiredMax = (ScaleType == EInstanceScaleType::MinToMax ? ScaleMax : ScaleMin);
 
 		Scale = FVector(FMath::Lerp(DesiredMin, DesiredMax, DistFromCenter/(GetGenericSize().X/2)));
 	}

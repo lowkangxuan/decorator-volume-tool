@@ -11,34 +11,34 @@ struct FPaletteStruct
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="Palette Settings")
 	UStaticMesh* Mesh;
 
-	UPROPERTY(EditAnywhere)
-	UMaterial* Mat;
+	UPROPERTY(EditAnywhere, Category="Palette Settings")
+	UMaterialInstance* Mat;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="Palette Settings")
 	FCollisionProfileName CollisionProfile = UCollisionProfile::BlockAll_ProfileName;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(ClampMin = 0))
+	UPROPERTY(EditAnywhere, Category="Palette Settings", meta=(ClampMin = 0))
 	int32 Density = 1; // Default density set to 1
 	
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="Palette Settings")
 	bool RandomScale = false;
 
-	UPROPERTY(EditAnywhere, meta=(EditCondition="RandomScale", EditConditionHides))
+	UPROPERTY(EditAnywhere, Category="Palette Settings", meta=(EditCondition="RandomScale", EditConditionHides))
 	float ScaleMin = 1.0f;
 
-	UPROPERTY(EditAnywhere, meta=(EditCondition="RandomScale", EditConditionHides))
+	UPROPERTY(EditAnywhere, Category="Palette Settings", meta=(EditCondition="RandomScale", EditConditionHides))
 	float ScaleMax = 1.0f;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="Palette Settings")
 	bool RandomRotation = false;
 
-	UPROPERTY(EditAnywhere, meta=(AllowPreserveRatio, EditCondition="RandomRotation", EditConditionHides))
+	UPROPERTY(EditAnywhere, Category="Palette Settings", meta=(AllowPreserveRatio, EditCondition="RandomRotation", EditConditionHides))
 	FRotator RotationMin = FRotator::ZeroRotator;
 
-	UPROPERTY(EditAnywhere, meta=(AllowPreserveRatio, EditCondition="RandomRotation", EditConditionHides))
+	UPROPERTY(EditAnywhere, Category="Palette Settings", meta=(AllowPreserveRatio, EditCondition="RandomRotation", EditConditionHides))
 	FRotator RotationMax = FRotator::ZeroRotator;
 };
 
@@ -48,19 +48,20 @@ class PROJECTORTOOLRUNTIME_API UDecoratorPalette : public UObject
 	GENERATED_BODY()
 	
 public:
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category="Palette Settings")
 	int32 TotalDensity;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (TitleProperty="Density: {Density}"))
+	UPROPERTY(EditAnywhere, Category="Palette Settings", meta = (TitleProperty="Density: {Density}"))
 	TArray<FPaletteStruct> Instances = TArray<FPaletteStruct>();
 
 public:
+
+#if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& e) override;
 	virtual void PostEditChangeChainProperty(FPropertyChangedChainEvent& e) override;
+#endif
 	
-	UFUNCTION(BlueprintCallable, BlueprintPure)
 	int32 GetTotalDensity();
-
 	int32 GetNumberOfInstances() const;
 	float GetDensityRatioAtIndex(int32 Index);
 	float GetScaleAtIndex(int32 Index);

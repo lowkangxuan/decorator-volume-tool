@@ -26,6 +26,13 @@
 			"Name": "DataTableEditorUtilities",
 			"Enabled": false,
 			"MarketplaceURL": "https://unrealengineresources.com/plugins"
+		},
+		{
+			"Name": "ProjectorTool",
+			"Enabled": true
 		}
+	],
+	"TargetPlatforms": [
+		"Windows"
 	]
 }

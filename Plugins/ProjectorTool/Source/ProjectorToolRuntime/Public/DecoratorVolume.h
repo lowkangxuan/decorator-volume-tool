@@ -22,15 +22,17 @@ private:
 	const uint32 HollowPadding = 100;
 	
 	bool bIsStreamInitialized = false;
-	bool bFlushComponents = false;
-	
-	UBillboardComponent* SpriteComponent = nullptr;
+
+#if WITH_EDITORONLY_DATA
+	UPROPERTY()
+	UBillboardComponent* SpriteComponent;
+#endif
 
 	UPROPERTY()
-	UDecoratorVolumeVisualizerComponent* VisualizerComponent = nullptr;
+	UDecoratorVolumeVisualizerComponent* VisualizerComponent;
 	
 	UPROPERTY(VisibleDefaultsOnly)
-	USceneComponent* DefaultRoot = nullptr;
+	USceneComponent* DefaultRoot;
 
 	UPROPERTY()
 	FRandomStream RandStream = FRandomStream();

@@ -17,4 +17,4 @@ void FProjectorToolModule::ShutdownModule()
 
 #undef LOCTEXT_NAMESPACE
 	
-IMPLEMENT_MODULE(FProjectorToolModule, ProjectorTool)
+IMPLEMENT_MODULE(FProjectorToolModule, ProjectorToolRuntime)
