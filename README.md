@@ -7,10 +7,10 @@ The tool itself was first developed in UE5.2 and later upgraded to UE5.3. Due to
 If you are interested in testing the tool out in the above mentioned versions, please head [here](https://github.com/lowkangxuan/decorator-volume-tool/issues/1) for more information.
 
 ## Legend
-🟢 - Supported
-🟠 - WIP
-🔴 - Deprecated
-🔵 - Untested
+🟢 - Supported <br>
+🟠 - WIP <br>
+🔴 - Deprecated <br>
+🔵 - Untested <br>
 
 | Engine Version  | Support       |
 | --------------- | ------------  |
