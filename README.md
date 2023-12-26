@@ -26,6 +26,13 @@ If you are interested in testing the tool out in the above mentioned versions, p
 Head to the [release page](https://github.com/lowkangxuan/decorator-volume-tool/releases) to install the latest version of the tool.
 You get the option to install the entire source code that contains an example project and the plugin itself, or you can choose to install only the plugin which you can then use in any of your other unreal projects.
 
+## Adding the plugin to your project
+After downloading the plugin, head to your project directory (where your `.uproject` file located), create a folder named `Plugins` (if it does not exist already), and place the tool's plugin folder in there.
+
+Once done, open your project and open the plugins window (`Edit -> Plugins`). Under the `Installed` section, select `Projector Tool`, enable the plugin by ensuring the checkbox is checked, and restart the project.
+
+When the above steps are done properly, the tool should be usable in your project.
+
 # Usage
 To make use of the tool itself, you will have to place a `Decorator Volume` actor into your level, assign a `Decorator Palette` to the volume actor and tweak the parameters available to your ideal look and feel.
 
