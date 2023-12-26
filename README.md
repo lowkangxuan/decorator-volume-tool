@@ -1,6 +1,8 @@
 # Decorator Volume tool
 A "volumetric" tool made in Unreal Engine 5 using C++ that simplifies the placement of decorations, foliage, props, etc.
 
+Trello: https://trello.com/b/lAVw5H68/unreal-prop-projector-tool
+
 # Version Support
 The tool itself was first developed in UE5.2 and later upgraded to UE5.3. Due to this, the tool have not been tested in both UE5.0 and 5.1, as well as any versions of UE4, so please beware when using the tool in those untested versions.
 
