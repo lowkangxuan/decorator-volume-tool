@@ -124,13 +124,13 @@ private:
 	void InitNewStreamSeed();
 	void RandomizeSeed();
 	
-	UFUNCTION(CallInEditor, Category="DecoratorVolume")
+	UFUNCTION(CallInEditor)
 	void Regenerate();
 	
-	UFUNCTION(CallInEditor, Category="DecoratorVolume")
+	UFUNCTION(CallInEditor)
 	void GenerateNewSeed();
 
-	UFUNCTION(CallInEditor, Category="DecoratorVolume")
+	UFUNCTION(CallInEditor)
 	void Clear();
 	
 	void TriggerGeneration(bool NewSeed = false);
