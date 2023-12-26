@@ -37,5 +37,5 @@ When the above steps are done properly, the tool should be usable in your projec
 To make use of the tool itself, you will have to place a `Decorator Volume` actor into your level, assign a `Decorator Palette` to the volume actor and tweak the parameters available to your ideal look and feel.
 
 ## Creating a volume and palette
-Right click the content browser, go to the "Decorator Volume" category, and you can choose to create either a `Volume` or `Palette`
+Right click the content browser, go to the "Decorator Volume" category, and you can choose to create either a `Volume` or `Palette`<br>
 ![](https://i.imgur.com/O9vLccu.png)
