@@ -91,8 +91,6 @@ void ADecoratorVolume::Tick(float DeltaTime)
 void ADecoratorVolume::BeginDestroy()
 {
 	Super::BeginDestroy();
-	GEngine->AddOnScreenDebugMessage(0, 3, FColor::Green, TEXT("Decorator Volume Destroyed!"));
-	//UE_LOG(LogTemp, Display, TEXT("Destroyed"));
 }
 
 #if WITH_EDITOR
@@ -375,7 +373,7 @@ void ADecoratorVolume::RunLineTrace()
 	FCollisionQueryParams TraceParams;
 
 	// LineTrace to ignore self and specified array of actors
-	ActorsToIgnore.AddUnique(this);
+	TraceParams.AddIgnoredActor(this); // Ignore self to prevent overlapping
 	TraceParams.AddIgnoredActors(ActorsToIgnore);
 	
 	for (FVector CurrPoint : GeneratedPoints)
