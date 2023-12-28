@@ -103,9 +103,6 @@ protected:
 	virtual void BeginPlay() override;
 
 #if WITH_EDITOR
-	// Function called once properties are first initialized
-	virtual void PostInitProperties() override;
-	
 	// Function called once a property has been edited in the Details Panel
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& e) override;
 #endif
@@ -142,7 +139,7 @@ private:
 	void UpdateInstanceTransform();
 	void UpdateInstanceCollisionProfile();
 
-	FVector RandomInstanceScale(int32 InstanceIndex, float ScaleMin, float ScaleMax) const;
+	FVector RandomInstanceScale(FVector PointLocation, float ScaleMin, float ScaleMax) const;
 	UDecoratorPalette* GetPalette() const;
 	FVector GetGenericSize() const;
 	TArray<UInstancedStaticMeshComponent*> GetAllInstMeshComponents() const;

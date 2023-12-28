@@ -69,11 +69,11 @@ void ADecoratorVolume::OnConstruction(const FTransform& Transform)
 {
 	// Trying to initialize stream when constructed in Level
 	// Also ensure that we are initializing the proper Seed value instead of a default '0'
-	if (!bIsStreamInitialized)
+	/*if (!bIsStreamInitialized)
 	{
 		InitNewStreamSeed();
 		bIsStreamInitialized = true;
-	}
+	}*/
 }
 
 // Called when the game starts or when spawned
@@ -94,12 +94,6 @@ void ADecoratorVolume::BeginDestroy()
 }
 
 #if WITH_EDITOR
-void ADecoratorVolume::PostInitProperties()
-{
-	Super::PostInitProperties();
-	//InitNewStreamSeed(); //To initialize stream with current seed value when all properties are initialized
-}
-
 void ADecoratorVolume::PostEditChangeProperty(FPropertyChangedEvent& e)
 {
 	Super::PostEditChangeProperty(e);
@@ -363,11 +357,12 @@ void ADecoratorVolume::PointsGeneration()
 // Run a set of line traces to gather location and rotation (from hit normal) using generated points and projector size
 void ADecoratorVolume::RunLineTrace()
 {
+	// Clear array
 	LineTracedLocations.Empty();
 	LineTracedRotations.Empty();
 	
 	const FVector ActorLocation = GetActorLocation();
-	const float Z = GetGenericSize().Z; // Uses Vector2D Y value if shape is Cylinder or Cube, else it is using the Vector Z value for Cuboid
+	const float Z = GetGenericSize().Z;
 	const FVector HalfZOffset = FVector(0, 0, Z / 2);
 	FHitResult HitResult;
 	FCollisionQueryParams TraceParams;
@@ -456,7 +451,7 @@ void ADecoratorVolume::UpdateInstanceTransform()
 											 );
 			FRotator Rotation = UKismetMathLibrary::ComposeRotators(FirstRotation, UseSurfaceNormal ? LineTracedRotations[j] : FRotator::ZeroRotator);
 			FVector Location = LineTracedLocations[j];
-			FVector Scale = RandomInstanceScale(j, ScaleMin, ScaleMax);
+			FVector Scale = RandomInstanceScale(LineTracedLocations[j], ScaleMin, ScaleMax);
 			
 			FTransform InstanceTransform = FTransform(Rotation, Location, Scale);
 			CurrComponent->AddInstance(InstanceTransform, true);
@@ -479,13 +474,14 @@ void ADecoratorVolume::UpdateInstanceCollisionProfile()
 }
 
 // Generate random scale based on Min and Max value from the palette
-FVector ADecoratorVolume::RandomInstanceScale(int32 InstanceIndex, float ScaleMin, float ScaleMax) const
+FVector ADecoratorVolume::RandomInstanceScale(FVector PointLocation, float ScaleMin, float ScaleMax) const
 {
 	FVector Scale = FVector::One();
 	
 	if (ScaleFromCenter)
 	{
-		const float DistFromCenter = FMath::Abs(FVector::Distance(FVector::Zero(), GeneratedPoints[InstanceIndex]));
+		// Lerping the scale based on the distance of the point from (0, 0, 0) divided by the size of the volume
+		const float DistFromCenter = FMath::Abs(FVector::Distance(FVector::Zero(), PointLocation - GetActorLocation()));
 		const float DesiredMin = (ScaleType == EInstanceScaleType::MinToMax ? ScaleMin : ScaleMax);
 		const float DesiredMax = (ScaleType == EInstanceScaleType::MinToMax ? ScaleMax : ScaleMin);
 
