@@ -24,7 +24,7 @@ If you are interested in testing the tool out in the above mentioned versions, p
 
 # Installation
 Head to the [release page](https://github.com/lowkangxuan/decorator-volume-tool/releases) to install the latest version of the tool.
-You get the option to install the entire source code that contains an example project and the plugin itself, or you can choose to install only the plugin which you can then use in any of your other unreal projects.
+You get the option to install an example project thaat includes the plugin itself, or you can choose to install only the plugin which you can then use in any of your other unreal projects.
 
 ## Adding the plugin to your project
 After downloading the plugin, head to your project directory (where your `.uproject` file located), create a folder named `Plugins` (if it does not exist already), and place the tool's plugin folder in there.
