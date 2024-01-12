@@ -10,9 +10,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="00d91714-a503-47e4-bcd4-b0a5bf08be2b" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.PropProjectorTool/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.PropProjectorTool/.idea/workspace.xml" afterDir="false" />
-    </list>
+    <list default="true" id="00d91714-a503-47e4-bcd4-b0a5bf08be2b" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -34,7 +32,7 @@
     &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;stable&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;dev&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
@@ -125,6 +123,7 @@
       <workItem from="1690632921238" duration="594000" />
       <workItem from="1690688341913" duration="6546000" />
       <workItem from="1703823801698" duration="155000" />
+      <workItem from="1703841614807" duration="575000" />
     </task>
     <servers />
   </component>

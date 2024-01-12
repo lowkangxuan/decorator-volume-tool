@@ -1,6 +1,6 @@
 {
 	"FileVersion": 3,
-	"Version": 1,
+	"Version": 0.1,
 	"VersionName": "1.0",
 	"FriendlyName": "ProjectorTool",
 	"Description": "A volumetric tool simplifies the placement of decorations, foliage, props, etc.",
