@@ -2,8 +2,11 @@
 
 #include "DecoratorVolume.h"
 #include "UObject/ConstructorHelpers.h"
+#include "DecoratorPalette.h"
 #include "Components/BillboardComponent.h"
 #include "Components/InstancedStaticMeshComponent.h"
+#include "Components/DecoratorVolumeVisualizerComponent.h"
+#include "Components/InstanceBakingComponent.h"
 #include "Math/UnrealMathUtility.h"
 #include "Kismet/KismetMathLibrary.h"
 
@@ -30,6 +33,10 @@ ADecoratorVolume::ADecoratorVolume(const FObjectInitializer& ObjectInitializer) 
 	
 #pragma endregion Setting VisualizerComponent
 
+#if WITH_EDITORONLY_DATA
+InstanceBakingComponent = CreateEditorOnlyDefaultSubobject<UInstanceBakingComponent>("Instance Baking Component");
+#endif
+	
 #pragma region Editor Sprite Component Stuff
 #if WITH_EDITORONLY_DATA
 	SpriteComponent = CreateEditorOnlyDefaultSubobject<UBillboardComponent>("Sprite");
@@ -99,7 +106,6 @@ void ADecoratorVolume::PostEditChangeProperty(FPropertyChangedEvent& e)
 	Super::PostEditChangeProperty(e);
 	
 	const FName PropertyName = (e.Property != NULL ? e.MemberProperty->GetFName() : NAME_None);
-	UE_LOG(LogTemp, Display, TEXT("%s"), *PropertyName.ToString());
 	
 	// Generate new points when these properties are edited
 	if (PropertyName == "Seed" || PropertyName == "Shape")
@@ -242,6 +248,18 @@ void ADecoratorVolume::Clear()
 	Modify(); // Marks the actor as dirty
 }
 
+#if WITH_EDITOR
+void ADecoratorVolume::BakeInstances()
+{
+	InstanceBakingComponent->Bake();
+}
+
+void ADecoratorVolume::UnbakeInstances()
+{
+	InstanceBakingComponent->Unbake();
+}
+#endif
+
 // Main function for the generation
 void ADecoratorVolume::TriggerGeneration(bool NewSeed)
 {
@@ -251,6 +269,9 @@ void ADecoratorVolume::TriggerGeneration(bool NewSeed)
 		UE_LOG(LogTemp, Warning, TEXT("Decorator Volume: Please ensure to populate the Count, Palette, and Palette Instances parameters!"));
 		return;
 	}
+
+	// Cancel the whole generation process if the volume is currently unbaked for instance editing
+	if (!(InstanceBakingComponent->bIsBaked)) { return; }
 
 	// Prevents editor from crashing due to the exceeding array length
 	if (GetAllInstMeshComponents().Num() != GetPalette()->Instances.Num())
@@ -435,7 +456,7 @@ void ADecoratorVolume::UpdateInstanceTransform()
 		// Delete all existing instances
 		if (CurrComponent->GetInstanceCount() > 0) { CurrComponent->ClearInstances(); }
 		
-		float CurrCount = FMath::RoundHalfFromZero((Count * (GetPalette()->GetDensityRatioAtIndex(Index))) + PrevCount);
+		float CurrCount = FMath::RoundFromZero((Count * (GetPalette()->GetDensityRatioAtIndex(Index))) + PrevCount);
 		CurrCount = FMath::Clamp(CurrCount, 0, LineTracedLocations.Num()); // Clamp value within the number of array elements
 
 		const float ScaleMin = GetPalette()->Instances[Index].ScaleMin;
@@ -513,7 +534,7 @@ FVector ADecoratorVolume::GetGenericSize() const
 	}
 }
 
-TArray<UInstancedStaticMeshComponent*> ADecoratorVolume::GetAllInstMeshComponents() const
+TArray<UInstancedStaticMeshComponent*> ADecoratorVolume::GetAllInstMeshComponents()
 {
 	TArray<UInstancedStaticMeshComponent*> Components;
 	GetComponents<UInstancedStaticMeshComponent*>(Components);

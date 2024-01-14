@@ -5,9 +5,11 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "ToolEnums.h"
-#include "DecoratorPalette.h"
-#include "DecoratorVolumeVisualizerComponent.h"
 #include "DecoratorVolume.generated.h"
+
+class UDecoratorPalette;
+class UDecoratorVolumeVisualizerComponent;
+class UInstanceBakingComponent;
 
 UCLASS(Abstract, Blueprintable, BlueprintType, HideCategories=(Collision, HLOD, Physics, Networking, Input))
 class PROJECTORTOOLRUNTIME_API ADecoratorVolume : public AActor
@@ -26,6 +28,9 @@ private:
 #if WITH_EDITORONLY_DATA
 	UPROPERTY()
 	UBillboardComponent* SpriteComponent;
+
+	UPROPERTY(VisibleAnywhere)
+	UInstanceBakingComponent* InstanceBakingComponent = nullptr;
 #endif
 
 	UPROPERTY()
@@ -47,7 +52,6 @@ private:
 public:	
 	// Sets default values for this actor's properties
 	ADecoratorVolume(const class FObjectInitializer& ObjectInitializer);
-
 	
 	UPROPERTY(EditAnywhere)
 	UDecoratorPalette* Palette = nullptr;
@@ -115,7 +119,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	virtual void BeginDestroy() override;
-
+	
 private:
 	// Seed Stuff
 	void InitNewStreamSeed();
@@ -129,6 +133,14 @@ private:
 
 	UFUNCTION(CallInEditor, Category="DecoratorVolume")
 	void Clear();
+
+#if WITH_EDITOR
+	UFUNCTION(CallInEditor, Category="DecoratorVolume")
+	void BakeInstances();
+
+	UFUNCTION(CallInEditor, Category="DecoratorVolume")
+	void UnbakeInstances();
+#endif
 	
 	void TriggerGeneration(bool NewSeed = false);
 	void PointsGeneration();
@@ -142,5 +154,5 @@ private:
 	FVector RandomInstanceScale(FVector PointLocation, float ScaleMin, float ScaleMax) const;
 	UDecoratorPalette* GetPalette() const;
 	FVector GetGenericSize() const;
-	TArray<UInstancedStaticMeshComponent*> GetAllInstMeshComponents() const;
+	TArray<UInstancedStaticMeshComponent*> GetAllInstMeshComponents();
 };

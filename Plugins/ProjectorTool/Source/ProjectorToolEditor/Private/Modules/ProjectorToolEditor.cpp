@@ -3,7 +3,7 @@
 #include "Modules/ProjectorToolEditor.h"
 
 #include "DecoratorVolumeVisualizer.h"
-#include "DecoratorVolumeVisualizerComponent.h"
+#include "Components/DecoratorVolumeVisualizerComponent.h"
 #include "UnrealEdGlobals.h"
 #include "Editor/UnrealEdEngine.h"
 

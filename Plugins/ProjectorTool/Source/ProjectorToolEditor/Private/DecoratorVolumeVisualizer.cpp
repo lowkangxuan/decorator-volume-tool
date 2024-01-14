@@ -2,7 +2,7 @@
 
 
 #include "DecoratorVolumeVisualizer.h"
-#include "DecoratorVolumeVisualizerComponent.h"
+#include "Components/DecoratorVolumeVisualizerComponent.h"
 
 // Rewrote this function for Unreal's DrawDirectionalArrow function (https://github.com/EpicGames/UnrealEngine/blob/a3cb3d8fdec1fc32f071ae7d22250f33f80b21c4/Engine/Source/Runtime/Engine/Private/PrimitiveDrawingUtils.cpp#L1385)
 // As the Unreal's version defaults to X axis, this function will default it to the -Z axis for the tool usecase
