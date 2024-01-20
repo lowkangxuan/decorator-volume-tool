@@ -23,8 +23,7 @@ private:
 	UPROPERTY(VisibleDefaultsOnly)
 	UStaticMeshComponent* StaticMesh;
 
-	UPROPERTY(EditAnywhere)
-	bool bSnapToSurface = true;
+	bool bSnapEnabled = false;
 	
 public:
 	UPROPERTY(VisibleInstanceOnly)
@@ -40,6 +39,15 @@ public:
 	// Sets default values for this actor's properties
 	AInstanceProxyMesh();
 
+private:
+#if WITH_EDITOR
+	virtual void EditorApplyTranslation(const FVector& DeltaTranslation, bool bAltDown, bool bShiftDown, bool bCtrlDown) override;
+	virtual void EditorKeyPressed(FKey Key, EInputEvent Event) override;
+	
+	UFUNCTION(CallInEditor, Category="InstanceProxyMesh")
+	void SelectOwnerVolume();
+#endif
+	
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -47,15 +55,6 @@ protected:
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-#if WITH_EDITOR
-	virtual void PostEditMove(bool bFinished) override;
-	virtual void EditorApplyTranslation(const FVector& DeltaTranslation, bool bAltDown, bool bShiftDown, bool bCtrlDown) override;
-#endif
-
-#if WITH_EDITOR
-	UFUNCTION(CallInEditor, Category="InstanceProxyMesh")
-	void SelectParentActor();
-#endif
 
 	void SetupProxy(UStaticMesh* Mesh, UMaterialInstance* Mat, FRotator BaseRotation, int32 BaseComponentIndex, int32 BaseInstanceIndex);
 

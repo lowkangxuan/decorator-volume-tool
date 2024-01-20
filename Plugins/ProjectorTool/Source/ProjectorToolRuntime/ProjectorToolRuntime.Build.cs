@@ -38,7 +38,8 @@ public class ProjectorToolRuntime : ModuleRules
 				"Engine",
 				"Slate",
 				"SlateCore",
-				"UnrealEd"
+				"UnrealEd",
+				"InputCore"
 				// ... add private dependencies that you statically link with here ...
 			}
 			);

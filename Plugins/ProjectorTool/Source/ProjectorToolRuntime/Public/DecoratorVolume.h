@@ -135,10 +135,10 @@ private:
 	void Clear();
 
 #if WITH_EDITOR
-	UFUNCTION(CallInEditor, Category="InstanceBakingComponent")
+	UFUNCTION(CallInEditor, Category="DecoratorVolume")
 	void BakeInstances();
 
-	UFUNCTION(CallInEditor, Category="InstanceBakingComponent")
+	UFUNCTION(CallInEditor, Category="DecoratorVolume")
 	void UnbakeInstances();
 #endif
 	

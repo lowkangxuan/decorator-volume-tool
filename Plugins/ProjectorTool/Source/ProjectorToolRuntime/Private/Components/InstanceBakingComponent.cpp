@@ -2,7 +2,7 @@
 
 #include "Components/InstanceBakingComponent.h"
 #include "Components/InstancedStaticMeshComponent.h"
-#include "InstanceProxyMesh.h"
+#include "Engine/StaticMeshActor.h"
 #include "Kismet/KismetMathLibrary.h"
 
 // Sets default values for this component's properties
@@ -42,14 +42,15 @@ void UInstanceBakingComponent::Bake()
 	
 	for (int i = 0; i < UnbakedInstances.Num(); ++i)
 	{
-		AInstanceProxyMesh* MeshInstance = UnbakedInstances[i];
-		FVector LocalLocation = UKismetMathLibrary::InverseTransformLocation(GetOwner()->GetTransform(), MeshInstance->GetActorLocation());
-		FTransform NewTransform = FTransform(MeshInstance->GetActorRotation(), LocalLocation, MeshInstance->GetActorScale());
-		GetOwnerInstMeshComponents()[MeshInstance->ComponentIndex]->AddInstance(NewTransform);
-		MeshInstance->Destroy();
+		AInstanceProxyMesh* ProxyMesh = UnbakedInstances[i];
+		//FVector LocalLocation = UKismetMathLibrary::InverseTransformLocation(GetOwner()->GetTransform(), ProxyMesh->GetActorLocation());
+		FTransform NewTransform = FTransform(ProxyMesh->GetActorRotation(), ProxyMesh->GetActorLocation() - GetOwner()->GetActorLocation(), ProxyMesh->GetActorScale());
+		GetOwnerInstMeshComponents()[ProxyMesh->ComponentIndex]->AddInstance(NewTransform);
+		ProxyMesh->Destroy();
 	}
 
 	UnbakedInstances.Empty(); // Clear array
+	Modify();
 }
 
 void UInstanceBakingComponent::Unbake()
@@ -72,14 +73,16 @@ void UInstanceBakingComponent::Unbake()
 		}
 		++ComponentIndex;
 		Component->ClearInstances();
+		Component->Modify();
 	}
 }
 
 void UInstanceBakingComponent::ConstructProxyMesh(UStaticMesh* Mesh, UMaterialInstance* Mat, FTransform Transform, int32 ComponentIndex, int32 InstanceIndex)
 {
 	AInstanceProxyMesh* ProxyMesh = GetWorld()->SpawnActor<AInstanceProxyMesh>(AInstanceProxyMesh::StaticClass(), Transform);
-	ProxyMesh->SetupProxy(Mesh, Mat, Transform.Rotator(), ComponentIndex, InstanceIndex);
+	//AStaticMeshActor* ProxyMesh = GetWorld()->SpawnActor<AStaticMeshActor>(AStaticMeshActor::StaticClass(), Transform, SpawnParams);
 	ProxyMesh->AttachToActor(GetOwner(), FAttachmentTransformRules::KeepWorldTransform);
+	ProxyMesh->SetupProxy(Mesh, Mat, Transform.Rotator(), ComponentIndex, InstanceIndex);
 	UnbakedInstances.Add(ProxyMesh);
 }
 

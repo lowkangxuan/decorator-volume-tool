@@ -14,6 +14,7 @@ AInstanceProxyMesh::AInstanceProxyMesh()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	AActor::SetActorHiddenInGame(true);
 
 #pragma region Setup RootComponent
 	DefaultRoot = CreateDefaultSubobject<USceneComponent>("DefaultRoot");
@@ -75,24 +76,26 @@ void AInstanceProxyMesh::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-void AInstanceProxyMesh::PostEditMove(bool bFinished)
-{
-	Super::PostEditMove(bFinished);
-
-	if (bFinished && bSnapToSurface)
-	{
-		SnapActorDown();
-	}
-}
-
+#if WITH_EDITOR
 void AInstanceProxyMesh::EditorApplyTranslation(const FVector& DeltaTranslation, bool bAltDown, bool bShiftDown, bool bCtrlDown)
 {
 	Super::EditorApplyTranslation(DeltaTranslation, bAltDown, bShiftDown, bCtrlDown);
-	UE_LOG(LogTemp, Display, TEXT("Test"));
+
+	if (bSnapEnabled) { SnapActorDown(); }
 }
 
-#if WITH_EDITOR
-void AInstanceProxyMesh::SelectParentActor()
+void AInstanceProxyMesh::EditorKeyPressed(FKey Key, EInputEvent Event)
+{
+	Super::EditorKeyPressed(Key, Event);
+
+	if (Key.GetDisplayName().ToString() == "s")
+	{
+		if (Event == IE_Pressed) { bSnapEnabled = true; }
+		else if (Event == IE_Released) { bSnapEnabled = false; }
+	}
+}
+
+void AInstanceProxyMesh::SelectOwnerVolume()
 {
 	// Deselects self and selects the owning Decorator Volume actor
 	GEditor->SelectActor(this, false, true);
@@ -122,7 +125,7 @@ void AInstanceProxyMesh::SnapActorDown()
 	{
 		SetActorLocation(OutHit.ImpactPoint);
 		FRotator HitRotation = UKismetMathLibrary::MakeRotFromZ(OutHit.ImpactNormal);
-		FRotator FinalRotation = UKismetMathLibrary::ComposeRotators(DefaultRotation + FRotator(0, 90, 0), HitRotation);
+		FRotator FinalRotation = UKismetMathLibrary::ComposeRotators(FRotator(0, 90, 0), HitRotation);
 		SetActorRotation(FinalRotation);
 	}
 }

@@ -4,9 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "InstanceProxyMesh.h"
 #include "InstanceBakingComponent.generated.h"
-
-class AInstanceProxyMesh;
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class PROJECTORTOOLRUNTIME_API UInstanceBakingComponent : public UActorComponent
@@ -14,7 +13,7 @@ class PROJECTORTOOLRUNTIME_API UInstanceBakingComponent : public UActorComponent
 	GENERATED_BODY()
 
 private:
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY()
 	TArray<AInstanceProxyMesh*> UnbakedInstances;
 
 public:

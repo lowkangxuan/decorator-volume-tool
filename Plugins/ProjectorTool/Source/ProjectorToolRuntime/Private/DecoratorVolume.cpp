@@ -33,7 +33,9 @@ ADecoratorVolume::ADecoratorVolume(const FObjectInitializer& ObjectInitializer) 
 	
 #pragma endregion Setting VisualizerComponent
 
-CreateDefaultSubobject<UInstanceBakingComponent>("Instance Baking Component");
+#if WITH_EDITORONLY_DATA
+CreateEditorOnlyDefaultSubobject<UInstanceBakingComponent>("Instance Baking Component");
+#endif
 	
 #pragma region Editor Sprite Component Stuff
 #if WITH_EDITORONLY_DATA
