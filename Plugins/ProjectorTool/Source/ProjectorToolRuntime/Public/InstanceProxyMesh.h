@@ -4,10 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "EditableMeshInstance.generated.h"
+#include "InstanceProxyMesh.generated.h"
 
 UCLASS()
-class PROJECTORTOOLRUNTIME_API AEditableMeshInstance : public AActor
+class PROJECTORTOOLRUNTIME_API AInstanceProxyMesh : public AActor
 {
 	GENERATED_BODY()
 
@@ -33,9 +33,12 @@ public:
 	UPROPERTY(VisibleInstanceOnly)
 	int32 InstanceIndex;
 	
+	UPROPERTY(VisibleInstanceOnly)
+	FRotator DefaultRotation = FRotator::ZeroRotator;
+	
 public:
 	// Sets default values for this actor's properties
-	AEditableMeshInstance();
+	AInstanceProxyMesh();
 
 protected:
 	// Called when the game starts or when spawned
@@ -44,15 +47,17 @@ protected:
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+#if WITH_EDITOR
 	virtual void PostEditMove(bool bFinished) override;
+	virtual void EditorApplyTranslation(const FVector& DeltaTranslation, bool bAltDown, bool bShiftDown, bool bCtrlDown) override;
+#endif
 
 #if WITH_EDITOR
-	UFUNCTION(CallInEditor, Category="EditableMeshInstance")
+	UFUNCTION(CallInEditor, Category="InstanceProxyMesh")
 	void SelectParentActor();
 #endif
 
-	void SetMesh(UStaticMesh* Mesh);
-	void SetMaterial(UMaterialInstance* Mat);
+	void SetupProxy(UStaticMesh* Mesh, UMaterialInstance* Mat, FRotator BaseRotation, int32 BaseComponentIndex, int32 BaseInstanceIndex);
 
 private:
 	void SnapActorDown();

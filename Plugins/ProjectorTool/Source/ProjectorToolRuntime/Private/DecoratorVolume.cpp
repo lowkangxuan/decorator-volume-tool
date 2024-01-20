@@ -33,9 +33,7 @@ ADecoratorVolume::ADecoratorVolume(const FObjectInitializer& ObjectInitializer) 
 	
 #pragma endregion Setting VisualizerComponent
 
-#if WITH_EDITORONLY_DATA
-InstanceBakingComponent = CreateEditorOnlyDefaultSubobject<UInstanceBakingComponent>("Instance Baking Component");
-#endif
+CreateDefaultSubobject<UInstanceBakingComponent>("Instance Baking Component");
 	
 #pragma region Editor Sprite Component Stuff
 #if WITH_EDITORONLY_DATA
@@ -238,9 +236,10 @@ void ADecoratorVolume::GenerateNewSeed()
 // Completely remove all instances of each Instanced Static Mesh Component(s) in the actor
 void ADecoratorVolume::Clear()
 {
-	TArray<UInstancedStaticMeshComponent*> InstMeshComponents = GetAllInstMeshComponents();
-
-	for (UInstancedStaticMeshComponent* CurrComponent : InstMeshComponents)
+	// We do not want to call this function if volume is currently unbaked!!!
+	if (!InstanceBakingComponent->bIsBaked) { return; }
+	
+	for (UInstancedStaticMeshComponent* CurrComponent : GetAllInstMeshComponents())
 	{
 		CurrComponent->ClearInstances();
 	}

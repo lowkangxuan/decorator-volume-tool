@@ -2,7 +2,7 @@
 
 #include "Components/InstanceBakingComponent.h"
 #include "Components/InstancedStaticMeshComponent.h"
-#include "EditableMeshInstance.h"
+#include "InstanceProxyMesh.h"
 #include "Kismet/KismetMathLibrary.h"
 
 // Sets default values for this component's properties
@@ -38,12 +38,11 @@ void UInstanceBakingComponent::Bake()
 {
 	// We do not want to run this function it is already baked!!!
 	if (bIsBaked) { return; }
-	
 	bIsBaked = true;
 	
 	for (int i = 0; i < UnbakedInstances.Num(); ++i)
 	{
-		AEditableMeshInstance* MeshInstance = UnbakedInstances[i];
+		AInstanceProxyMesh* MeshInstance = UnbakedInstances[i];
 		FVector LocalLocation = UKismetMathLibrary::InverseTransformLocation(GetOwner()->GetTransform(), MeshInstance->GetActorLocation());
 		FTransform NewTransform = FTransform(MeshInstance->GetActorRotation(), LocalLocation, MeshInstance->GetActorScale());
 		GetOwnerInstMeshComponents()[MeshInstance->ComponentIndex]->AddInstance(NewTransform);
@@ -61,7 +60,7 @@ void UInstanceBakingComponent::Unbake()
 	bIsBaked = false;
 	int32 ComponentIndex = 0;
 	
-	for (UInstancedStaticMeshComponent* Component : GetOwnerInstMeshComponents() )
+	for (UInstancedStaticMeshComponent* Component : GetOwnerInstMeshComponents())
 	{
 		for (int i = 0; i < Component->GetInstanceCount(); ++i)
 		{
@@ -69,22 +68,19 @@ void UInstanceBakingComponent::Unbake()
 			UMaterialInstance* Mat = Cast<UMaterialInstance>(Component->GetMaterial(0));
 			FTransform Transform;
 			Component->GetInstanceTransform(i, Transform, true);
-			ConstructEditableMesh(Mesh, Mat, Transform, ComponentIndex, i);
+			ConstructProxyMesh(Mesh, Mat, Transform, ComponentIndex, i);
 		}
 		++ComponentIndex;
 		Component->ClearInstances();
 	}
 }
 
-void UInstanceBakingComponent::ConstructEditableMesh(UStaticMesh* Mesh, UMaterialInstance* Mat, FTransform Transform, int32 ComponentIndex, int32 InstanceIndex)
+void UInstanceBakingComponent::ConstructProxyMesh(UStaticMesh* Mesh, UMaterialInstance* Mat, FTransform Transform, int32 ComponentIndex, int32 InstanceIndex)
 {
-	AEditableMeshInstance* EditableMesh = GetWorld()->SpawnActor<AEditableMeshInstance>(AEditableMeshInstance::StaticClass(), Transform);
-	EditableMesh->SetMesh(Mesh);
-	EditableMesh->SetMaterial(Mat);
-	EditableMesh->ComponentIndex = ComponentIndex;
-	EditableMesh->InstanceIndex = InstanceIndex;
-	EditableMesh->AttachToActor(GetOwner(), FAttachmentTransformRules::KeepWorldTransform);
-	UnbakedInstances.Add(EditableMesh);
+	AInstanceProxyMesh* ProxyMesh = GetWorld()->SpawnActor<AInstanceProxyMesh>(AInstanceProxyMesh::StaticClass(), Transform);
+	ProxyMesh->SetupProxy(Mesh, Mat, Transform.Rotator(), ComponentIndex, InstanceIndex);
+	ProxyMesh->AttachToActor(GetOwner(), FAttachmentTransformRules::KeepWorldTransform);
+	UnbakedInstances.Add(ProxyMesh);
 }
 
 TArray<UInstancedStaticMeshComponent*> UInstanceBakingComponent::GetOwnerInstMeshComponents()

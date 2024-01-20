@@ -11,7 +11,7 @@ class UDecoratorPalette;
 class UDecoratorVolumeVisualizerComponent;
 class UInstanceBakingComponent;
 
-UCLASS(Abstract, Blueprintable, BlueprintType, HideCategories=(Collision, HLOD, Physics, Networking, Input))
+UCLASS(Abstract, Blueprintable, BlueprintType, HideCategories=(Collision, HLOD, Physics, Networking, Input), meta=(PrioritizeCategories = "DecoratorVolume"))
 class PROJECTORTOOLRUNTIME_API ADecoratorVolume : public AActor
 {
 	GENERATED_BODY()
@@ -135,10 +135,10 @@ private:
 	void Clear();
 
 #if WITH_EDITOR
-	UFUNCTION(CallInEditor, Category="DecoratorVolume")
+	UFUNCTION(CallInEditor, Category="InstanceBakingComponent")
 	void BakeInstances();
 
-	UFUNCTION(CallInEditor, Category="DecoratorVolume")
+	UFUNCTION(CallInEditor, Category="InstanceBakingComponent")
 	void UnbakeInstances();
 #endif
 	

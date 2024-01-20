@@ -1,7 +1,7 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "EditableMeshInstance.h"
+#include "InstanceProxyMesh.h"
 #include "Components/BillboardComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 
@@ -10,7 +10,7 @@
 #endif
 
 // Sets default values
-AEditableMeshInstance::AEditableMeshInstance()
+AInstanceProxyMesh::AInstanceProxyMesh()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -63,19 +63,19 @@ AEditableMeshInstance::AEditableMeshInstance()
 }
 
 // Called when the game starts or when spawned
-void AEditableMeshInstance::BeginPlay()
+void AInstanceProxyMesh::BeginPlay()
 {
 	Super::BeginPlay();
 	
 }
 
 // Called every frame
-void AEditableMeshInstance::Tick(float DeltaTime)
+void AInstanceProxyMesh::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 }
 
-void AEditableMeshInstance::PostEditMove(bool bFinished)
+void AInstanceProxyMesh::PostEditMove(bool bFinished)
 {
 	Super::PostEditMove(bFinished);
 
@@ -85,8 +85,14 @@ void AEditableMeshInstance::PostEditMove(bool bFinished)
 	}
 }
 
+void AInstanceProxyMesh::EditorApplyTranslation(const FVector& DeltaTranslation, bool bAltDown, bool bShiftDown, bool bCtrlDown)
+{
+	Super::EditorApplyTranslation(DeltaTranslation, bAltDown, bShiftDown, bCtrlDown);
+	UE_LOG(LogTemp, Display, TEXT("Test"));
+}
+
 #if WITH_EDITOR
-void AEditableMeshInstance::SelectParentActor()
+void AInstanceProxyMesh::SelectParentActor()
 {
 	// Deselects self and selects the owning Decorator Volume actor
 	GEditor->SelectActor(this, false, true);
@@ -94,29 +100,29 @@ void AEditableMeshInstance::SelectParentActor()
 }
 #endif
 
-void AEditableMeshInstance::SetMesh(UStaticMesh* Mesh)
+void AInstanceProxyMesh::SetupProxy(UStaticMesh* Mesh, UMaterialInstance* Mat, FRotator BaseRotation, int32 BaseComponentIndex, int32 BaseInstanceIndex)
 {
 	StaticMesh->SetStaticMesh(Mesh);
-}
-
-void AEditableMeshInstance::SetMaterial(UMaterialInstance* Mat)
-{
 	StaticMesh->SetMaterial(0, Mat);
+	this->DefaultRotation = BaseRotation;
+	this->ComponentIndex = BaseComponentIndex;
+	this->InstanceIndex = BaseInstanceIndex;
 }
 
-void AEditableMeshInstance::SnapActorDown()
+void AInstanceProxyMesh::SnapActorDown()
 {
 	FHitResult OutHit;
-	FVector Start = GetActorLocation() + FVector(0, 0, 10);
+	FCollisionQueryParams TraceParams;
+	FVector Start = GetActorLocation() + FVector(0, 0, 100);
 	FVector End = GetActorLocation() - FVector(0, 0, 100);
-	GetWorld()->LineTraceSingleByChannel(OutHit, Start, End, ECC_WorldStatic);
+	TraceParams.AddIgnoredActor(this);
+	GetWorld()->LineTraceSingleByChannel(OutHit, Start, End, ECC_WorldStatic, TraceParams);
 
 	if (OutHit.bBlockingHit)
 	{
 		SetActorLocation(OutHit.ImpactPoint);
-		FRotator FirstRotation = FRotator(0, 90, 0);
 		FRotator HitRotation = UKismetMathLibrary::MakeRotFromZ(OutHit.ImpactNormal);
-		FRotator FinalRotation = UKismetMathLibrary::ComposeRotators(FirstRotation, HitRotation);
+		FRotator FinalRotation = UKismetMathLibrary::ComposeRotators(DefaultRotation + FRotator(0, 90, 0), HitRotation);
 		SetActorRotation(FinalRotation);
 	}
 }

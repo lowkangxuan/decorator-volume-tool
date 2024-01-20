@@ -6,7 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "InstanceBakingComponent.generated.h"
 
-class AEditableMeshInstance;
+class AInstanceProxyMesh;
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class PROJECTORTOOLRUNTIME_API UInstanceBakingComponent : public UActorComponent
@@ -15,7 +15,7 @@ class PROJECTORTOOLRUNTIME_API UInstanceBakingComponent : public UActorComponent
 
 private:
 	UPROPERTY(VisibleAnywhere)
-	TArray<AEditableMeshInstance*> UnbakedInstances;
+	TArray<AInstanceProxyMesh*> UnbakedInstances;
 
 public:
 	UPROPERTY(VisibleAnywhere)
@@ -32,10 +32,13 @@ protected:
 public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	UFUNCTION(CallInEditor)
 	void Bake();
+
+	UFUNCTION(CallInEditor)
 	void Unbake();
 
 private:
-	void ConstructEditableMesh(UStaticMesh* Mesh, UMaterialInstance* Mat, FTransform Transform, int32 ComponentIndex, int32 InstanceIndex);
+	void ConstructProxyMesh(UStaticMesh* Mesh, UMaterialInstance* Mat, FTransform Transform, int32 ComponentIndex, int32 InstanceIndex);
 	TArray<UInstancedStaticMeshComponent*> GetOwnerInstMeshComponents();
 };
