@@ -27,40 +27,19 @@ AInstanceProxyMesh::AInstanceProxyMesh()
 	StaticMesh->SetMobility(EComponentMobility::Static);
 	StaticMesh->SetupAttachment(RootComponent);
 #pragma endregion
-	
-#pragma region Editor Sprite Component Stuff
+
 #if WITH_EDITORONLY_DATA
-	SpriteComponent = CreateEditorOnlyDefaultSubobject<UBillboardComponent>("Sprite");
-	
-	struct FConstructorStatics
+	ArrowComponent = CreateEditorOnlyDefaultSubobject<UArrowComponent>("Arrow Component");
+	if (ArrowComponent)
 	{
-		// A helper class object we use to find target UTexture2D object in resource package
-		ConstructorHelpers::FObjectFinderOptional<UTexture2D> EmptyActorTextureObject;
-		FName ID_Actor;
-		FText NAME_Actor;
-		FConstructorStatics()
-			// Use helper class object to find the texture
-			// "/Engine/EditorResources/S_Note" is resource path
-			: EmptyActorTextureObject(TEXT("/Engine/EditorResources/EmptyActor"))
-			, ID_Actor(TEXT("Actor"))
-			, NAME_Actor(NSLOCTEXT("SpriteCategory", "Actor", "Actor"))
-		{
-		}
-	};
-	static FConstructorStatics ConstructorStatics;
-	
-	if (SpriteComponent)
-	{
-		SpriteComponent->Sprite = ConstructorStatics.EmptyActorTextureObject.Get();
-		SpriteComponent->SpriteInfo.Category = ConstructorStatics.ID_Actor;		// Assign sprite category name
-		SpriteComponent->SpriteInfo.DisplayName = ConstructorStatics.NAME_Actor;	// Assign sprite display name
-		SpriteComponent->bIsScreenSizeScaled = true;
-		SpriteComponent->Mobility = EComponentMobility::Static;
-		SpriteComponent->SetRelativeScale3D(FVector(0.5f, 0.5f, 0.5f));
-		SpriteComponent->SetupAttachment(RootComponent);
+		ArrowComponent->ArrowColor = FColor::Red;
+		ArrowComponent->ArrowSize = 1.0f;
+		ArrowComponent->bTreatAsASprite = true;
+		ArrowComponent->SetupAttachment(RootComponent);
+		ArrowComponent->bIsScreenSizeScaled = true;
 	}
+	
 #endif
-#pragma endregion Editor Sprite Component Stuff
 }
 
 // Called when the game starts or when spawned
@@ -74,6 +53,12 @@ void AInstanceProxyMesh::BeginPlay()
 void AInstanceProxyMesh::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+}
+
+void AInstanceProxyMesh::Destroyed()
+{
+	OnProxyDestroyedDelegate.Execute(this);
+	Super::Destroyed();
 }
 
 #if WITH_EDITOR
@@ -107,7 +92,6 @@ void AInstanceProxyMesh::SetupProxy(UStaticMesh* Mesh, UMaterialInstance* Mat, F
 {
 	StaticMesh->SetStaticMesh(Mesh);
 	StaticMesh->SetMaterial(0, Mat);
-	this->DefaultRotation = BaseRotation;
 	this->ComponentIndex = BaseComponentIndex;
 	this->InstanceIndex = BaseInstanceIndex;
 }

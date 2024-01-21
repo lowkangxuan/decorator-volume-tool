@@ -22,8 +22,6 @@ private:
 	const int32 MaxSeedClamp = 999999;
 
 	const uint32 HollowPadding = 100;
-	
-	bool bIsStreamInitialized = false;
 
 #if WITH_EDITORONLY_DATA
 	UPROPERTY()
@@ -112,9 +110,6 @@ protected:
 #endif
 
 public:	
-	// Function similar to the Construction Script
-	virtual void OnConstruction(const FTransform& Transform) override;
-
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 

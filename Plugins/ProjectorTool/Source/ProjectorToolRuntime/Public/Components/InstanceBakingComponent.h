@@ -13,8 +13,8 @@ class PROJECTORTOOLRUNTIME_API UInstanceBakingComponent : public UActorComponent
 	GENERATED_BODY()
 
 private:
-	UPROPERTY()
-	TArray<AInstanceProxyMesh*> UnbakedInstances;
+	UPROPERTY(VisibleAnywhere)
+	TArray<AInstanceProxyMesh*> UnbakedProxies;
 
 public:
 	UPROPERTY(VisibleAnywhere)
@@ -39,5 +39,6 @@ public:
 
 private:
 	void ConstructProxyMesh(UStaticMesh* Mesh, UMaterialInstance* Mat, FTransform Transform, int32 ComponentIndex, int32 InstanceIndex);
+	void RemoveProxy(AInstanceProxyMesh*);
 	TArray<UInstancedStaticMeshComponent*> GetOwnerInstMeshComponents();
 };

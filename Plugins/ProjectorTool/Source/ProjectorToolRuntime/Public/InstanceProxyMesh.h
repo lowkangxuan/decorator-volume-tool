@@ -4,7 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Components/ArrowComponent.h"
 #include "InstanceProxyMesh.generated.h"
+
+DECLARE_DELEGATE_OneParam(FOnProxyDestroyedSignature, AInstanceProxyMesh* /* Proxy */)
 
 UCLASS()
 class PROJECTORTOOLRUNTIME_API AInstanceProxyMesh : public AActor
@@ -14,7 +17,7 @@ class PROJECTORTOOLRUNTIME_API AInstanceProxyMesh : public AActor
 private:
 #if WITH_EDITORONLY_DATA
 	UPROPERTY()
-	UBillboardComponent* SpriteComponent;
+	UArrowComponent* ArrowComponent;
 #endif
 
 	UPROPERTY(VisibleDefaultsOnly)
@@ -31,9 +34,8 @@ public:
 
 	UPROPERTY(VisibleInstanceOnly)
 	int32 InstanceIndex;
-	
-	UPROPERTY(VisibleInstanceOnly)
-	FRotator DefaultRotation = FRotator::ZeroRotator;
+
+	FOnProxyDestroyedSignature OnProxyDestroyedDelegate;
 	
 public:
 	// Sets default values for this actor's properties
@@ -51,6 +53,7 @@ private:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	virtual void Destroyed() override;
 
 public:
 	// Called every frame

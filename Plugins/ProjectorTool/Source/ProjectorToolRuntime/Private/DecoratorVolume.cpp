@@ -72,17 +72,6 @@ CreateEditorOnlyDefaultSubobject<UInstanceBakingComponent>("Instance Baking Comp
 #pragma endregion Editor Sprite Component Stuff
 }
 
-void ADecoratorVolume::OnConstruction(const FTransform& Transform)
-{
-	// Trying to initialize stream when constructed in Level
-	// Also ensure that we are initializing the proper Seed value instead of a default '0'
-	/*if (!bIsStreamInitialized)
-	{
-		InitNewStreamSeed();
-		bIsStreamInitialized = true;
-	}*/
-}
-
 // Called when the game starts or when spawned
 void ADecoratorVolume::BeginPlay()
 {
@@ -459,7 +448,7 @@ void ADecoratorVolume::UpdateInstanceTransform()
 		
 		float CurrCount = FMath::RoundFromZero((Count * (GetPalette()->GetDensityRatioAtIndex(Index))) + PrevCount);
 		CurrCount = FMath::Clamp(CurrCount, 0, LineTracedLocations.Num()); // Clamp value within the number of array elements
-
+		
 		const float ScaleMin = GetPalette()->Instances[Index].ScaleMin;
 		const float ScaleMax = GetPalette()->Instances[Index].ScaleMax;
 		const FRotator RotationMin = GetPalette()->Instances[Index].RotationMin;
@@ -474,7 +463,7 @@ void ADecoratorVolume::UpdateInstanceTransform()
 			FRotator Rotation = UKismetMathLibrary::ComposeRotators(FirstRotation, UseSurfaceNormal ? LineTracedRotations[j] : FRotator::ZeroRotator);
 			FVector Location = LineTracedLocations[j];
 			FVector Scale = RandomInstanceScale(LineTracedLocations[j], ScaleMin, ScaleMax);
-			
+
 			FTransform InstanceTransform = FTransform(Rotation, Location, Scale);
 			CurrComponent->AddInstance(InstanceTransform, true);
 		}
@@ -498,8 +487,6 @@ void ADecoratorVolume::UpdateInstanceCollisionProfile()
 // Generate random scale based on Min and Max value from the palette
 FVector ADecoratorVolume::RandomInstanceScale(FVector PointLocation, float ScaleMin, float ScaleMax) const
 {
-	FVector Scale = FVector::One();
-	
 	if (ScaleFromCenter)
 	{
 		// Lerping the scale based on the distance of the point from (0, 0, 0) divided by the size of the volume
@@ -507,14 +494,10 @@ FVector ADecoratorVolume::RandomInstanceScale(FVector PointLocation, float Scale
 		const float DesiredMin = (ScaleType == EInstanceScaleType::MinToMax ? ScaleMin : ScaleMax);
 		const float DesiredMax = (ScaleType == EInstanceScaleType::MinToMax ? ScaleMax : ScaleMin);
 
-		Scale = FVector(FMath::Lerp(DesiredMin, DesiredMax, DistFromCenter/(GetGenericSize().X/2)));
+		return FVector(FMath::Lerp(DesiredMin, DesiredMax, DistFromCenter/(GetGenericSize().X/2)));
 	}
-	else
-	{
-		Scale = FVector(RandStream.FRandRange(ScaleMin, ScaleMax));
-	}
-	
-	return Scale;
+
+	return FVector(RandStream.FRandRange(ScaleMin, ScaleMax));
 }
 
 UDecoratorPalette* ADecoratorVolume::GetPalette() const
@@ -525,14 +508,8 @@ UDecoratorPalette* ADecoratorVolume::GetPalette() const
 // Returns the size in 3D vector based on the current projection shape
 FVector ADecoratorVolume::GetGenericSize() const
 {
-	if (Shape == EProjectionShape::Cuboid)
-	{
-		return Size3D;
-	}
-	else
-	{
-		return FVector(Size2D.X, Size2D.X, Size2D.Y);
-	}
+	if (Shape == EProjectionShape::Cuboid) { return Size3D; }
+	return FVector(Size2D.X, Size2D.X, Size2D.Y);
 }
 
 TArray<UInstancedStaticMeshComponent*> ADecoratorVolume::GetAllInstMeshComponents()

@@ -40,22 +40,22 @@ void UInstanceBakingComponent::Bake()
 	if (bIsBaked) { return; }
 	bIsBaked = true;
 	
-	for (int i = 0; i < UnbakedInstances.Num(); ++i)
+	while (UnbakedProxies.Num() > 0)
 	{
-		AInstanceProxyMesh* ProxyMesh = UnbakedInstances[i];
+		AInstanceProxyMesh* ProxyMesh = UnbakedProxies[0];
+		
 		//FVector LocalLocation = UKismetMathLibrary::InverseTransformLocation(GetOwner()->GetTransform(), ProxyMesh->GetActorLocation());
 		FTransform NewTransform = FTransform(ProxyMesh->GetActorRotation(), ProxyMesh->GetActorLocation() - GetOwner()->GetActorLocation(), ProxyMesh->GetActorScale());
 		GetOwnerInstMeshComponents()[ProxyMesh->ComponentIndex]->AddInstance(NewTransform);
 		ProxyMesh->Destroy();
 	}
-
-	UnbakedInstances.Empty(); // Clear array
+	
 	Modify();
 }
 
 void UInstanceBakingComponent::Unbake()
 {
-	// We do not want to run this function it is not baked!!!
+	// We do not want to run this function when it is not baked!!!
 	if (!bIsBaked) { return; }
 	
 	bIsBaked = false;
@@ -80,10 +80,16 @@ void UInstanceBakingComponent::Unbake()
 void UInstanceBakingComponent::ConstructProxyMesh(UStaticMesh* Mesh, UMaterialInstance* Mat, FTransform Transform, int32 ComponentIndex, int32 InstanceIndex)
 {
 	AInstanceProxyMesh* ProxyMesh = GetWorld()->SpawnActor<AInstanceProxyMesh>(AInstanceProxyMesh::StaticClass(), Transform);
-	//AStaticMeshActor* ProxyMesh = GetWorld()->SpawnActor<AStaticMeshActor>(AStaticMeshActor::StaticClass(), Transform, SpawnParams);
 	ProxyMesh->AttachToActor(GetOwner(), FAttachmentTransformRules::KeepWorldTransform);
 	ProxyMesh->SetupProxy(Mesh, Mat, Transform.Rotator(), ComponentIndex, InstanceIndex);
-	UnbakedInstances.Add(ProxyMesh);
+	ProxyMesh->OnProxyDestroyedDelegate.BindUObject(this, &ThisClass::RemoveProxy);
+	UnbakedProxies.Add(ProxyMesh);
+}
+
+void UInstanceBakingComponent::RemoveProxy(AInstanceProxyMesh* DestroyedProxy)
+{
+	UnbakedProxies.RemoveSingle(DestroyedProxy);
+	DestroyedProxy->OnProxyDestroyedDelegate.Unbind();
 }
 
 TArray<UInstancedStaticMeshComponent*> UInstanceBakingComponent::GetOwnerInstMeshComponents()
