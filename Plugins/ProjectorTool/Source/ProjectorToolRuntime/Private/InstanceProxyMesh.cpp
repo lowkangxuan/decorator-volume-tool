@@ -55,12 +55,6 @@ void AInstanceProxyMesh::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-void AInstanceProxyMesh::Destroyed()
-{
-	OnProxyDestroyedDelegate.Execute(this);
-	Super::Destroyed();
-}
-
 #if WITH_EDITOR
 void AInstanceProxyMesh::EditorApplyTranslation(const FVector& DeltaTranslation, bool bAltDown, bool bShiftDown, bool bCtrlDown)
 {
@@ -101,7 +95,7 @@ void AInstanceProxyMesh::SnapActorDown()
 	FHitResult OutHit;
 	FCollisionQueryParams TraceParams;
 	FVector Start = GetActorLocation() + FVector(0, 0, 100);
-	FVector End = GetActorLocation() - FVector(0, 0, 100);
+	FVector End = GetActorLocation() - FVector(0, 0, 500);
 	TraceParams.AddIgnoredActor(this);
 	GetWorld()->LineTraceSingleByChannel(OutHit, Start, End, ECC_WorldStatic, TraceParams);
 

@@ -7,8 +7,6 @@
 #include "Components/ArrowComponent.h"
 #include "InstanceProxyMesh.generated.h"
 
-DECLARE_DELEGATE_OneParam(FOnProxyDestroyedSignature, AInstanceProxyMesh* /* Proxy */)
-
 UCLASS()
 class PROJECTORTOOLRUNTIME_API AInstanceProxyMesh : public AActor
 {
@@ -29,13 +27,10 @@ private:
 	bool bSnapEnabled = false;
 	
 public:
-	UPROPERTY(VisibleInstanceOnly)
+	UPROPERTY()
 	int32 ComponentIndex;
-
-	UPROPERTY(VisibleInstanceOnly)
+	UPROPERTY()
 	int32 InstanceIndex;
-
-	FOnProxyDestroyedSignature OnProxyDestroyedDelegate;
 	
 public:
 	// Sets default values for this actor's properties
@@ -53,7 +48,6 @@ private:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-	virtual void Destroyed() override;
 
 public:
 	// Called every frame

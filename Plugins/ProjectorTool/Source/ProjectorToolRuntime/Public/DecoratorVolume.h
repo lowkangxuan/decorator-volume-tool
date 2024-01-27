@@ -114,12 +114,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	virtual void BeginDestroy() override;
-	
-private:
-	// Seed Stuff
-	void InitNewStreamSeed();
-	void RandomizeSeed();
-	
+
 	UFUNCTION(CallInEditor, Category="DecoratorVolume")
 	void Regenerate();
 	
@@ -137,6 +132,11 @@ private:
 	void UnbakeInstances();
 #endif
 	
+private:
+	// Seed Stuff
+	void InitNewStreamSeed();
+	void RandomizeSeed();
+
 	void TriggerGeneration(bool NewSeed = false);
 	void PointsGeneration();
 	void RunLineTrace();

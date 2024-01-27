@@ -6,10 +6,10 @@
 #include "Components/DecoratorVolumeVisualizerComponent.h"
 #include "UnrealEdGlobals.h"
 #include "Editor/UnrealEdEngine.h"
+#include "CustomMenu/ProjectorToolMenu.h"
+#include "CustomMenu/ProjectToolCommands.h"
 
-#define LOCTEXT_NAMESPACE "FProjectorToolModule"
-
-void FProjectorToolModule::StartupModule()
+void FProjectorToolEditor::StartupModule()
 {
 	// This code will execute after your module is loaded into memory; the exact timing is specified in the .uplugin file per-module
 	
@@ -24,6 +24,7 @@ void FProjectorToolModule::StartupModule()
 		}
 	}
 
+#pragma region Factory Stuff
 	IAssetTools& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
 	EAssetTypeCategories::Type NewCategory = AssetTools.RegisterAdvancedAssetCategory(FName(TEXT("Decorator Volume")), FText::FromString("Decorator Volume"));
 
@@ -35,9 +36,12 @@ void FProjectorToolModule::StartupModule()
 
 	CreatedAssetTypeActions.Add(PaletteAction);
 	CreatedAssetTypeActions.Add(VolumeAction);
+#pragma endregion
+	
+	IProjectorToolModuleInterface::StartupModule();
 }
 
-void FProjectorToolModule::ShutdownModule()
+void FProjectorToolEditor::ShutdownModule()
 {
 	// This function may be called during shutdown to clean up your module.  For modules that support dynamic reloading,
 	// we call this function before unloading the module.
@@ -58,6 +62,10 @@ void FProjectorToolModule::ShutdownModule()
 	}
 }
 
-#undef LOCTEXT_NAMESPACE
+void FProjectorToolEditor::AddModuleListeners()
+{
+	IProjectorToolModuleInterface::AddModuleListeners();
+	ModuleListeners.Add(MakeShareable(new FProjectorToolMenu));
+}
 	
-IMPLEMENT_MODULE(FProjectorToolModule, ProjectorToolEditor)
+IMPLEMENT_MODULE(FProjectorToolEditor, ProjectorToolEditor)

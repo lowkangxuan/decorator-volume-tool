@@ -39,6 +39,5 @@ public:
 
 private:
 	void ConstructProxyMesh(UStaticMesh* Mesh, UMaterialInstance* Mat, FTransform Transform, int32 ComponentIndex, int32 InstanceIndex);
-	void RemoveProxy(AInstanceProxyMesh*);
 	TArray<UInstancedStaticMeshComponent*> GetOwnerInstMeshComponents();
 };

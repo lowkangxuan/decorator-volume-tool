@@ -227,8 +227,9 @@ void ADecoratorVolume::GenerateNewSeed()
 // Completely remove all instances of each Instanced Static Mesh Component(s) in the actor
 void ADecoratorVolume::Clear()
 {
-	// We do not want to call this function if volume is currently unbaked!!!
+#if WITH_EDITORONLY_DATA	// We do not want to call this function if volume is currently unbaked!!!
 	if (!InstanceBakingComponent->bIsBaked) { return; }
+#endif
 	
 	for (UInstancedStaticMeshComponent* CurrComponent : GetAllInstMeshComponents())
 	{
@@ -260,9 +261,11 @@ void ADecoratorVolume::TriggerGeneration(bool NewSeed)
 		return;
 	}
 
+#if WITH_EDITORONLY_DATA
 	// Cancel the whole generation process if the volume is currently unbaked for instance editing
 	if (!(InstanceBakingComponent->bIsBaked)) { return; }
-
+#endif
+	
 	// Prevents editor from crashing due to the exceeding array length
 	if (GetAllInstMeshComponents().Num() != GetPalette()->Instances.Num())
 	{

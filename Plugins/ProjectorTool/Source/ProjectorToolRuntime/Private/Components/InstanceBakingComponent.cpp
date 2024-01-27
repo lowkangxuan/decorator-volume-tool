@@ -37,19 +37,20 @@ void UInstanceBakingComponent::TickComponent(float DeltaTime, ELevelTick TickTyp
 void UInstanceBakingComponent::Bake()
 {
 	// We do not want to run this function it is already baked!!!
-	if (bIsBaked) { return; }
+	if (bIsBaked || UnbakedProxies.IsEmpty()) { return; }
 	bIsBaked = true;
 	
-	while (UnbakedProxies.Num() > 0)
+	for (int i = 0; i < UnbakedProxies.Num(); ++i)
 	{
-		AInstanceProxyMesh* ProxyMesh = UnbakedProxies[0];
+		AInstanceProxyMesh* ProxyMesh = UnbakedProxies[i];
+		if (!ProxyMesh) { continue; }
 		
-		//FVector LocalLocation = UKismetMathLibrary::InverseTransformLocation(GetOwner()->GetTransform(), ProxyMesh->GetActorLocation());
 		FTransform NewTransform = FTransform(ProxyMesh->GetActorRotation(), ProxyMesh->GetActorLocation() - GetOwner()->GetActorLocation(), ProxyMesh->GetActorScale());
 		GetOwnerInstMeshComponents()[ProxyMesh->ComponentIndex]->AddInstance(NewTransform);
 		ProxyMesh->Destroy();
 	}
-	
+
+	UnbakedProxies.Empty();
 	Modify();
 }
 
@@ -82,14 +83,7 @@ void UInstanceBakingComponent::ConstructProxyMesh(UStaticMesh* Mesh, UMaterialIn
 	AInstanceProxyMesh* ProxyMesh = GetWorld()->SpawnActor<AInstanceProxyMesh>(AInstanceProxyMesh::StaticClass(), Transform);
 	ProxyMesh->AttachToActor(GetOwner(), FAttachmentTransformRules::KeepWorldTransform);
 	ProxyMesh->SetupProxy(Mesh, Mat, Transform.Rotator(), ComponentIndex, InstanceIndex);
-	ProxyMesh->OnProxyDestroyedDelegate.BindUObject(this, &ThisClass::RemoveProxy);
 	UnbakedProxies.Add(ProxyMesh);
-}
-
-void UInstanceBakingComponent::RemoveProxy(AInstanceProxyMesh* DestroyedProxy)
-{
-	UnbakedProxies.RemoveSingle(DestroyedProxy);
-	DestroyedProxy->OnProxyDestroyedDelegate.Unbind();
 }
 
 TArray<UInstancedStaticMeshComponent*> UInstanceBakingComponent::GetOwnerInstMeshComponents()
