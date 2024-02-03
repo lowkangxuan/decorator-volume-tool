@@ -2,12 +2,13 @@
 
 #include "Modules/ProjectorToolEditor.h"
 
+#include "DecoratorVolume.h"
 #include "DecoratorVolumeVisualizer.h"
-#include "Components/DecoratorVolumeVisualizerComponent.h"
+#include "Components/PointsGeneratorComponent.h"
 #include "UnrealEdGlobals.h"
 #include "Editor/UnrealEdEngine.h"
 #include "CustomMenu/ProjectorToolMenu.h"
-#include "CustomMenu/ProjectToolCommands.h"
+#include "DetailCustomization/DecoratorVolumeCustomization.h"
 
 void FProjectorToolEditor::StartupModule()
 {
@@ -19,7 +20,7 @@ void FProjectorToolEditor::StartupModule()
 
 		if (Visualizer.IsValid())
 		{
-			GUnrealEd->RegisterComponentVisualizer(UDecoratorVolumeVisualizerComponent::StaticClass()->GetFName(), Visualizer);
+			GUnrealEd->RegisterComponentVisualizer(UPointsGeneratorComponent::StaticClass()->GetFName(), Visualizer);
 			Visualizer->OnRegister();
 		}
 	}
@@ -37,6 +38,12 @@ void FProjectorToolEditor::StartupModule()
 	CreatedAssetTypeActions.Add(PaletteAction);
 	CreatedAssetTypeActions.Add(VolumeAction);
 #pragma endregion
+
+	FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
+	PropertyModule.RegisterCustomClassLayout(
+		ADecoratorVolume::StaticClass()->GetFName(),
+		FOnGetDetailCustomizationInstance::CreateStatic(&FDecoratorVolumeCustomization::MakeInstance)
+		);
 	
 	IProjectorToolModuleInterface::StartupModule();
 }
@@ -48,7 +55,7 @@ void FProjectorToolEditor::ShutdownModule()
 
 	if (GUnrealEd != nullptr)
 	{
-		GUnrealEd->UnregisterComponentVisualizer(UDecoratorVolumeVisualizerComponent::StaticClass()->GetFName());
+		GUnrealEd->UnregisterComponentVisualizer(UPointsGeneratorComponent::StaticClass()->GetFName());
 	}
 
 	if (FModuleManager::Get().IsModuleLoaded("AssetTools"))
@@ -59,6 +66,12 @@ void FProjectorToolEditor::ShutdownModule()
 		{
 			AssetTools.UnregisterAssetTypeActions(CreatedAssetTypeActions[i].ToSharedRef());
 		}
+	}
+
+	if (FModuleManager::Get().IsModuleLoaded("PropertyEditor"))
+	{
+		FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
+		PropertyModule.UnregisterCustomClassLayout(ADecoratorVolume::StaticClass()->GetFName());
 	}
 }
 

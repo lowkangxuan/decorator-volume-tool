@@ -11,26 +11,25 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="00d91714-a503-47e4-bcd4-b0a5bf08be2b" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolEditor/Private/CustomMenu/ProjectToolCommands.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolEditor/Private/CustomMenu/ProjectorToolMenu.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolEditor/Private/CustomMenu/ProjectorToolMenu.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolEditor/Private/Modules/IProjectorToolModuleInterface.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolEditor/Public/CustomMenu/ProjectToolCommands.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolEditor/Public/Modules/IProjectorToolModuleInterface.h" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolEditor/Private/DetailCustomization/DecoratorPaletteCustomization.cpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolEditor/Private/DetailCustomization/DecoratorVolumeCustomization.cpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolEditor/Public/DetailCustomization/DecoratorPaletteCustomization.h" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolEditor/Public/DetailCustomization/DecoratorVolumeCustomization.h" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolRuntime/Private/Components/PointsGeneratorComponent.cpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolRuntime/Public/Components/PointsGeneratorComponent.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.PropProjectorTool/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.PropProjectorTool/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/DecoratorVolume/BP_DecoratorVolume.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/DecoratorVolume/BP_DecoratorVolume.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/DecoratorVolume/Palettes/DecoratorPalette3.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/DecoratorVolume/Palettes/DecoratorPalette3.uasset" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Content/TestTerrainMap.umap" beforeDir="false" afterPath="$PROJECT_DIR$/Content/TestTerrainMap.umap" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Content/ThirdPerson/Maps/ThirdPersonMap.umap" beforeDir="false" afterPath="$PROJECT_DIR$/Content/ThirdPerson/Maps/ThirdPersonMap.umap" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolEditor/Private/CustomMenu/ProjectorToolMenu.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolEditor/Private/CustomMenu/ProjectorToolMenu.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolEditor/Private/CustomMenu/ProjectorToolMenu.h" beforeDir="false" afterPath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolEditor/Public/CustomMenu/ProjectorToolMenu.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolEditor/Private/DecoratorVolumeVisualizer.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolEditor/Private/DecoratorVolumeVisualizer.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolEditor/Private/Modules/ProjectorToolEditor.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolEditor/Private/Modules/ProjectorToolEditor.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolEditor/Public/Modules/ProjectorToolEditor.h" beforeDir="false" afterPath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolEditor/Public/Modules/ProjectorToolEditor.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolRuntime/Private/Components/InstanceBakingComponent.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolRuntime/Private/Components/InstanceBakingComponent.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolEditor/ProjectorToolEditor.Build.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolEditor/ProjectorToolEditor.Build.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolRuntime/Private/DecoratorVolume.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolRuntime/Private/DecoratorVolume.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolRuntime/Private/InstanceProxyMesh.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolRuntime/Private/InstanceProxyMesh.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolRuntime/Private/Modules/ProjectorToolRuntime.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolRuntime/Private/Modules/ProjectorToolRuntime.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolRuntime/ProjectorToolRuntime.Build.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolRuntime/ProjectorToolRuntime.Build.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolRuntime/Public/Components/InstanceBakingComponent.h" beforeDir="false" afterPath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolRuntime/Public/Components/InstanceBakingComponent.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolRuntime/Public/DecoratorVolume.h" beforeDir="false" afterPath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolRuntime/Public/DecoratorVolume.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolRuntime/Public/InstanceProxyMesh.h" beforeDir="false" afterPath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolRuntime/Public/InstanceProxyMesh.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolRuntime/Public/Modules/ProjectorToolRuntime.h" beforeDir="false" afterPath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolRuntime/Public/Modules/ProjectorToolRuntime.h" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -41,8 +40,7 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="HighlightingSettingsPerFile">
-    <setting file="mock://C:/Users/kx123/Documents/Unreal Projects/unreal-volume-tool/Plugins/ProjectorTool/Source/ProjectorToolRuntime/Private/DecoratorVolume.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock://C:/Users/kx123/Documents/Unreal Projects/unreal-volume-tool/Plugins/ProjectorTool/Source/ProjectorToolRuntime/Public/DecoratorVolume.h" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../../../../../Program Files (x86)/UE_5.3/Engine/Source/ThirdParty/NVIDIA/CUDA/cuda.h" root0="SKIP_HIGHLIGHTING" />
   </component>
   <component name="MetaFilesCheckinStateConfiguration" checkMetaFiles="true" />
   <component name="ProjectColorInfo">{
@@ -181,7 +179,19 @@
       <workItem from="1706282367707" duration="5909000" />
       <workItem from="1706290877681" duration="6062000" />
       <workItem from="1706297056236" duration="433000" />
-      <workItem from="1706330104015" duration="5360000" />
+      <workItem from="1706330104015" duration="5423000" />
+      <workItem from="1706349124705" duration="1506000" />
+      <workItem from="1706364591933" duration="2110000" />
+      <workItem from="1706374229974" duration="904000" />
+      <workItem from="1706432600226" duration="9341000" />
+      <workItem from="1706879856735" duration="4262000" />
+      <workItem from="1706928255618" duration="2790000" />
+      <workItem from="1706938995967" duration="3577000" />
+      <workItem from="1706946866802" duration="1302000" />
+      <workItem from="1706951497822" duration="4808000" />
+      <workItem from="1706961740479" duration="3543000" />
+      <workItem from="1706973774730" duration="2724000" />
+      <workItem from="1706976577095" duration="4329000" />
     </task>
     <servers />
   </component>

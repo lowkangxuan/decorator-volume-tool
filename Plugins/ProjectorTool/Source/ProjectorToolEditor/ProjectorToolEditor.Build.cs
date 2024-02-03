@@ -28,7 +28,9 @@ public class ProjectorToolEditor : ModuleRules
 			new string[]
 			{
 				"Core",
-				// ... add other public dependencies that you statically link with here ...
+				"Slate",
+				"EditorStyle",
+				"EditorWidgets",
 				"ProjectorToolRuntime"
 			}
 			);
@@ -41,8 +43,8 @@ public class ProjectorToolEditor : ModuleRules
 				"Engine",
 				"Slate",
 				"SlateCore",
-				// ... add private dependencies that you statically link with here ...	
 				"UnrealEd",
+				"PropertyEditor",
 				"ComponentVisualizers"
 			}
 			);

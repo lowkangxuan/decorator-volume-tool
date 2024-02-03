@@ -8,8 +8,23 @@
 #include "DecoratorVolume.generated.h"
 
 class UDecoratorPalette;
-class UDecoratorVolumeVisualizerComponent;
+class UPointsGeneratorComponent;
 class UInstanceBakingComponent;
+
+USTRUCT()
+struct FTracedTransform
+{
+	GENERATED_BODY()
+
+	FVector Location;
+	FRotator Rotation;
+
+	FTracedTransform() {};
+	FTracedTransform(FVector NewLocation, FRotator NewRotation)
+		: Location(NewLocation),
+		Rotation(NewRotation)
+	{}
+};
 
 UCLASS(Abstract, Blueprintable, BlueprintType, HideCategories=(Collision, HLOD, Physics, Networking, Input), meta=(PrioritizeCategories = "DecoratorVolume"))
 class PROJECTORTOOLRUNTIME_API ADecoratorVolume : public AActor
@@ -31,8 +46,8 @@ private:
 	UInstanceBakingComponent* InstanceBakingComponent = nullptr;
 #endif
 
-	UPROPERTY()
-	UDecoratorVolumeVisualizerComponent* VisualizerComponent;
+	UPROPERTY(VisibleAnywhere)
+	UPointsGeneratorComponent* PointsGeneratorComponent;
 	
 	UPROPERTY(VisibleDefaultsOnly)
 	USceneComponent* DefaultRoot;
@@ -44,8 +59,7 @@ private:
 	int32 Count = 0;
 
 	TArray<FVector> GeneratedPoints;
-	TArray<FVector> LineTracedLocations;
-	TArray<FRotator> LineTracedRotations;
+	TArray<FTracedTransform> LineTracedTransforms;
 	
 public:	
 	// Sets default values for this actor's properties
@@ -55,20 +69,7 @@ public:
 	UDecoratorPalette* Palette = nullptr;
 
 	UPROPERTY(EditAnywhere)
-	EProjectionShape Shape = EProjectionShape::Cylinder;
-
-	UPROPERTY(EditAnywhere)
 	EInstanceAlignment Alignment = EInstanceAlignment::SurfaceNormal;
-
-	// Size for shapes that requires/needs the same X and Y value (e.g. Cube and Cylinder)
-	// X is the Length and Breadth, while the Y is the Height
-	UPROPERTY(EditAnywhere, meta=(EditCondition = "Shape!=EProjectionShape::Cuboid", EditConditionHides, DisplayName="Size"))
-	FVector2D Size2D = FVector2D(200, 100);
-
-	// Size for shapes that can be fully manipulated in any axis (e.g. Cuboid)
-	// X is the Length, Y is the Breadth, Z is the Height
-	UPROPERTY(EditAnywhere, meta=(EditCondition = "Shape==EProjectionShape::Cuboid", EditConditionHides, DisplayName="Size"))
-	FVector Size3D = FVector(200, 200, 100);
 
 	UPROPERTY(EditAnywhere, meta = (ClampMin = -999999, ClampMax = 999999))
 	int32 Seed;
@@ -82,23 +83,8 @@ public:
 	UPROPERTY(EditAnywhere, meta=(EditCondition = "ScaleFromCenter", EditConditionHides))
 	EInstanceScaleType ScaleType = EInstanceScaleType::MaxToMin;
 	
-	UPROPERTY(EditAnywhere)
-	bool Hollow = false;
-	
-	// Hollow Size for shapes that uses the same X and Y value (e.g. Cube and Cylinder)
-	UPROPERTY(EditAnywhere, meta=(EditCondition = "Hollow && Shape!=EProjectionShape::Cuboid", EditConditionHides, DisplayName="Hollow Size"))
-	float HollowSizeF = 100;
-
-	// Hollow Size for shapes that have both manipulatable X and Y value (e.g. Cuboid)
-	// X is the Length, Y is the Breadth
-	UPROPERTY(EditAnywhere, meta=(EditCondition = "Hollow && Shape==EProjectionShape::Cuboid", EditConditionHides, DisplayName="Hollow Size"))
-	FVector2D HollowSize2D = FVector2D(100, 100);
-	
 	UPROPERTY(EditAnywhere, Category="Debug")
 	bool DrawRaycastLines = false;
-
-	UPROPERTY(EditAnywhere, Category="Debug")
-	bool ShowInstanceIndex = false;
 
 protected:
 	// Called when the game starts or when spawneds
@@ -115,20 +101,20 @@ public:
 
 	virtual void BeginDestroy() override;
 
-	UFUNCTION(CallInEditor, Category="DecoratorVolume")
+	UFUNCTION(Category="Editor")
 	void Regenerate();
 	
-	UFUNCTION(CallInEditor, Category="DecoratorVolume")
+	UFUNCTION(Category="Editor")
 	void GenerateNewSeed();
 
-	UFUNCTION(CallInEditor, Category="DecoratorVolume")
+	UFUNCTION(Category="Editor")
 	void Clear();
 
 #if WITH_EDITOR
-	UFUNCTION(CallInEditor, Category="DecoratorVolume")
+	UFUNCTION(Category="Editor")
 	void BakeInstances();
 
-	UFUNCTION(CallInEditor, Category="DecoratorVolume")
+	UFUNCTION(Category="Editor")
 	void UnbakeInstances();
 #endif
 	
@@ -148,6 +134,5 @@ private:
 
 	FVector RandomInstanceScale(FVector PointLocation, float ScaleMin, float ScaleMax) const;
 	UDecoratorPalette* GetPalette() const;
-	FVector GetGenericSize() const;
 	TArray<UInstancedStaticMeshComponent*> GetAllInstMeshComponents();
 };

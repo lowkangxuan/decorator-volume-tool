@@ -13,11 +13,11 @@ class PROJECTORTOOLRUNTIME_API UInstanceBakingComponent : public UActorComponent
 	GENERATED_BODY()
 
 private:
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY()
 	TArray<AInstanceProxyMesh*> UnbakedProxies;
 
 public:
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY()
 	bool bIsBaked = true;
 
 public:

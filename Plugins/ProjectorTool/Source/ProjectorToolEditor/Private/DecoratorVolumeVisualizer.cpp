@@ -2,6 +2,7 @@
 
 
 #include "DecoratorVolumeVisualizer.h"
+#include "Components/PointsGeneratorComponent.h"
 #include "Components/DecoratorVolumeVisualizerComponent.h"
 
 // Rewrote this function for Unreal's DrawDirectionalArrow function (https://github.com/EpicGames/UnrealEngine/blob/a3cb3d8fdec1fc32f071ae7d22250f33f80b21c4/Engine/Source/Runtime/Engine/Private/PrimitiveDrawingUtils.cpp#L1385)
@@ -17,18 +18,18 @@ void FDecoratorVolumeVisualizer::DrawDirectionalArrowNegZ(FPrimitiveDrawInterfac
 
 void FDecoratorVolumeVisualizer::DrawVisualization(const UActorComponent* Component, const FSceneView* View, FPrimitiveDrawInterface* PDI)
 {
-	const UDecoratorVolumeVisualizerComponent* VisualizerComponent = Cast<UDecoratorVolumeVisualizerComponent>(Component);
+	const UPointsGeneratorComponent* VisualizerComponent = Cast<UPointsGeneratorComponent>(Component);
 	if (!VisualizerComponent) return; // Stop function if component does not exist
 	
-	const EProjectionShape Shape = VisualizerComponent->GetShape();
+	const EProjectionShape Shape = VisualizerComponent->Shape;
 	const FVector ActorLocation = VisualizerComponent->GetOwner()->GetActorLocation();
 	const FRotator ActorRotation = VisualizerComponent->GetOwner()->GetActorRotation();
 	const FRotationMatrix ActorRotationMatrix = FRotationMatrix(VisualizerComponent->GetOwner()->GetActorRotation());
 	const FLinearColor Color = FLinearColor::Yellow;
-	const float MaxHeight = (Shape == EProjectionShape::Cuboid ? VisualizerComponent->GetSize3D().Z : VisualizerComponent->GetSize2D().Y);
-	const float HalfHeight = (Shape == EProjectionShape::Cuboid ? VisualizerComponent->GetSize3D().Z / 2 : VisualizerComponent->GetSize2D().Y / 2);
-	const float HalfLength = (Shape == EProjectionShape::Cuboid ? VisualizerComponent->GetSize3D().X / 2 : VisualizerComponent->GetSize2D().X / 2); // AKA radius for Cylinder shape
-	const float HalfBreadth = VisualizerComponent->GetSize3D().Y / 2;
+	const float MaxHeight = VisualizerComponent->GetGenericSize().Z;
+	const float HalfHeight = VisualizerComponent->GetGenericSize().Z / 2;
+	const float HalfLength = VisualizerComponent->GetGenericSize().X / 2; // AKA radius for Cylinder shape
+	const float HalfBreadth = VisualizerComponent->GetGenericSize().Y / 2;
 	constexpr int32 Sides = 32;
 	constexpr uint8 DepthPriority = 0;
 	constexpr float Thickness = 2;
@@ -36,9 +37,9 @@ void FDecoratorVolumeVisualizer::DrawVisualization(const UActorComponent* Compon
 	constexpr bool ScreenSpace = false;
 
 	const FLinearColor RedColor = FLinearColor::Red;
-	const float HollowHalfHeight = (Shape == EProjectionShape::Cuboid ? VisualizerComponent->GetHollowSize2D().X / 2 : VisualizerComponent->GetHollowSizeF() / 2); // AKA radius for Cylinder shape)
-	const float HollowHalfBreadth = VisualizerComponent->GetHollowSize2D().Y / 2;
-
+	const float HollowHalfLength = VisualizerComponent->GetGenericHollowSize().X / 2; // AKA radius for Cylinder shape)
+	const float HollowHalfBreadth = VisualizerComponent->GetGenericHollowSize().Y / 2;
+	
 	const FRotationTranslationMatrix Matrix = FRotationTranslationMatrix(
 		VisualizerComponent->GetOwner()->GetActorRotation(),
 		ActorLocation); // Rotation and Translation Matrix
@@ -67,26 +68,26 @@ void FDecoratorVolumeVisualizer::DrawVisualization(const UActorComponent* Compon
 	}
 
 	// Visualizing the shape and hollow size
-	if (VisualizerComponent->CanDrawHollow())
+	if (VisualizerComponent->Hollow)
 	{
 		switch (Shape)
 		{
 		case (EProjectionShape::Cylinder):
 			{	
-				DrawWireCylinder(PDI, ActorLocation, ActorRotationMatrix.GetScaledAxis(EAxis::X), ActorRotationMatrix.GetScaledAxis(EAxis::Y), ActorRotationMatrix.GetScaledAxis(EAxis::Z), RedColor, HollowHalfHeight, HalfHeight, Sides, DepthPriority, Thickness, DepthBias, ScreenSpace);
+				DrawWireCylinder(PDI, ActorLocation, ActorRotationMatrix.GetScaledAxis(EAxis::X), ActorRotationMatrix.GetScaledAxis(EAxis::Y), ActorRotationMatrix.GetScaledAxis(EAxis::Z), RedColor, HollowHalfLength, HalfHeight, Sides, DepthPriority, Thickness, DepthBias, ScreenSpace);
 				break;
 			}
 
 		case (EProjectionShape::Cube):
 			{
-				const FBox CubeShape = FBox::BuildAABB(FVector::Zero(), FVector(HollowHalfHeight, HollowHalfHeight, HalfHeight));
+				const FBox CubeShape = FBox::BuildAABB(FVector::Zero(), FVector(HollowHalfLength, HollowHalfLength, HalfHeight));
 				DrawWireBox(PDI, Matrix, CubeShape, RedColor, DepthPriority, Thickness, DepthBias, ScreenSpace);
 				break;
 			}
 
 		case (EProjectionShape::Cuboid):
 			{
-				const FBox CuboidShape = FBox::BuildAABB(FVector::Zero(), FVector(HollowHalfHeight, HollowHalfBreadth, HalfHeight));
+				const FBox CuboidShape = FBox::BuildAABB(FVector::Zero(), FVector(HollowHalfLength, HollowHalfBreadth, HalfHeight));
 				DrawWireBox(PDI, Matrix, CuboidShape, RedColor, DepthPriority, Thickness, DepthBias, ScreenSpace);
 				break;
 			}
@@ -94,9 +95,9 @@ void FDecoratorVolumeVisualizer::DrawVisualization(const UActorComponent* Compon
 	}
 
 	// Visualizing raycast lines
-	if (VisualizerComponent->CanDrawRaycastLines())
+	if (VisualizerComponent->DrawDebugRaycastLines)
 	{
-		TArray<FVector> Points = VisualizerComponent->GetPoints();
+		TArray<FVector> Points = VisualizerComponent->GeneratedPoints;
 		
 		for (FVector Point : Points)
 		{

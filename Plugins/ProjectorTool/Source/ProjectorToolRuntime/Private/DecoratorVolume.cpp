@@ -5,7 +5,7 @@
 #include "DecoratorPalette.h"
 #include "Components/BillboardComponent.h"
 #include "Components/InstancedStaticMeshComponent.h"
-#include "Components/DecoratorVolumeVisualizerComponent.h"
+#include "Components/PointsGeneratorComponent.h"
 #include "Components/InstanceBakingComponent.h"
 #include "Math/UnrealMathUtility.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -25,16 +25,10 @@ ADecoratorVolume::ADecoratorVolume(const FObjectInitializer& ObjectInitializer) 
 	RootComponent->SetMobility(EComponentMobility::Static);
 #pragma endregion Setting RootComponent
 
-#pragma region Setting VisualizerComponent
-	VisualizerComponent = CreateDefaultSubobject<UDecoratorVolumeVisualizerComponent>("Visualizer");
-	VisualizerComponent->UpdateSize2D(Size2D);
-	VisualizerComponent->UpdateSize3D(Size3D);
-	VisualizerComponent->UpdateShape(Shape);
-	
-#pragma endregion Setting VisualizerComponent
+PointsGeneratorComponent = CreateDefaultSubobject<UPointsGeneratorComponent>("Points Generator Component");
 
 #if WITH_EDITORONLY_DATA
-CreateEditorOnlyDefaultSubobject<UInstanceBakingComponent>("Instance Baking Component");
+InstanceBakingComponent = CreateEditorOnlyDefaultSubobject<UInstanceBakingComponent>("Instance Baking Component");
 #endif
 	
 #pragma region Editor Sprite Component Stuff
@@ -95,7 +89,7 @@ void ADecoratorVolume::PostEditChangeProperty(FPropertyChangedEvent& e)
 	Super::PostEditChangeProperty(e);
 	
 	const FName PropertyName = (e.Property != NULL ? e.MemberProperty->GetFName() : NAME_None);
-	
+	UE_LOG(LogTemp, Log, TEXT("%s"), *PropertyName.ToString());
 	// Generate new points when these properties are edited
 	if (PropertyName == "Seed" || PropertyName == "Shape")
 	{
@@ -103,12 +97,6 @@ void ADecoratorVolume::PostEditChangeProperty(FPropertyChangedEvent& e)
 		if (PropertyName == "Seed")
 		{
 			InitNewStreamSeed();
-		}
-
-		// Update Visualizer Shape
-		if (PropertyName == "Shape")
-		{
-			VisualizerComponent->UpdateShape(Shape);
 		}
 
 		TriggerGeneration();
@@ -124,34 +112,6 @@ void ADecoratorVolume::PostEditChangeProperty(FPropertyChangedEvent& e)
 		FlushComponents();
 		TriggerGeneration();
 	}
-	
-	//  Update Visualizer Size and regenerate the instanced meshes Location
-	if (PropertyName == "Size2D" || PropertyName == "Size3D")
-	{
-		// If current shape is Cuboid, pass in the Vector CuboidSize into the visualizer
-		// else, just pass in the default Vector2D Size
-		if (Shape == EProjectionShape::Cuboid)
-		{
-			VisualizerComponent->UpdateSize3D(Size3D);
-		}
-		else
-		{
-			VisualizerComponent->UpdateSize2D(Size2D);
-		}
-
-		if (Size2D.X <= HollowSizeF + HollowPadding)
-		{
-			HollowSizeF = FMath::Clamp(HollowSizeF, 0, Size2D.X - HollowPadding);
-			VisualizerComponent->UpdateHollowSizeF(HollowSizeF);
-		}
-
-		if (Size3D.X <= HollowSize2D.X + HollowPadding || Size3D.Y <= HollowSize2D.Y + HollowPadding)
-		{
-			HollowSize2D.X = FMath::Clamp(HollowSize2D.X, 0, Size3D.X - HollowPadding);
-			HollowSize2D.Y = FMath::Clamp(HollowSize2D.Y, 0, Size3D.Y - HollowPadding);
-			VisualizerComponent->UpdateHollowSize2D(HollowSize2D);
-		}
-	}
 
 	if (PropertyName == "ScaleFromCenter" || PropertyName == "ScaleType")
 	{
@@ -161,39 +121,11 @@ void ADecoratorVolume::PostEditChangeProperty(FPropertyChangedEvent& e)
 	if (PropertyName == "Hollow")
 	{
 		TriggerGeneration();
-		VisualizerComponent->DrawHollow(Hollow);
-	}
-	
-	if (PropertyName == "HollowSizeF" || PropertyName == "HollowSize2D")
-	{
-		if (Shape == EProjectionShape::Cuboid)
-		{
-			HollowSize2D.X = FMath::Clamp(HollowSize2D.X, 0, Size3D.X - HollowPadding);
-			HollowSize2D.Y = FMath::Clamp(HollowSize2D.Y, 0, Size3D.Y - HollowPadding);
-			VisualizerComponent->UpdateHollowSize2D(HollowSize2D);
-		}
-		else
-		{
-			HollowSizeF = FMath::Clamp(HollowSizeF, 0, GetGenericSize().X - HollowPadding);
-			VisualizerComponent->UpdateHollowSizeF(HollowSizeF);
-		}
-
-		TriggerGeneration();
 	}
 	
 	if (PropertyName == "Alignment")
 	{
 		TriggerGeneration();
-	}
-
-	if (PropertyName == "DrawRaycastLines")
-	{
-		VisualizerComponent->DrawRaycastLines(DrawRaycastLines);
-
-		if (DrawRaycastLines)
-		{
-			VisualizerComponent->UpdateStartPoints(GeneratedPoints);
-		}
 	}
 }
 #endif
@@ -263,7 +195,7 @@ void ADecoratorVolume::TriggerGeneration(bool NewSeed)
 
 #if WITH_EDITORONLY_DATA
 	// Cancel the whole generation process if the volume is currently unbaked for instance editing
-	if (!(InstanceBakingComponent->bIsBaked)) { return; }
+	if (!(InstanceBakingComponent->bIsBaked)) return;
 #endif
 	
 	// Prevents editor from crashing due to the exceeding array length
@@ -278,7 +210,6 @@ void ADecoratorVolume::TriggerGeneration(bool NewSeed)
 	RandStream.Reset(); // Resets the Stream to get back original RANDOM values
 	PointsGeneration();
 	RunLineTrace();
-	VisualizerComponent->UpdateStartPoints(GeneratedPoints);
 
 	// Reregister Instanced Static Mesh Components and its individual instance Material and Transform
 	UpdateInstanceMeshMaterial();
@@ -291,92 +222,17 @@ void ADecoratorVolume::TriggerGeneration(bool NewSeed)
 // Regenerate points using Maths and based on the number of Counts and Shape
 void ADecoratorVolume::PointsGeneration()
 {
-	GeneratedPoints.Empty(); // Clear array first before generating new points
-
-	while (GeneratedPoints.Num() < Count)
-	{
-		const float RandFloat = RandStream.FRand();
-		float x = 0;
-		float y = 0;
-
-		// Generating points based on the shape
-		switch (Shape)
-		{
-			case EProjectionShape::Cylinder :
-				{
-					const float Radius = GetGenericSize().X / 2;
-					const float R = Radius * FMath::Sqrt(RandFloat) ;
-					const float Theta = 200 * PI * RandFloat;
-					x = R * FMath::Cos(Theta);
-					y = R * FMath::Sin(Theta);
-					break;
-				}
-
-			case EProjectionShape::Cube :
-				{
-					x = RandStream.FRandRange(-50, 50) * (GetGenericSize().X / 100);
-					y = RandStream.FRandRange(-50, 50) * (GetGenericSize().X / 100);
-					break;
-				}
-
-			case EProjectionShape::Cuboid :
-				{
-					x = RandStream.FRandRange(-50, 50) * (GetGenericSize().X / 100);
-					y = RandStream.FRandRange(-50, 50) * (GetGenericSize().Y / 100);
-					break;
-				}
-		}
-
-		// When hollow is enabled and we do not want the generated points to lie within the hollowed zone
-		if (Hollow)
-		{
-			float xThreshold = 0, yThreshold = 0;
-			bool bPointInHollowCircle = false;
-
-			switch (Shape)
-			{
-				case EProjectionShape::Cylinder :
-					{
-						float DistFromCenter = FMath::Sqrt(x*x + y*y); 
-						bPointInHollowCircle = (DistFromCenter <= HollowSizeF/2);
-						break;
-					}
-
-				case EProjectionShape::Cube :
-					{
-						xThreshold = HollowSizeF / 2;
-						yThreshold = HollowSizeF / 2;
-						break;
-					}
-
-				case EProjectionShape::Cuboid :
-					{
-						xThreshold = HollowSize2D.X / 2;
-						yThreshold = HollowSize2D.Y / 2;
-						break;
-					}
-			}
-			
-			if ((-xThreshold <= x && x <= xThreshold && -yThreshold <= y && y <= yThreshold) || bPointInHollowCircle)
-			{
-				continue; //Skip this iteration if the point lies within the hollowed threshold
-			}
-		}
-		
-		FVector NewPoint = FVector(x, y, 0);
-		GeneratedPoints.Add(NewPoint);
-	}
+	PointsGeneratorComponent->GeneratePoints(Count, RandStream, GeneratedPoints);
 }
 
 // Run a set of line traces to gather location and rotation (from hit normal) using generated points and projector size
 void ADecoratorVolume::RunLineTrace()
 {
 	// Clear array
-	LineTracedLocations.Empty();
-	LineTracedRotations.Empty();
+	LineTracedTransforms.Empty();
 	
 	const FVector ActorLocation = GetActorLocation();
-	const float Z = GetGenericSize().Z;
+	const float Z = PointsGeneratorComponent->GetGenericSize().Z;
 	const FVector HalfZOffset = FVector(0, 0, Z / 2);
 	FHitResult HitResult;
 	FCollisionQueryParams TraceParams;
@@ -394,8 +250,10 @@ void ADecoratorVolume::RunLineTrace()
 		
 		if (HitResult.bBlockingHit)
 		{
-			LineTracedLocations.Add(HitResult.ImpactPoint);
-			LineTracedRotations.Add(UKismetMathLibrary::MakeRotFromZ(HitResult.ImpactNormal)); // Creating rotation from surface normal
+			LineTracedTransforms.Add( FTracedTransform(
+				(HitResult.ImpactPoint),
+				(UKismetMathLibrary::MakeRotFromZ(HitResult.ImpactNormal))
+			));
 		}
 	}
 }
@@ -410,6 +268,8 @@ void ADecoratorVolume::FlushComponents()
 		Components->DestroyComponent();
 	}
 
+	if (!GetPalette()) return; // Prevents weird editor crashes
+	
 	// Add Instanced Static Mesh Components based on the number of instances in the assigned palette
 	for (int i = 0; i < GetPalette()->GetNumberOfInstances(); ++i)
 	{
@@ -450,7 +310,7 @@ void ADecoratorVolume::UpdateInstanceTransform()
 		if (CurrComponent->GetInstanceCount() > 0) { CurrComponent->ClearInstances(); }
 		
 		float CurrCount = FMath::RoundFromZero((Count * (GetPalette()->GetDensityRatioAtIndex(Index))) + PrevCount);
-		CurrCount = FMath::Clamp(CurrCount, 0, LineTracedLocations.Num()); // Clamp value within the number of array elements
+		CurrCount = FMath::Clamp(CurrCount, 0, LineTracedTransforms.Num()); // Clamp value within the number of array elements
 		
 		const float ScaleMin = GetPalette()->Instances[Index].ScaleMin;
 		const float ScaleMax = GetPalette()->Instances[Index].ScaleMax;
@@ -463,9 +323,9 @@ void ADecoratorVolume::UpdateInstanceTransform()
 											 FMath::FRandRange(RotationMin.Yaw, RotationMax.Yaw) + 90, /* +90 to make the meshes face the correct world orientation */
 											 FMath::FRandRange(RotationMin.Roll, RotationMax.Roll)
 											 );
-			FRotator Rotation = UKismetMathLibrary::ComposeRotators(FirstRotation, UseSurfaceNormal ? LineTracedRotations[j] : FRotator::ZeroRotator);
-			FVector Location = LineTracedLocations[j];
-			FVector Scale = RandomInstanceScale(LineTracedLocations[j], ScaleMin, ScaleMax);
+			FRotator Rotation = UKismetMathLibrary::ComposeRotators(FirstRotation, UseSurfaceNormal ? LineTracedTransforms[j].Rotation : FRotator::ZeroRotator);
+			FVector Location = LineTracedTransforms[j].Location;
+			FVector Scale = RandomInstanceScale(LineTracedTransforms[j].Location, ScaleMin, ScaleMax);
 
 			FTransform InstanceTransform = FTransform(Rotation, Location, Scale);
 			CurrComponent->AddInstance(InstanceTransform, true);
@@ -490,15 +350,15 @@ void ADecoratorVolume::UpdateInstanceCollisionProfile()
 // Generate random scale based on Min and Max value from the palette
 FVector ADecoratorVolume::RandomInstanceScale(FVector PointLocation, float ScaleMin, float ScaleMax) const
 {
-	if (ScaleFromCenter)
+	/*if (ScaleFromCenter)
 	{
 		// Lerping the scale based on the distance of the point from (0, 0, 0) divided by the size of the volume
 		const float DistFromCenter = FMath::Abs(FVector::Distance(FVector::Zero(), PointLocation - GetActorLocation()));
 		const float DesiredMin = (ScaleType == EInstanceScaleType::MinToMax ? ScaleMin : ScaleMax);
 		const float DesiredMax = (ScaleType == EInstanceScaleType::MinToMax ? ScaleMax : ScaleMin);
 
-		return FVector(FMath::Lerp(DesiredMin, DesiredMax, DistFromCenter/(GetGenericSize().X/2)));
-	}
+		return FVector(FMath::Lerp(DesiredMin, DesiredMax, DistFromCenter/(PointsGeneratorComponent->GetGenericSize().X/2)));
+	}*/
 
 	return FVector(RandStream.FRandRange(ScaleMin, ScaleMax));
 }
@@ -506,13 +366,6 @@ FVector ADecoratorVolume::RandomInstanceScale(FVector PointLocation, float Scale
 UDecoratorPalette* ADecoratorVolume::GetPalette() const
 {
 	return Palette;
-}
-
-// Returns the size in 3D vector based on the current projection shape
-FVector ADecoratorVolume::GetGenericSize() const
-{
-	if (Shape == EProjectionShape::Cuboid) { return Size3D; }
-	return FVector(Size2D.X, Size2D.X, Size2D.Y);
 }
 
 TArray<UInstancedStaticMeshComponent*> ADecoratorVolume::GetAllInstMeshComponents()
