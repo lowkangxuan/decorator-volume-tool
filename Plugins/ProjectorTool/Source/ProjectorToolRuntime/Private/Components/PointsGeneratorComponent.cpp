@@ -2,6 +2,7 @@
 
 
 #include "Components/PointsGeneratorComponent.h"
+#include "Kismet/KismetMathLibrary.h"
 
 
 // Sets default values for this component's properties
@@ -67,11 +68,11 @@ void UPointsGeneratorComponent::TickComponent(float DeltaTime, ELevelTick TickTy
 	// ...
 }
 
-void UPointsGeneratorComponent::GeneratePoints(int32 Count, FRandomStream Stream, TArray<FVector>& InPoints)
+void UPointsGeneratorComponent::GeneratePoints(int32 Count, FRandomStream& Stream)
 {
-	InPoints.Empty();
+	GeneratedPoints.Empty();
 	
-	while (InPoints.Num() < Count)
+	while (GeneratedPoints.Num() < Count)
 	{
 		const float RandFloat = Stream.FRand();
 		FVector2D Point;
@@ -150,12 +151,15 @@ void UPointsGeneratorComponent::GeneratePoints(int32 Count, FRandomStream Stream
 			}
 		}
 
-		InPoints.Add(FVector(Point, 0));
+		GeneratedPoints.Add(FVector(Point, 0));
 	}
 }
 
 void UPointsGeneratorComponent::DoLineTrace()
 {
+	// Clear array
+	LineTracedTransforms.Empty();
+	
 	const FVector ActorLocation = GetOwner()->GetActorLocation();
 	const float Z = GetGenericSize().Z;
 	const FVector HalfZOffset = FVector(0, 0, Z / 2);
@@ -165,6 +169,22 @@ void UPointsGeneratorComponent::DoLineTrace()
 	// LineTrace to ignore self and specified array of actors
 	TraceParams.AddIgnoredActor(GetOwner()); // Ignore owner actor to prevent overlapping
 	TraceParams.AddIgnoredActors(ActorsToIgnore);
+
+	for (FVector CurrPoint : GeneratedPoints)
+	{
+		// Local Position to World Position == CurrPoint + ActorLocation
+		FVector Start =  GetOwner()->GetActorRotation().RotateVector(CurrPoint + HalfZOffset) + ActorLocation;
+		FVector End = Start + (GetOwner()->GetActorUpVector() * Z) * -1;
+		GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_WorldStatic, TraceParams);
+		
+		if (HitResult.bBlockingHit)
+		{
+			LineTracedTransforms.Add( FTracedTransform(
+				(HitResult.ImpactPoint),
+				(UKismetMathLibrary::MakeRotFromZ(HitResult.ImpactNormal))
+			));
+		}
+	}
 }
 
 FVector UPointsGeneratorComponent::GetGenericSize() const

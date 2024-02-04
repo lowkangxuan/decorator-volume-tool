@@ -11,6 +11,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="00d91714-a503-47e4-bcd4-b0a5bf08be2b" name="Changes" comment="">
+<<<<<<< Updated upstream
       <change afterPath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolEditor/Private/DetailCustomization/DecoratorPaletteCustomization.cpp" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolEditor/Private/DetailCustomization/DecoratorVolumeCustomization.cpp" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolEditor/Public/DetailCustomization/DecoratorPaletteCustomization.h" afterDir="false" />
@@ -30,6 +31,10 @@
       <change beforePath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolRuntime/Private/DecoratorVolume.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolRuntime/Private/DecoratorVolume.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolRuntime/Public/Components/InstanceBakingComponent.h" beforeDir="false" afterPath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolRuntime/Public/Components/InstanceBakingComponent.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolRuntime/Public/DecoratorVolume.h" beforeDir="false" afterPath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolRuntime/Public/DecoratorVolume.h" afterDir="false" />
+=======
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.PropProjectorTool/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.PropProjectorTool/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/ThirdPerson/Maps/ThirdPersonMap.umap" beforeDir="false" afterPath="$PROJECT_DIR$/Content/ThirdPerson/Maps/ThirdPersonMap.umap" afterDir="false" />
+>>>>>>> Stashed changes
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -51,27 +56,27 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;dev&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.lookFeel&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "git-widget-placeholder": "e4a6e352",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "settings.editor.selected.configurable": "preferences.lookFeel",
+    "vue.rearranger.settings.migration": "true"
   },
-  &quot;keyToStringList&quot;: {
-    &quot;rider.external.source.directories&quot;: [
-      &quot;C:\\Users\\kx123\\AppData\\Roaming\\JetBrains\\Rider2023.2\\resharper-host\\DecompilerCache&quot;,
-      &quot;C:\\Users\\kx123\\AppData\\Roaming\\JetBrains\\Rider2023.2\\resharper-host\\SourcesCache&quot;,
-      &quot;C:\\Users\\kx123\\AppData\\Local\\Symbols\\src&quot;
+  "keyToStringList": {
+    "rider.external.source.directories": [
+      "C:\\Users\\kx123\\AppData\\Roaming\\JetBrains\\Rider2023.2\\resharper-host\\DecompilerCache",
+      "C:\\Users\\kx123\\AppData\\Roaming\\JetBrains\\Rider2023.2\\resharper-host\\SourcesCache",
+      "C:\\Users\\kx123\\AppData\\Local\\Symbols\\src"
     ]
   }
-}</component>
+}]]></component>
   <component name="RunManager">
     <configuration name="PropProjectorTool" type="CppProject" factoryName="C++ Project">
       <configuration_1>
@@ -179,6 +184,7 @@
       <workItem from="1706282367707" duration="5909000" />
       <workItem from="1706290877681" duration="6062000" />
       <workItem from="1706297056236" duration="433000" />
+<<<<<<< Updated upstream
       <workItem from="1706330104015" duration="5423000" />
       <workItem from="1706349124705" duration="1506000" />
       <workItem from="1706364591933" duration="2110000" />
@@ -192,6 +198,10 @@
       <workItem from="1706961740479" duration="3543000" />
       <workItem from="1706973774730" duration="2724000" />
       <workItem from="1706976577095" duration="4329000" />
+=======
+      <workItem from="1706330104015" duration="5360000" />
+      <workItem from="1706981039189" duration="146000" />
+>>>>>>> Stashed changes
     </task>
     <servers />
   </component>

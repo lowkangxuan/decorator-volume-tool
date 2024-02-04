@@ -89,16 +89,11 @@ void ADecoratorVolume::PostEditChangeProperty(FPropertyChangedEvent& e)
 	Super::PostEditChangeProperty(e);
 	
 	const FName PropertyName = (e.Property != NULL ? e.MemberProperty->GetFName() : NAME_None);
-	UE_LOG(LogTemp, Log, TEXT("%s"), *PropertyName.ToString());
+	
 	// Generate new points when these properties are edited
-	if (PropertyName == "Seed" || PropertyName == "Shape")
+	if (PropertyName == "Seed")
 	{
-		// Init new seed as well when Seed property is edited
-		if (PropertyName == "Seed")
-		{
-			InitNewStreamSeed();
-		}
-
+		InitNewStreamSeed();
 		TriggerGeneration();
 	}
 
@@ -114,11 +109,6 @@ void ADecoratorVolume::PostEditChangeProperty(FPropertyChangedEvent& e)
 	}
 
 	if (PropertyName == "ScaleFromCenter" || PropertyName == "ScaleType")
-	{
-		TriggerGeneration();
-	}
-
-	if (PropertyName == "Hollow")
 	{
 		TriggerGeneration();
 	}
@@ -209,7 +199,6 @@ void ADecoratorVolume::TriggerGeneration(bool NewSeed)
 
 	RandStream.Reset(); // Resets the Stream to get back original RANDOM values
 	PointsGeneration();
-	RunLineTrace();
 
 	// Reregister Instanced Static Mesh Components and its individual instance Material and Transform
 	UpdateInstanceMeshMaterial();
@@ -222,40 +211,8 @@ void ADecoratorVolume::TriggerGeneration(bool NewSeed)
 // Regenerate points using Maths and based on the number of Counts and Shape
 void ADecoratorVolume::PointsGeneration()
 {
-	PointsGeneratorComponent->GeneratePoints(Count, RandStream, GeneratedPoints);
-}
-
-// Run a set of line traces to gather location and rotation (from hit normal) using generated points and projector size
-void ADecoratorVolume::RunLineTrace()
-{
-	// Clear array
-	LineTracedTransforms.Empty();
-	
-	const FVector ActorLocation = GetActorLocation();
-	const float Z = PointsGeneratorComponent->GetGenericSize().Z;
-	const FVector HalfZOffset = FVector(0, 0, Z / 2);
-	FHitResult HitResult;
-	FCollisionQueryParams TraceParams;
-
-	// LineTrace to ignore self and specified array of actors
-	TraceParams.AddIgnoredActor(this); // Ignore self to prevent overlapping
-	TraceParams.AddIgnoredActors(ActorsToIgnore);
-	
-	for (FVector CurrPoint : GeneratedPoints)
-	{
-		// Local Position to World Position == CurrPoint + ActorLocation
-		FVector Start =  GetActorRotation().RotateVector(CurrPoint + HalfZOffset) + ActorLocation;
-		FVector End = Start + (GetActorUpVector() * Z) * -1;
-		GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_WorldStatic, TraceParams);
-		
-		if (HitResult.bBlockingHit)
-		{
-			LineTracedTransforms.Add( FTracedTransform(
-				(HitResult.ImpactPoint),
-				(UKismetMathLibrary::MakeRotFromZ(HitResult.ImpactNormal))
-			));
-		}
-	}
+	PointsGeneratorComponent->GeneratePoints(Count, RandStream);
+	PointsGeneratorComponent->DoLineTrace();
 }
 
 // Removing and Adding new Instanced Static Mesh Component(s)
@@ -310,8 +267,8 @@ void ADecoratorVolume::UpdateInstanceTransform()
 		if (CurrComponent->GetInstanceCount() > 0) { CurrComponent->ClearInstances(); }
 		
 		float CurrCount = FMath::RoundFromZero((Count * (GetPalette()->GetDensityRatioAtIndex(Index))) + PrevCount);
-		CurrCount = FMath::Clamp(CurrCount, 0, LineTracedTransforms.Num()); // Clamp value within the number of array elements
-		
+		CurrCount = FMath::Clamp(CurrCount, 0, PointsGeneratorComponent->LineTracedTransforms.Num()); // Clamp value within the number of array elements
+
 		const float ScaleMin = GetPalette()->Instances[Index].ScaleMin;
 		const float ScaleMax = GetPalette()->Instances[Index].ScaleMax;
 		const FRotator RotationMin = GetPalette()->Instances[Index].RotationMin;
@@ -323,9 +280,9 @@ void ADecoratorVolume::UpdateInstanceTransform()
 											 FMath::FRandRange(RotationMin.Yaw, RotationMax.Yaw) + 90, /* +90 to make the meshes face the correct world orientation */
 											 FMath::FRandRange(RotationMin.Roll, RotationMax.Roll)
 											 );
-			FRotator Rotation = UKismetMathLibrary::ComposeRotators(FirstRotation, UseSurfaceNormal ? LineTracedTransforms[j].Rotation : FRotator::ZeroRotator);
-			FVector Location = LineTracedTransforms[j].Location;
-			FVector Scale = RandomInstanceScale(LineTracedTransforms[j].Location, ScaleMin, ScaleMax);
+			FRotator Rotation = UKismetMathLibrary::ComposeRotators(FirstRotation, UseSurfaceNormal ? PointsGeneratorComponent->LineTracedTransforms[j].Rotation : FRotator::ZeroRotator);
+			FVector Location = PointsGeneratorComponent->LineTracedTransforms[j].Location;
+			FVector Scale = RandomInstanceScale(Location, ScaleMin, ScaleMax);
 
 			FTransform InstanceTransform = FTransform(Rotation, Location, Scale);
 			CurrComponent->AddInstance(InstanceTransform, true);
@@ -350,7 +307,7 @@ void ADecoratorVolume::UpdateInstanceCollisionProfile()
 // Generate random scale based on Min and Max value from the palette
 FVector ADecoratorVolume::RandomInstanceScale(FVector PointLocation, float ScaleMin, float ScaleMax) const
 {
-	/*if (ScaleFromCenter)
+	if (ScaleFromCenter)
 	{
 		// Lerping the scale based on the distance of the point from (0, 0, 0) divided by the size of the volume
 		const float DistFromCenter = FMath::Abs(FVector::Distance(FVector::Zero(), PointLocation - GetActorLocation()));
@@ -358,7 +315,7 @@ FVector ADecoratorVolume::RandomInstanceScale(FVector PointLocation, float Scale
 		const float DesiredMax = (ScaleType == EInstanceScaleType::MinToMax ? ScaleMax : ScaleMin);
 
 		return FVector(FMath::Lerp(DesiredMin, DesiredMax, DistFromCenter/(PointsGeneratorComponent->GetGenericSize().X/2)));
-	}*/
+	}
 
 	return FVector(RandStream.FRandRange(ScaleMin, ScaleMax));
 }

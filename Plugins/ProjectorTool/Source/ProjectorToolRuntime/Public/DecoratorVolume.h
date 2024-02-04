@@ -11,21 +11,6 @@ class UDecoratorPalette;
 class UPointsGeneratorComponent;
 class UInstanceBakingComponent;
 
-USTRUCT()
-struct FTracedTransform
-{
-	GENERATED_BODY()
-
-	FVector Location;
-	FRotator Rotation;
-
-	FTracedTransform() {};
-	FTracedTransform(FVector NewLocation, FRotator NewRotation)
-		: Location(NewLocation),
-		Rotation(NewRotation)
-	{}
-};
-
 UCLASS(Abstract, Blueprintable, BlueprintType, HideCategories=(Collision, HLOD, Physics, Networking, Input), meta=(PrioritizeCategories = "DecoratorVolume"))
 class PROJECTORTOOLRUNTIME_API ADecoratorVolume : public AActor
 {
@@ -35,8 +20,6 @@ private:
 	// Min Max clamps for Seed value
 	const int32 MinSeedClamp = -999999;
 	const int32 MaxSeedClamp = 999999;
-
-	const uint32 HollowPadding = 100;
 
 #if WITH_EDITORONLY_DATA
 	UPROPERTY()
@@ -57,9 +40,6 @@ private:
 	
 	UPROPERTY(EditAnywhere, meta = (ClampMin = 0))
 	int32 Count = 0;
-
-	TArray<FVector> GeneratedPoints;
-	TArray<FTracedTransform> LineTracedTransforms;
 	
 public:	
 	// Sets default values for this actor's properties
@@ -73,9 +53,6 @@ public:
 
 	UPROPERTY(EditAnywhere, meta = (ClampMin = -999999, ClampMax = 999999))
 	int32 Seed;
-
-	UPROPERTY(EditAnywhere)
-	TArray<AActor*> ActorsToIgnore;
 	
 	UPROPERTY(EditAnywhere)
 	bool ScaleFromCenter;
@@ -125,7 +102,6 @@ private:
 
 	void TriggerGeneration(bool NewSeed = false);
 	void PointsGeneration();
-	void RunLineTrace();
 
 	void FlushComponents();
 	void UpdateInstanceMeshMaterial();

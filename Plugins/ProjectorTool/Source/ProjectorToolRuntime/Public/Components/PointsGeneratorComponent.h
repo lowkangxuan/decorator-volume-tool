@@ -7,6 +7,21 @@
 #include "ToolEnums.h"
 #include "PointsGeneratorComponent.generated.h"
 
+USTRUCT()
+struct FTracedTransform
+{
+	GENERATED_BODY()
+
+	FVector Location;
+	FRotator Rotation;
+
+	FTracedTransform() {};
+	FTracedTransform(FVector NewLocation, FRotator NewRotation)
+		: Location(NewLocation),
+		Rotation(NewRotation)
+	{}
+};
+
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class PROJECTORTOOLRUNTIME_API UPointsGeneratorComponent : public UActorComponent
 {
@@ -20,6 +35,7 @@ public:
 	UPointsGeneratorComponent();
 
 	TArray<FVector> GeneratedPoints;
+	TArray<FTracedTransform> LineTracedTransforms;
 
 	UPROPERTY(EditAnywhere)
 	EInstanceAlignment Alignment = EInstanceAlignment::SurfaceNormal;
@@ -68,7 +84,7 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	UFUNCTION(BlueprintCallable)
-	void GeneratePoints(int32 Count, FRandomStream Stream, TArray<FVector>& InPoints);
+	void GeneratePoints(int32 Count, FRandomStream& Stream);
 
 	UFUNCTION()
 	void DoLineTrace();

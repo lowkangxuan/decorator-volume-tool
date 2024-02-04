@@ -18,18 +18,18 @@ void FDecoratorVolumeVisualizer::DrawDirectionalArrowNegZ(FPrimitiveDrawInterfac
 
 void FDecoratorVolumeVisualizer::DrawVisualization(const UActorComponent* Component, const FSceneView* View, FPrimitiveDrawInterface* PDI)
 {
-	const UPointsGeneratorComponent* VisualizerComponent = Cast<UPointsGeneratorComponent>(Component);
-	if (!VisualizerComponent) return; // Stop function if component does not exist
+	const UPointsGeneratorComponent* GeneratorComponent = Cast<UPointsGeneratorComponent>(Component);
+	if (!GeneratorComponent) return; // Stop function if component does not exist
 	
-	const EProjectionShape Shape = VisualizerComponent->Shape;
-	const FVector ActorLocation = VisualizerComponent->GetOwner()->GetActorLocation();
-	const FRotator ActorRotation = VisualizerComponent->GetOwner()->GetActorRotation();
-	const FRotationMatrix ActorRotationMatrix = FRotationMatrix(VisualizerComponent->GetOwner()->GetActorRotation());
+	const EProjectionShape Shape = GeneratorComponent->Shape;
+	const FVector ActorLocation = GeneratorComponent->GetOwner()->GetActorLocation();
+	const FRotator ActorRotation = GeneratorComponent->GetOwner()->GetActorRotation();
+	const FRotationMatrix ActorRotationMatrix = FRotationMatrix(GeneratorComponent->GetOwner()->GetActorRotation());
 	const FLinearColor Color = FLinearColor::Yellow;
-	const float MaxHeight = VisualizerComponent->GetGenericSize().Z;
-	const float HalfHeight = VisualizerComponent->GetGenericSize().Z / 2;
-	const float HalfLength = VisualizerComponent->GetGenericSize().X / 2; // AKA radius for Cylinder shape
-	const float HalfBreadth = VisualizerComponent->GetGenericSize().Y / 2;
+	const float MaxHeight = GeneratorComponent->GetGenericSize().Z;
+	const float HalfHeight = GeneratorComponent->GetGenericSize().Z / 2;
+	const float HalfLength = GeneratorComponent->GetGenericSize().X / 2; // AKA radius for Cylinder shape
+	const float HalfBreadth = GeneratorComponent->GetGenericSize().Y / 2;
 	constexpr int32 Sides = 32;
 	constexpr uint8 DepthPriority = 0;
 	constexpr float Thickness = 2;
@@ -37,11 +37,11 @@ void FDecoratorVolumeVisualizer::DrawVisualization(const UActorComponent* Compon
 	constexpr bool ScreenSpace = false;
 
 	const FLinearColor RedColor = FLinearColor::Red;
-	const float HollowHalfLength = VisualizerComponent->GetGenericHollowSize().X / 2; // AKA radius for Cylinder shape)
-	const float HollowHalfBreadth = VisualizerComponent->GetGenericHollowSize().Y / 2;
+	const float HollowHalfLength = GeneratorComponent->GetGenericHollowSize().X / 2; // AKA radius for Cylinder shape)
+	const float HollowHalfBreadth = GeneratorComponent->GetGenericHollowSize().Y / 2;
 	
 	const FRotationTranslationMatrix Matrix = FRotationTranslationMatrix(
-		VisualizerComponent->GetOwner()->GetActorRotation(),
+		GeneratorComponent->GetOwner()->GetActorRotation(),
 		ActorLocation); // Rotation and Translation Matrix
 	
 	switch (Shape)
@@ -68,7 +68,7 @@ void FDecoratorVolumeVisualizer::DrawVisualization(const UActorComponent* Compon
 	}
 
 	// Visualizing the shape and hollow size
-	if (VisualizerComponent->Hollow)
+	if (GeneratorComponent->Hollow)
 	{
 		switch (Shape)
 		{
@@ -95,9 +95,9 @@ void FDecoratorVolumeVisualizer::DrawVisualization(const UActorComponent* Compon
 	}
 
 	// Visualizing raycast lines
-	if (VisualizerComponent->DrawDebugRaycastLines)
+	if (GeneratorComponent->DrawDebugRaycastLines)
 	{
-		TArray<FVector> Points = VisualizerComponent->GeneratedPoints;
+		TArray<FVector> Points = GeneratorComponent->GeneratedPoints;
 		
 		for (FVector Point : Points)
 		{
