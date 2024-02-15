@@ -35,6 +35,8 @@ public:
 	UPointsGeneratorComponent();
 
 	TArray<FVector> GeneratedPoints;
+
+	UPROPERTY(Transient)
 	TArray<FTracedTransform> LineTracedTransforms;
 
 	UPROPERTY(EditAnywhere)

@@ -5,11 +5,8 @@
 #include "CoreMinimal.h"
 #include "Modules/ModuleManager.h"
 #include "IProjectorToolModuleInterface.h"
-#include "SlateBasics.h"
-#include "SlateExtras.h"
-#include "Factories/Palette/DecoratorPaletteAssetTypeActions.h"
-#include "Factories/Volume/DecoratorVolumeAssetTypeActions.h"
-#include "Editor/LevelEditor/Public/LevelEditor.h"
+
+class IAssetTypeActions;
 
 class FProjectorToolEditor : public IProjectorToolModuleInterface
 {

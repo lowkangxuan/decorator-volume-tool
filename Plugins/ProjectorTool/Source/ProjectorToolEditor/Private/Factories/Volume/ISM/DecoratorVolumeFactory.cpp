@@ -1,13 +1,13 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Factories/Volume/DecoratorVolumeFactory.h"
-#include "DecoratorVolume.h"
+#include "Factories/Volume/ISM/DecoratorVolumeFactory.h"
+#include "DecoratorVolumeISM.h"
 #include "Kismet2/KismetEditorUtilities.h"
 
 UDecoratorVolumeFactory::UDecoratorVolumeFactory()
 {
-	SupportedClass = ADecoratorVolume::StaticClass();
+	SupportedClass = ADecoratorVolumeISM::StaticClass();
 	bCreateNew = true;
 	bEditAfterNew = true;
 }

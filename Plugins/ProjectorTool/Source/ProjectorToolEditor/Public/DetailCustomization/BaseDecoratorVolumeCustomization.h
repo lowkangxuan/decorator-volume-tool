@@ -1,18 +1,22 @@
 ﻿#pragma once
 #include "IDetailCustomization.h"
 
-class ADecoratorVolumeISM;
-class UInstanceBakingComponent;
+#define BUTTON_PADDING_FIRST 0 /*Left*/, 5 /*Top*/, 5 /*Right*/, 5 /*Bottom*/
+#define BUTTON_PADDING 0 /*Left*/, 0 /*Top*/, 5 /*Right*/, 5 /*Bottom*/
+#define BUTTON_ALIGNMENT HAlign_Fill
+
+class ABaseDecoratorVolume;
 class FReply;
 
 UENUM()
-enum EBtnType
+enum EBaseBtnType
 {
-	Bake,
-	Unbake
+	Regenerate,
+	GenerateNew,
+	Clear
 };
 
-class FDecoratorVolumeCustomization : public IDetailCustomization
+class FBaseDecoratorVolumeCustomization : public IDetailCustomization
 {
 public:
 	// Makes a new instance of this detail layout class for a specific detail view requesting it
@@ -22,13 +26,10 @@ public:
 	virtual void CustomizeDetails(IDetailLayoutBuilder& DetailBuilder) override;
 	virtual void CustomizeDetails(const TSharedPtr<IDetailLayoutBuilder>& DetailBuilder) override;
 
-	FReply EditorFuncs(EBtnType Type);
+	FReply EditorFuncs(EBaseBtnType Type);
 	bool CheckIfBaked();
-	bool CheckIfCleared();
 
 private:
 	TWeakPtr<IDetailLayoutBuilder> CachedDetailBuilder;
 	TArray<TWeakObjectPtr<UObject>> Objects;
-	TWeakObjectPtr<ADecoratorVolumeISM> ActorBeingCustomized;
-	TWeakObjectPtr<UInstanceBakingComponent> ComponentBeingCustomized;
 };

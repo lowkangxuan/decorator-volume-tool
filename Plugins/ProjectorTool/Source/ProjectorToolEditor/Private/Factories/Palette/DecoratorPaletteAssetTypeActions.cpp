@@ -21,7 +21,7 @@ FText FDecoratorPaletteAssetTypeActions::GetName() const
 
 FColor FDecoratorPaletteAssetTypeActions::GetTypeColor() const
 {
-	return FColor::Cyan;
+	return FColor::Green;
 }
 
 uint32 FDecoratorPaletteAssetTypeActions::GetCategories()

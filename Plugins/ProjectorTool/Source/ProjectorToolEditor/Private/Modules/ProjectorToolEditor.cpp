@@ -1,14 +1,21 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "Modules/ProjectorToolEditor.h"
-
-#include "DecoratorVolume.h"
-#include "DecoratorVolumeVisualizer.h"
-#include "Components/PointsGeneratorComponent.h"
 #include "UnrealEdGlobals.h"
 #include "Editor/UnrealEdEngine.h"
+
+#include "BaseDecoratorVolume.h"
+#include "DecoratorVolumeISM.h"
+#include "DecoratorVolumeVisualizer.h"
+#include "Components/PointsGeneratorComponent.h"
 #include "CustomMenu/ProjectorToolMenu.h"
+
+#include "DetailCustomization/BaseDecoratorVolumeCustomization.h"
 #include "DetailCustomization/DecoratorVolumeCustomization.h"
+
+#include "Factories/Palette/DecoratorPaletteAssetTypeActions.h"
+#include "Factories/Volume/ISM/DecoratorVolumeAssetTypeActions.h"
+#include "Factories/Volume/HISM/DecoratorVolumeHISMAssetTypeActions.h"
 
 void FProjectorToolEditor::StartupModule()
 {
@@ -29,21 +36,29 @@ void FProjectorToolEditor::StartupModule()
 	IAssetTools& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
 	EAssetTypeCategories::Type NewCategory = AssetTools.RegisterAdvancedAssetCategory(FName(TEXT("Decorator Volume")), FText::FromString("Decorator Volume"));
 
-	TSharedPtr<IAssetTypeActions> PaletteAction = MakeShareable(new FDecoratorPaletteAssetTypeActions(NewCategory));
-	TSharedPtr<IAssetTypeActions> VolumeAction = MakeShareable(new FDecoratorVolumeAssetTypeActions(NewCategory));
+	const TSharedPtr<IAssetTypeActions> PaletteAction = MakeShareable(new FDecoratorPaletteAssetTypeActions(NewCategory));
+	const TSharedPtr<IAssetTypeActions> VolumeISMAction = MakeShareable(new FDecoratorVolumeAssetTypeActions(NewCategory));
+	const TSharedPtr<IAssetTypeActions> VolumeHISMAction = MakeShareable(new FDecoratorVolumeHISMAssetTypeActions(NewCategory));
 
 	AssetTools.RegisterAssetTypeActions(PaletteAction.ToSharedRef());
-	AssetTools.RegisterAssetTypeActions(VolumeAction.ToSharedRef());
+	AssetTools.RegisterAssetTypeActions(VolumeISMAction.ToSharedRef());
+	AssetTools.RegisterAssetTypeActions(VolumeHISMAction.ToSharedRef());
 
 	CreatedAssetTypeActions.Add(PaletteAction);
-	CreatedAssetTypeActions.Add(VolumeAction);
+	CreatedAssetTypeActions.Add(VolumeISMAction);
+	CreatedAssetTypeActions.Add(VolumeHISMAction);
 #pragma endregion
 
 	FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
 	PropertyModule.RegisterCustomClassLayout(
-		ADecoratorVolume::StaticClass()->GetFName(),
+		ADecoratorVolumeISM::StaticClass()->GetFName(),
 		FOnGetDetailCustomizationInstance::CreateStatic(&FDecoratorVolumeCustomization::MakeInstance)
-		);
+	);
+	
+	PropertyModule.RegisterCustomClassLayout(
+		ABaseDecoratorVolume::StaticClass()->GetFName(),
+		FOnGetDetailCustomizationInstance::CreateStatic(&FBaseDecoratorVolumeCustomization::MakeInstance)
+	);
 	
 	IProjectorToolModuleInterface::StartupModule();
 }
@@ -71,7 +86,8 @@ void FProjectorToolEditor::ShutdownModule()
 	if (FModuleManager::Get().IsModuleLoaded("PropertyEditor"))
 	{
 		FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
-		PropertyModule.UnregisterCustomClassLayout(ADecoratorVolume::StaticClass()->GetFName());
+		PropertyModule.UnregisterCustomClassLayout(ABaseDecoratorVolume::StaticClass()->GetFName());
+		PropertyModule.UnregisterCustomClassLayout(ADecoratorVolumeISM::StaticClass()->GetFName());
 	}
 }
 

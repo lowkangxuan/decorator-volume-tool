@@ -1,8 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Factories/Volume/DecoratorVolumeAssetTypeActions.h"
-#include "DecoratorVolume.h"
+#include "Factories/Volume/ISM/DecoratorVolumeAssetTypeActions.h"
+#include "DecoratorVolumeISM.h"
 
 FDecoratorVolumeAssetTypeActions::FDecoratorVolumeAssetTypeActions(EAssetTypeCategories::Type InAssetCategory)
 {
@@ -11,22 +11,17 @@ FDecoratorVolumeAssetTypeActions::FDecoratorVolumeAssetTypeActions(EAssetTypeCat
 
 UClass* FDecoratorVolumeAssetTypeActions::GetSupportedClass() const
 {
-	return ADecoratorVolume::StaticClass();
+	return ADecoratorVolumeISM::StaticClass();
 }
 
 FText FDecoratorVolumeAssetTypeActions::GetName() const
 {
-	return INVTEXT("Volume");
-}
-
-FText FDecoratorVolumeAssetTypeActions::GetAssetDescription(const FAssetData& AssetData) const
-{
-	return INVTEXT("Test");
+	return INVTEXT("Volume ISM");
 }
 
 FColor FDecoratorVolumeAssetTypeActions::GetTypeColor() const
 {
-	return FColor::Cyan;
+	return FColor(63, 126, 255);
 }
 
 uint32 FDecoratorVolumeAssetTypeActions::GetCategories()

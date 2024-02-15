@@ -1,10 +1,11 @@
 ﻿#include "CustomMenu/ProjectorToolMenu.h"
 
-#include "DecoratorVolume.h"
+#include "DecoratorVolumeISM.h"
 #include "EngineUtils.h"
 #include "Selection.h"
 #include "Modules/ProjectorToolEditor.h"
 #include "CustomMenu/ProjectToolCommands.h"
+#include "Editor/LevelEditor/Public/LevelEditor.h"
 
 #define LOCTEXT_NAMESPACE "ProjectorToolMenu"
 
@@ -111,7 +112,7 @@ void FProjectorToolMenu::RegenerateAll()
 {
 	GEditor->GetSelectedActors()->BeginBatchSelectOperation();
 	GEditor->SelectNone(false, true);
-	for( ADecoratorVolume* Volume : TActorRange<ADecoratorVolume>(GetWorld()))
+	for( ADecoratorVolumeISM* Volume : TActorRange<ADecoratorVolumeISM>(GetWorld()))
 	{
 		Volume->Regenerate();
 	}
@@ -122,7 +123,7 @@ void FProjectorToolMenu::RegenerateAllNewSeed()
 {
 	GEditor->GetSelectedActors()->BeginBatchSelectOperation();
 	GEditor->SelectNone(false, true);
-	for( ADecoratorVolume* Volume : TActorRange<ADecoratorVolume>(GetWorld()))
+	for( ADecoratorVolumeISM* Volume : TActorRange<ADecoratorVolumeISM>(GetWorld()))
 	{
 		Volume->GenerateNewSeed();
 	}
@@ -133,7 +134,7 @@ void FProjectorToolMenu::BakeAll()
 {
 	GEditor->GetSelectedActors()->BeginBatchSelectOperation();
 	GEditor->SelectNone(false, true);
-	for( ADecoratorVolume* Volume : TActorRange<ADecoratorVolume>(GetWorld()))
+	for( ADecoratorVolumeISM* Volume : TActorRange<ADecoratorVolumeISM>(GetWorld()))
 	{
 		Volume->BakeInstances();
 	}
@@ -144,7 +145,7 @@ void FProjectorToolMenu::UnbakeAll()
 {
 	GEditor->GetSelectedActors()->BeginBatchSelectOperation();
 	GEditor->SelectNone(false, true);
-	for( ADecoratorVolume* Volume : TActorRange<ADecoratorVolume>(GetWorld()))
+	for( ADecoratorVolumeISM* Volume : TActorRange<ADecoratorVolumeISM>(GetWorld()))
 	{
 		Volume->UnbakeInstances();
 	}
