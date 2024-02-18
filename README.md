@@ -41,3 +41,11 @@ There are 2 types of volumes, `Decorator Volume ISM` and `Decorator Volume HISM`
 ## Creating a volume and palette
 Right click the content browser, go to the "Projector Tool" category, choose the asset to create.<br><br>
 ![](https://i.imgur.com/hA83q8W.png)
+
+## Baking and Unbaking
+A baking and unbaking feature for each volume that allows editing each individual instance Transform. 
+
+### Instance Proxy Mesh
+The unbaked instances are essentially just an `Instance Proxy Mesh` that derives from an actor and has only a static mesh component tagged to it. The proxy meshes are actually set to be hidden in game to prevent for major performance loss if you were to unbake a volume with many instances.
+
+Holding the `S` hotkey while moving the proxy mesh allows itself to snap to the nearest surface and orientates to the normal of the snapped surface.
