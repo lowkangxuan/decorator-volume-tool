@@ -1,9 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "..\Public\DecoratorPalette.h"
-
-#include "AssetTypeCategories.h"
-#include "HairStrandsInterface.h"
+#include "DecoratorPalette.h"
 #include "GenericPlatform/GenericPlatformMath.h"
 
 #if WITH_EDITOR

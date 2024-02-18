@@ -1,18 +1,12 @@
 ﻿#pragma once
 #include "IDetailCustomization.h"
+#include "Enums/VolumeActionsEnum.h"
 
 class ADecoratorVolumeISM;
 class UInstanceBakingComponent;
 class FReply;
 
-UENUM()
-enum EBtnType
-{
-	Bake,
-	Unbake
-};
-
-class FDecoratorVolumeCustomization : public IDetailCustomization
+class FDecoratorVolumeISMDetails : public IDetailCustomization
 {
 public:
 	// Makes a new instance of this detail layout class for a specific detail view requesting it
@@ -22,7 +16,7 @@ public:
 	virtual void CustomizeDetails(IDetailLayoutBuilder& DetailBuilder) override;
 	virtual void CustomizeDetails(const TSharedPtr<IDetailLayoutBuilder>& DetailBuilder) override;
 
-	FReply EditorFuncs(EBtnType Type);
+	FReply EditorFuncs(EVolumeActionsEnum Type);
 	bool CheckIfBaked();
 	bool CheckIfCleared();
 

@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "ToolEnums.h"
+#include "Enums/ToolEnums.h"
 #include "PointsGeneratorComponent.generated.h"
 
 USTRUCT()

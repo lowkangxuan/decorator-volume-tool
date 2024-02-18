@@ -1,18 +1,18 @@
-﻿#include "DetailCustomization/DecoratorVolumeCustomization.h"
+﻿#include "DetailCustomizations/DecoratorVolumeISMDetails.h"
 
 #include "DecoratorVolumeISM.h"
 #include "DetailCategoryBuilder.h"
 #include "DetailLayoutBuilder.h"
 #include "DetailWidgetRow.h"
 #include "Components/InstanceBakingComponent.h"
-#include "DetailCustomization/BaseDecoratorVolumeCustomization.h"
+#include "DetailCustomizations/BaseDecoratorVolumeDetails.h"
 
-TSharedRef<IDetailCustomization> FDecoratorVolumeCustomization::MakeInstance()
+TSharedRef<IDetailCustomization> FDecoratorVolumeISMDetails::MakeInstance()
 {
-	return MakeShareable(new FDecoratorVolumeCustomization);
+	return MakeShareable(new FDecoratorVolumeISMDetails);
 }
 
-void FDecoratorVolumeCustomization::CustomizeDetails(IDetailLayoutBuilder& DetailBuilder)
+void FDecoratorVolumeISMDetails::CustomizeDetails(IDetailLayoutBuilder& DetailBuilder)
 {
 	DetailBuilder.GetObjectsBeingCustomized(Objects);
 	ActorBeingCustomized = Cast<ADecoratorVolumeISM>(Objects[0].Get());
@@ -41,7 +41,7 @@ void FDecoratorVolumeCustomization::CustomizeDetails(IDetailLayoutBuilder& Detai
 			.VAlign(VAlign_Center)
 			.ContentPadding(FMargin(0, 5))
 			.IsEnabled(!CheckIfBaked() && !CheckIfCleared())
-			.OnClicked_Raw(this, &FDecoratorVolumeCustomization::EditorFuncs, EBtnType::Bake)
+			.OnClicked_Raw(this, &FDecoratorVolumeISMDetails::EditorFuncs, EVolumeActionsEnum::Bake)
 		]
 		+ SHorizontalBox::Slot()
 		.FillWidth(1.0f)
@@ -53,18 +53,18 @@ void FDecoratorVolumeCustomization::CustomizeDetails(IDetailLayoutBuilder& Detai
 			.VAlign(VAlign_Center)
 			.ContentPadding(FMargin(0, 5))
 			.IsEnabled(CheckIfBaked() && !CheckIfCleared())
-			.OnClicked_Raw(this, &FDecoratorVolumeCustomization::EditorFuncs, EBtnType::Unbake)
+			.OnClicked_Raw(this, &FDecoratorVolumeISMDetails::EditorFuncs, EVolumeActionsEnum::Unbake)
 		]
 	];
 }
 
-void FDecoratorVolumeCustomization::CustomizeDetails(const TSharedPtr<IDetailLayoutBuilder>& DetailBuilder)
+void FDecoratorVolumeISMDetails::CustomizeDetails(const TSharedPtr<IDetailLayoutBuilder>& DetailBuilder)
 {
 	CachedDetailBuilder = DetailBuilder;
 	CustomizeDetails(*DetailBuilder);
 }
 
-FReply FDecoratorVolumeCustomization::EditorFuncs(EBtnType Type)
+FReply FDecoratorVolumeISMDetails::EditorFuncs(EVolumeActionsEnum Type)
 {
 	for (TWeakObjectPtr<UObject> Object : Objects)
 	{
@@ -81,13 +81,13 @@ FReply FDecoratorVolumeCustomization::EditorFuncs(EBtnType Type)
 				break;	
 			}
 			
-			case EBtnType::Bake:
+			case EVolumeActionsEnum::Bake:
 			{
 				VolumeActor->BakeInstances();
 				break;
 			}
 
-			case EBtnType::Unbake:
+			case EVolumeActionsEnum::Unbake:
 			{
 				VolumeActor->UnbakeInstances();
 				break;
@@ -103,12 +103,12 @@ FReply FDecoratorVolumeCustomization::EditorFuncs(EBtnType Type)
 	return FReply::Handled();
 }
 
-bool FDecoratorVolumeCustomization::CheckIfBaked()
+bool FDecoratorVolumeISMDetails::CheckIfBaked()
 {
 	return ComponentBeingCustomized->bIsBaked;
 }
 
-bool FDecoratorVolumeCustomization::CheckIfCleared()
+bool FDecoratorVolumeISMDetails::CheckIfCleared()
 {
 	return ActorBeingCustomized->bIsCleared;
 }

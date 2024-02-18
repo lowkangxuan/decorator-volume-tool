@@ -10,8 +10,8 @@
 #include "Components/PointsGeneratorComponent.h"
 #include "CustomMenu/ProjectorToolMenu.h"
 
-#include "DetailCustomization/BaseDecoratorVolumeCustomization.h"
-#include "DetailCustomization/DecoratorVolumeCustomization.h"
+#include "..\..\Public\DetailCustomizations\BaseDecoratorVolumeDetails.h"
+#include "..\..\Public\DetailCustomizations\DecoratorVolumeISMDetails.h"
 
 #include "Factories/Palette/DecoratorPaletteAssetTypeActions.h"
 #include "Factories/Volume/ISM/DecoratorVolumeAssetTypeActions.h"
@@ -52,12 +52,12 @@ void FProjectorToolEditor::StartupModule()
 	FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
 	PropertyModule.RegisterCustomClassLayout(
 		ADecoratorVolumeISM::StaticClass()->GetFName(),
-		FOnGetDetailCustomizationInstance::CreateStatic(&FDecoratorVolumeCustomization::MakeInstance)
+		FOnGetDetailCustomizationInstance::CreateStatic(&FDecoratorVolumeISMDetails::MakeInstance)
 	);
 	
 	PropertyModule.RegisterCustomClassLayout(
 		ABaseDecoratorVolume::StaticClass()->GetFName(),
-		FOnGetDetailCustomizationInstance::CreateStatic(&FBaseDecoratorVolumeCustomization::MakeInstance)
+		FOnGetDetailCustomizationInstance::CreateStatic(&FBaseDecoratorVolumeDetails::MakeInstance)
 	);
 	
 	IProjectorToolModuleInterface::StartupModule();

@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "ToolEnums.h"
+#include "Enums/ToolEnums.h"
 #include "BaseDecoratorVolume.generated.h"
 
 class UBillboardComponent;
@@ -53,9 +53,6 @@ public:
 
 	UPROPERTY(EditAnywhere, meta=(EditCondition = "ScaleFromCenter", EditConditionHides))
 	EInstanceScaleType ScaleType = EInstanceScaleType::MaxToMin;
-	
-	UPROPERTY(EditAnywhere, Category="Debug")
-	bool DrawRaycastLines = false;
 
 protected:
 	// Called when the game starts or when spawned

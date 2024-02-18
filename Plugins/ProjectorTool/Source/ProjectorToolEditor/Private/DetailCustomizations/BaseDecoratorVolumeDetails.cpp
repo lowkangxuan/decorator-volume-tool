@@ -1,4 +1,4 @@
-﻿#include "DetailCustomization/BaseDecoratorVolumeCustomization.h"
+﻿#include "DetailCustomizations/BaseDecoratorVolumeDetails.h"
 
 #include "BaseDecoratorVolume.h"
 #include "DetailCategoryBuilder.h"
@@ -6,12 +6,12 @@
 #include "DetailWidgetRow.h"
 #include "Components/InstanceBakingComponent.h"
 
-TSharedRef<IDetailCustomization> FBaseDecoratorVolumeCustomization::MakeInstance()
+TSharedRef<IDetailCustomization> FBaseDecoratorVolumeDetails::MakeInstance()
 {
-	return MakeShareable(new FBaseDecoratorVolumeCustomization);
+	return MakeShareable(new FBaseDecoratorVolumeDetails);
 }
 
-void FBaseDecoratorVolumeCustomization::CustomizeDetails(IDetailLayoutBuilder& DetailBuilder)
+void FBaseDecoratorVolumeDetails::CustomizeDetails(IDetailLayoutBuilder& DetailBuilder)
 {
 	DetailBuilder.GetObjectsBeingCustomized(Objects);
 	const bool bShouldDisplay = !Objects[0]->HasAnyFlags(RF_ArchetypeObject | RF_ClassDefaultObject); // Checking if these flags exist
@@ -47,7 +47,7 @@ void FBaseDecoratorVolumeCustomization::CustomizeDetails(IDetailLayoutBuilder& D
 					.VAlign(VAlign_Center)
 					.ContentPadding(FMargin(0, 5))
 					.IsEnabled(CheckIfBaked())
-					.OnClicked_Raw(this, &FBaseDecoratorVolumeCustomization::EditorFuncs, EBaseBtnType::Regenerate)
+					.OnClicked_Raw(this, &FBaseDecoratorVolumeDetails::EditorFuncs, EVolumeActionsEnum::Regenerate)
 				]
 				+ SHorizontalBox::Slot()
 				.FillWidth(1.0f)
@@ -59,7 +59,7 @@ void FBaseDecoratorVolumeCustomization::CustomizeDetails(IDetailLayoutBuilder& D
 					.VAlign(VAlign_Center)
 					.ContentPadding(FMargin(0, 5))
 					.IsEnabled(CheckIfBaked())
-					.OnClicked_Raw(this, &FBaseDecoratorVolumeCustomization::EditorFuncs, EBaseBtnType::GenerateNew)
+					.OnClicked_Raw(this, &FBaseDecoratorVolumeDetails::EditorFuncs, EVolumeActionsEnum::RegenerateNewSeed)
 				]
 			]
 			+ SVerticalBox::Slot()
@@ -71,7 +71,7 @@ void FBaseDecoratorVolumeCustomization::CustomizeDetails(IDetailLayoutBuilder& D
 				.VAlign(VAlign_Center)
 				.ContentPadding(FMargin(0, 5))
 				.IsEnabled(CheckIfBaked())
-				.OnClicked_Raw(this, &FBaseDecoratorVolumeCustomization::EditorFuncs, EBaseBtnType::Clear)
+				.OnClicked_Raw(this, &FBaseDecoratorVolumeDetails::EditorFuncs, EVolumeActionsEnum::Clear)
 				[
 					SNew(STextBlock)
 					.Justification(ETextJustify::Center)
@@ -82,13 +82,13 @@ void FBaseDecoratorVolumeCustomization::CustomizeDetails(IDetailLayoutBuilder& D
 	}
 }
 
-void FBaseDecoratorVolumeCustomization::CustomizeDetails(const TSharedPtr<IDetailLayoutBuilder>& DetailBuilder)
+void FBaseDecoratorVolumeDetails::CustomizeDetails(const TSharedPtr<IDetailLayoutBuilder>& DetailBuilder)
 {
 	CachedDetailBuilder = DetailBuilder;
 	CustomizeDetails(*DetailBuilder);
 }
 
-FReply FBaseDecoratorVolumeCustomization::EditorFuncs(EBaseBtnType Type)
+FReply FBaseDecoratorVolumeDetails::EditorFuncs(EVolumeActionsEnum Type)
 {
 	for (TWeakObjectPtr<UObject> Object : Objects)
 	{
@@ -105,19 +105,19 @@ FReply FBaseDecoratorVolumeCustomization::EditorFuncs(EBaseBtnType Type)
 				break;	
 			}
 
-		case EBaseBtnType::Regenerate:
+		case EVolumeActionsEnum::Regenerate:
 			{
 				VolumeActor->Regenerate();
 				break;
 			}
 
-		case EBaseBtnType::GenerateNew:
+		case EVolumeActionsEnum::RegenerateNewSeed:
 			{
 				VolumeActor->GenerateNewSeed();
 				break;
 			}
 
-		case EBaseBtnType::Clear:
+		case EVolumeActionsEnum::Clear:
 			{
 				VolumeActor->Clear();
 				break;
@@ -133,7 +133,7 @@ FReply FBaseDecoratorVolumeCustomization::EditorFuncs(EBaseBtnType Type)
 	return FReply::Handled();
 }
 
-bool FBaseDecoratorVolumeCustomization::CheckIfBaked()
+bool FBaseDecoratorVolumeDetails::CheckIfBaked()
 {
 	TWeakObjectPtr<UInstanceBakingComponent> BakingComponent = Cast<ABaseDecoratorVolume>(Objects[0])->GetComponentByClass<UInstanceBakingComponent>();
 	if (!BakingComponent.IsValid()) return false;

@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Modules/IProjectorToolModuleInterface.h"
+#include "Enums/VolumeActionsEnum.h"
 
 class FProjectorToolMenu : public IProjectorToolModuleListenerInterface, public TSharedFromThis<FProjectorToolMenu>
 {
@@ -11,8 +12,6 @@ public:
 	virtual void OnShutdownModule() override;
 
 	static UWorld* GetWorld();
-
-	void MakeMenuEntry(FMenuBuilder &MenuBuilder);
 
 protected:
 	TSharedPtr<FUICommandList> CommandList;
@@ -29,6 +28,7 @@ protected:
 	void MapCommands();
 
 	// UI Command functions
+	void VolumeCommands(EVolumeActionsEnum Action);
 	void RegenerateAll();
 	void RegenerateAllNewSeed();
 	void BakeAll();

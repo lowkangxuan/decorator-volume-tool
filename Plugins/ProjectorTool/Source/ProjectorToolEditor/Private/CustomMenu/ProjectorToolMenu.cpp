@@ -88,23 +88,65 @@ void FProjectorToolMenu::MapCommands()
 
 	CommandList->MapAction(
 		Commands.RegenerateAll,
-		FExecuteAction::CreateSP(this, &FProjectorToolMenu::RegenerateAll),
+		FExecuteAction::CreateSP(this, &FProjectorToolMenu::VolumeCommands, EVolumeActionsEnum::Regenerate),
 		FCanExecuteAction());
 
 	CommandList->MapAction(
 		Commands.RegenerateAllNewSeed,
-		FExecuteAction::CreateSP(this, &FProjectorToolMenu::RegenerateAllNewSeed),
+		FExecuteAction::CreateSP(this, &FProjectorToolMenu::VolumeCommands, EVolumeActionsEnum::RegenerateNewSeed),
 		FCanExecuteAction());
 
 	CommandList->MapAction(
 		Commands.BakeAll,
-		FExecuteAction::CreateSP(this, &FProjectorToolMenu::BakeAll),
+		FExecuteAction::CreateSP(this, &FProjectorToolMenu::VolumeCommands, EVolumeActionsEnum::Bake),
 		FCanExecuteAction());
 
 	CommandList->MapAction(
 		Commands.UnbakeAll,
-		FExecuteAction::CreateSP(this, &FProjectorToolMenu::UnbakeAll),
+		FExecuteAction::CreateSP(this, &FProjectorToolMenu::VolumeCommands, EVolumeActionsEnum::Unbake),
 		FCanExecuteAction());
+}
+
+void FProjectorToolMenu::VolumeCommands(EVolumeActionsEnum Action)
+{
+	GEditor->GetSelectedActors()->BeginBatchSelectOperation();
+	GEditor->SelectNone(false, true);
+	for( ADecoratorVolumeISM* Volume : TActorRange<ADecoratorVolumeISM>(GetWorld()))
+	{
+		switch (Action)
+		{
+			case EVolumeActionsEnum::Bake:
+			{
+				Volume->BakeInstances();
+				break;
+			}
+			
+			case EVolumeActionsEnum::Unbake:
+			{
+				Volume->UnbakeInstances();
+				break;
+			}
+			
+			case EVolumeActionsEnum::Regenerate:
+			{
+				Volume->Regenerate();
+				break;
+			}
+
+			case EVolumeActionsEnum::RegenerateNewSeed:
+			{
+				Volume->GenerateNewSeed();
+				break;
+			}
+
+			case EVolumeActionsEnum::Clear:
+			{
+				Volume->Clear();
+				break;
+			}
+		}
+	}
+	GEditor->GetSelectedActors()->EndBatchSelectOperation();
 }
 
 #pragma region Commands
