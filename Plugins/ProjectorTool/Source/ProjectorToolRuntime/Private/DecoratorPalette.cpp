@@ -1,6 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "..\Public\DecoratorPalette.h"
+#include "DecoratorPalette.h"
 #include "GenericPlatform/GenericPlatformMath.h"
 
 #if WITH_EDITOR
@@ -25,19 +25,25 @@
 
 void UDecoratorPalette::PostEditChangeChainProperty(FPropertyChangedChainEvent& e)
 {
-		Super::PostEditChangeChainProperty(e);
-		const FName ChainPropertyName = (e.Property != NULL ? e.MemberProperty->GetFName() : NAME_None);
-		const int32 InstanceIndex = e.GetArrayIndex(TEXT("Instances"));
-		
-		if (ChainPropertyName == "ScaleMin")
-		{
-			Instances[InstanceIndex].ScaleMin = FMath::Clamp(Instances[InstanceIndex].ScaleMin, 0.0, Instances[InstanceIndex].ScaleMax);
-		}
+	Super::PostEditChangeChainProperty(e);
+	const FName ChainPropertyName = (e.Property != NULL ? e.MemberProperty->GetFName() : NAME_None);
+	const int32 EditedIndex = e.GetArrayIndex(TEXT("Instances"));
+	FPaletteStruct& EditedInstance = Instances[EditedIndex];
+	
+	if (ChainPropertyName == "ScaleMin")
+	{
+		EditedInstance.ScaleMin = FMath::Clamp(EditedInstance.ScaleMin, 0.0, EditedInstance.ScaleMax);
+	}
 
-		if (ChainPropertyName == "ScaleMax")
-		{
-			Instances[InstanceIndex].ScaleMax = FMath::Clamp(Instances[InstanceIndex].ScaleMax, Instances[InstanceIndex].ScaleMin, Instances[InstanceIndex].ScaleMax);
-		}
+	if (ChainPropertyName == "ScaleMax")
+	{
+		EditedInstance.ScaleMax = FMath::Clamp(EditedInstance.ScaleMax, EditedInstance.ScaleMin, EditedInstance.ScaleMax);
+	}
+
+	if (ChainPropertyName == "Mesh")
+	{
+		EditedInstance.Materials.SetNum(EditedInstance.Mesh->GetStaticMaterials().Num());
+	}
 }
 #endif
 
@@ -51,6 +57,11 @@ int32 UDecoratorPalette::GetTotalDensity()
 int32 UDecoratorPalette::GetNumberOfInstances() const
 {
 	return Instances.Num();
+}
+
+int32 UDecoratorPalette::GetNumMaterialsAtIndex(int32 Index) const
+{
+	return Instances[Index].Mesh->GetStaticMaterials().Num();
 }
 
 // Returns the calculated density ratio of the specified instance index

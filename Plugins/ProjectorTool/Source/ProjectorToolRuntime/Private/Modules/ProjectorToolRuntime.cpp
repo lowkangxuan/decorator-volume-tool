@@ -4,12 +4,12 @@
 
 #define LOCTEXT_NAMESPACE "FProjectorToolModule"
 
-void FProjectorToolModule::StartupModule()
+void FProjectorToolRuntime::StartupModule()
 {
 	// This code will execute after your module is loaded into memory; the exact timing is specified in the .uplugin file per-module
 }
 
-void FProjectorToolModule::ShutdownModule()
+void FProjectorToolRuntime::ShutdownModule()
 {
 	// This function may be called during shutdown to clean up your module.  For modules that support dynamic reloading,
 	// we call this function before unloading the module.
@@ -17,4 +17,4 @@ void FProjectorToolModule::ShutdownModule()
 
 #undef LOCTEXT_NAMESPACE
 	
-IMPLEMENT_MODULE(FProjectorToolModule, ProjectorToolRuntime)
+IMPLEMENT_MODULE(FProjectorToolRuntime, ProjectorToolRuntime)

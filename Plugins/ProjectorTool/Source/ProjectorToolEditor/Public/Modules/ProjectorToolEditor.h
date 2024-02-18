@@ -4,10 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "Modules/ModuleManager.h"
-#include "Factories/Palette/DecoratorPaletteAssetTypeActions.h"
-#include "Factories/Volume/DecoratorVolumeAssetTypeActions.h"
+#include "IProjectorToolModuleInterface.h"
 
-class FProjectorToolModule : public IModuleInterface
+class IAssetTypeActions;
+
+class FProjectorToolEditor : public IProjectorToolModuleInterface
 {
 public:
 
@@ -15,6 +16,20 @@ public:
 	virtual void StartupModule() override;
 	virtual void ShutdownModule() override;
 
+	virtual void AddModuleListeners() override;
+
+	static inline FProjectorToolEditor& Get()
+	{
+		return FModuleManager::LoadModuleChecked<FProjectorToolEditor>("ProjectorToolEditor");
+	}
+
+	static inline bool IsAvailable()
+	{
+		return FModuleManager::Get().IsModuleLoaded("ProjectorToolEditor");
+	}
+
+protected:
+	TSharedPtr<FExtensibilityManager> LevelEditorMenuExtensibilityManager;
 private:
 	TArray<TSharedPtr<IAssetTypeActions>> CreatedAssetTypeActions;
 };

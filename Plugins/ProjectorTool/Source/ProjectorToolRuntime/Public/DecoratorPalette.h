@@ -14,8 +14,8 @@ struct FPaletteStruct
 	UPROPERTY(EditAnywhere, Category="Palette Settings")
 	UStaticMesh* Mesh;
 
-	UPROPERTY(EditAnywhere, Category="Palette Settings")
-	UMaterialInstance* Mat;
+	UPROPERTY(EditAnywhere, Category="Palette Settings", EditFixedSize)
+	TArray<UMaterialInstance*> Materials;
 
 	UPROPERTY(EditAnywhere, Category="Palette Settings")
 	FCollisionProfileName CollisionProfile = UCollisionProfile::BlockAll_ProfileName;
@@ -42,6 +42,9 @@ struct FPaletteStruct
 	FRotator RotationMax = FRotator::ZeroRotator;
 };
 
+/**
+ * Palette that 
+ */
 UCLASS(Blueprintable, BlueprintType, CollapseCategories)
 class PROJECTORTOOLRUNTIME_API UDecoratorPalette : public UObject
 {
@@ -63,6 +66,7 @@ public:
 	
 	int32 GetTotalDensity();
 	int32 GetNumberOfInstances() const;
+	int32 GetNumMaterialsAtIndex(int32 Index) const;
 	float GetDensityRatioAtIndex(int32 Index);
 	float GetScaleAtIndex(int32 Index);
 	FRotator GetRotationAtIndex(int32 Index);

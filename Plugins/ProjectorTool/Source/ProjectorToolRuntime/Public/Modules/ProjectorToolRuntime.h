@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "Modules/ModuleManager.h"
 
-class FProjectorToolModule : public IModuleInterface
+class FProjectorToolRuntime : public IModuleInterface
 {
 public:
 

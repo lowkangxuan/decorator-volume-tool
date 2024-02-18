@@ -1,15 +1,23 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "Modules/ProjectorToolEditor.h"
-
-#include "DecoratorVolumeVisualizer.h"
-#include "DecoratorVolumeVisualizerComponent.h"
 #include "UnrealEdGlobals.h"
 #include "Editor/UnrealEdEngine.h"
 
-#define LOCTEXT_NAMESPACE "FProjectorToolModule"
+#include "BaseDecoratorVolume.h"
+#include "DecoratorVolumeISM.h"
+#include "DecoratorVolumeVisualizer.h"
+#include "Components/PointsGeneratorComponent.h"
+#include "CustomMenu/ProjectorToolMenu.h"
 
-void FProjectorToolModule::StartupModule()
+#include "..\..\Public\DetailCustomizations\BaseDecoratorVolumeDetails.h"
+#include "..\..\Public\DetailCustomizations\DecoratorVolumeISMDetails.h"
+
+#include "Factories/Palette/DecoratorPaletteAssetTypeActions.h"
+#include "Factories/Volume/ISM/DecoratorVolumeAssetTypeActions.h"
+#include "Factories/Volume/HISM/DecoratorVolumeHISMAssetTypeActions.h"
+
+void FProjectorToolEditor::StartupModule()
 {
 	// This code will execute after your module is loaded into memory; the exact timing is specified in the .uplugin file per-module
 	
@@ -19,32 +27,50 @@ void FProjectorToolModule::StartupModule()
 
 		if (Visualizer.IsValid())
 		{
-			GUnrealEd->RegisterComponentVisualizer(UDecoratorVolumeVisualizerComponent::StaticClass()->GetFName(), Visualizer);
+			GUnrealEd->RegisterComponentVisualizer(UPointsGeneratorComponent::StaticClass()->GetFName(), Visualizer);
 			Visualizer->OnRegister();
 		}
 	}
 
+#pragma region Factory Stuff
 	IAssetTools& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
 	EAssetTypeCategories::Type NewCategory = AssetTools.RegisterAdvancedAssetCategory(FName(TEXT("Decorator Volume")), FText::FromString("Decorator Volume"));
 
-	TSharedPtr<IAssetTypeActions> PaletteAction = MakeShareable(new FDecoratorPaletteAssetTypeActions(NewCategory));
-	TSharedPtr<IAssetTypeActions> VolumeAction = MakeShareable(new FDecoratorVolumeAssetTypeActions(NewCategory));
+	const TSharedPtr<IAssetTypeActions> PaletteAction = MakeShareable(new FDecoratorPaletteAssetTypeActions(NewCategory));
+	const TSharedPtr<IAssetTypeActions> VolumeISMAction = MakeShareable(new FDecoratorVolumeAssetTypeActions(NewCategory));
+	const TSharedPtr<IAssetTypeActions> VolumeHISMAction = MakeShareable(new FDecoratorVolumeHISMAssetTypeActions(NewCategory));
 
 	AssetTools.RegisterAssetTypeActions(PaletteAction.ToSharedRef());
-	AssetTools.RegisterAssetTypeActions(VolumeAction.ToSharedRef());
+	AssetTools.RegisterAssetTypeActions(VolumeISMAction.ToSharedRef());
+	AssetTools.RegisterAssetTypeActions(VolumeHISMAction.ToSharedRef());
 
 	CreatedAssetTypeActions.Add(PaletteAction);
-	CreatedAssetTypeActions.Add(VolumeAction);
+	CreatedAssetTypeActions.Add(VolumeISMAction);
+	CreatedAssetTypeActions.Add(VolumeHISMAction);
+#pragma endregion
+
+	FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
+	PropertyModule.RegisterCustomClassLayout(
+		ADecoratorVolumeISM::StaticClass()->GetFName(),
+		FOnGetDetailCustomizationInstance::CreateStatic(&FDecoratorVolumeISMDetails::MakeInstance)
+	);
+	
+	PropertyModule.RegisterCustomClassLayout(
+		ABaseDecoratorVolume::StaticClass()->GetFName(),
+		FOnGetDetailCustomizationInstance::CreateStatic(&FBaseDecoratorVolumeDetails::MakeInstance)
+	);
+	
+	IProjectorToolModuleInterface::StartupModule();
 }
 
-void FProjectorToolModule::ShutdownModule()
+void FProjectorToolEditor::ShutdownModule()
 {
 	// This function may be called during shutdown to clean up your module.  For modules that support dynamic reloading,
 	// we call this function before unloading the module.
 
 	if (GUnrealEd != nullptr)
 	{
-		GUnrealEd->UnregisterComponentVisualizer(UDecoratorVolumeVisualizerComponent::StaticClass()->GetFName());
+		GUnrealEd->UnregisterComponentVisualizer(UPointsGeneratorComponent::StaticClass()->GetFName());
 	}
 
 	if (FModuleManager::Get().IsModuleLoaded("AssetTools"))
@@ -56,8 +82,19 @@ void FProjectorToolModule::ShutdownModule()
 			AssetTools.UnregisterAssetTypeActions(CreatedAssetTypeActions[i].ToSharedRef());
 		}
 	}
+
+	if (FModuleManager::Get().IsModuleLoaded("PropertyEditor"))
+	{
+		FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
+		PropertyModule.UnregisterCustomClassLayout(ABaseDecoratorVolume::StaticClass()->GetFName());
+		PropertyModule.UnregisterCustomClassLayout(ADecoratorVolumeISM::StaticClass()->GetFName());
+	}
 }
 
-#undef LOCTEXT_NAMESPACE
+void FProjectorToolEditor::AddModuleListeners()
+{
+	IProjectorToolModuleInterface::AddModuleListeners();
+	ModuleListeners.Add(MakeShareable(new FProjectorToolMenu));
+}
 	
-IMPLEMENT_MODULE(FProjectorToolModule, ProjectorToolEditor)
+IMPLEMENT_MODULE(FProjectorToolEditor, ProjectorToolEditor)

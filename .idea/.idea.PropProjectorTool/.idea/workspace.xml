@@ -10,7 +10,31 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="00d91714-a503-47e4-bcd4-b0a5bf08be2b" name="Changes" comment="" />
+    <list default="true" id="89ad8f4e-bb5b-4318-83d2-c880857c0d50" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolRuntime/Private/Enums/VolumeActionsEnum.cpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolRuntime/Public/Enums/VolumeActionsEnum.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.PropProjectorTool/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.PropProjectorTool/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/TestTerrainMap.umap" beforeDir="false" afterPath="$PROJECT_DIR$/Content/TestTerrainMap.umap" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/ThirdPerson/Blueprints/BP_ThirdPersonCharacter.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/ThirdPerson/Blueprints/BP_ThirdPersonCharacter.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/ThirdPerson/Maps/ThirdPersonMap.umap" beforeDir="false" afterPath="$PROJECT_DIR$/Content/ThirdPerson/Maps/ThirdPersonMap.umap" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolEditor/Private/CustomMenu/ProjectToolCommands.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolEditor/Private/CustomMenu/ProjectToolCommands.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolEditor/Private/CustomMenu/ProjectorToolMenu.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolEditor/Private/CustomMenu/ProjectorToolMenu.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolEditor/Private/DetailCustomization/BaseDecoratorVolumeCustomization.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolEditor/Private/DetailCustomizations/BaseDecoratorVolumeDetails.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolEditor/Private/DetailCustomization/DecoratorPaletteCustomization.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolEditor/Private/DetailCustomization/DecoratorVolumeCustomization.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolEditor/Private/DetailCustomizations/DecoratorVolumeISMDetails.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolEditor/Private/Modules/ProjectorToolEditor.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolEditor/Private/Modules/ProjectorToolEditor.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolEditor/Public/CustomMenu/ProjectorToolMenu.h" beforeDir="false" afterPath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolEditor/Public/CustomMenu/ProjectorToolMenu.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolEditor/Public/DetailCustomization/BaseDecoratorVolumeCustomization.h" beforeDir="false" afterPath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolEditor/Public/DetailCustomizations/BaseDecoratorVolumeDetails.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolEditor/Public/DetailCustomization/DecoratorPaletteCustomization.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolEditor/Public/DetailCustomization/DecoratorVolumeCustomization.h" beforeDir="false" afterPath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolEditor/Public/DetailCustomizations/DecoratorVolumeISMDetails.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolRuntime/Private/Components/PointsGeneratorComponent.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolRuntime/Private/Components/PointsGeneratorComponent.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolRuntime/Private/DecoratorPalette.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolRuntime/Private/DecoratorPalette.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolRuntime/Private/ToolEnums.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolRuntime/Private/Enums/ToolEnums.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolRuntime/Public/BaseDecoratorVolume.h" beforeDir="false" afterPath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolRuntime/Public/BaseDecoratorVolume.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolRuntime/Public/Components/DecoratorVolumeVisualizerComponent.h" beforeDir="false" afterPath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolRuntime/Public/Components/DecoratorVolumeVisualizerComponent.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolRuntime/Public/Components/PointsGeneratorComponent.h" beforeDir="false" afterPath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolRuntime/Public/Components/PointsGeneratorComponent.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolRuntime/Public/ToolEnums.h" beforeDir="false" afterPath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolRuntime/Public/Enums/ToolEnums.h" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -19,10 +43,17 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolRuntime/Private/BaseDecoratorVolume.cpp" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolRuntime/Private/DecoratorVolumeISM.cpp" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolRuntime/Public/BaseDecoratorVolume.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolRuntime/Public/DecoratorVolumeISM.h" root0="FORCE_HIGHLIGHTING" />
+  </component>
   <component name="ProjectColorInfo">{
-  &quot;associatedIndex&quot;: 4
+  &quot;customColor&quot;: &quot;&quot;,
+  &quot;associatedIndex&quot;: 7
 }</component>
-  <component name="ProjectId" id="2SvVprnT7pHFfkoSpZiZ1knGq8M" />
+  <component name="ProjectId" id="2c7QV9amcLsuOWqCelr2rXS9voq" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
@@ -31,6 +62,7 @@
   &quot;keyToString&quot;: {
     &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
     &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
     &quot;git-widget-placeholder&quot;: &quot;dev&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
@@ -47,7 +79,7 @@
     ]
   }
 }</component>
-  <component name="RunManager">
+  <component name="RunManager" selected="C++ Project.PropProjectorTool">
     <configuration name="PropProjectorTool" type="CppProject" factoryName="C++ Project">
       <configuration_1>
         <option name="CONFIGURATION" value="DebugGame Editor" />
@@ -109,21 +141,82 @@
         <option name="Build" />
       </method>
     </configuration>
+    <configuration name="AutomationTool" type="DotNetProject" factoryName=".NET Project">
+      <option name="EXE_PATH" value="" />
+      <option name="PROGRAM_PARAMETERS" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="PASS_PARENT_ENVS" value="1" />
+      <option name="USE_EXTERNAL_CONSOLE" value="0" />
+      <option name="USE_MONO" value="0" />
+      <option name="RUNTIME_ARGUMENTS" value="" />
+      <option name="PROJECT_PATH" value="$PROJECT_DIR$/../../../../../Program Files (x86)/UE_5.3/Engine/Source/Programs/AutomationTool/AutomationTool.csproj" />
+      <option name="PROJECT_EXE_PATH_TRACKING" value="1" />
+      <option name="PROJECT_ARGUMENTS_TRACKING" value="1" />
+      <option name="PROJECT_WORKING_DIRECTORY_TRACKING" value="1" />
+      <option name="PROJECT_KIND" value="DotNetCore" />
+      <option name="PROJECT_TFM" value="" />
+      <method v="2">
+        <option name="Build" />
+      </method>
+    </configuration>
+    <configuration name="UnrealBuildTool" type="DotNetProject" factoryName=".NET Project">
+      <option name="EXE_PATH" value="" />
+      <option name="PROGRAM_PARAMETERS" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="PASS_PARENT_ENVS" value="1" />
+      <option name="USE_EXTERNAL_CONSOLE" value="0" />
+      <option name="USE_MONO" value="0" />
+      <option name="RUNTIME_ARGUMENTS" value="" />
+      <option name="PROJECT_PATH" value="$PROJECT_DIR$/../../../../../Program Files (x86)/UE_5.3/Engine/Source/Programs/UnrealBuildTool/UnrealBuildTool.csproj" />
+      <option name="PROJECT_EXE_PATH_TRACKING" value="1" />
+      <option name="PROJECT_ARGUMENTS_TRACKING" value="1" />
+      <option name="PROJECT_WORKING_DIRECTORY_TRACKING" value="1" />
+      <option name="PROJECT_KIND" value="DotNetCore" />
+      <option name="PROJECT_TFM" value="" />
+      <method v="2">
+        <option name="Build" />
+      </method>
+    </configuration>
+    <configuration name="EpicGames.AspNet" type="LaunchSettings" factoryName=".NET Launch Settings Profile">
+      <option name="LAUNCH_PROFILE_PROJECT_FILE_PATH" value="$PROJECT_DIR$/../../../../../Program Files (x86)/UE_5.3/Engine/Source/Programs/Shared/EpicGames.AspNet/EpicGames.AspNet.csproj" />
+      <option name="LAUNCH_PROFILE_TFM" value="net6.0" />
+      <option name="LAUNCH_PROFILE_NAME" value="EpicGames.AspNet" />
+      <option name="USE_EXTERNAL_CONSOLE" value="0" />
+      <option name="USE_MONO" value="0" />
+      <option name="RUNTIME_ARGUMENTS" value="" />
+      <option name="GENERATE_APPLICATIONHOST_CONFIG" value="1" />
+      <option name="SHOW_IIS_EXPRESS_OUTPUT" value="0" />
+      <option name="SEND_DEBUG_REQUEST" value="1" />
+      <option name="ADDITIONAL_IIS_EXPRESS_ARGUMENTS" value="" />
+      <method v="2">
+        <option name="Build" />
+      </method>
+    </configuration>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="00d91714-a503-47e4-bcd4-b0a5bf08be2b" name="Changes" comment="" />
-      <created>1690027228444</created>
+      <changelist id="89ad8f4e-bb5b-4318-83d2-c880857c0d50" name="Changes" comment="" />
+      <created>1707460159021</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
-      <updated>1690027228444</updated>
-      <workItem from="1690027231154" duration="337000" />
-      <workItem from="1690626581072" duration="1865000" />
-      <workItem from="1690632921238" duration="594000" />
-      <workItem from="1690688341913" duration="6546000" />
-      <workItem from="1703823801698" duration="155000" />
-      <workItem from="1703841614807" duration="575000" />
+      <updated>1707460159021</updated>
+      <workItem from="1707460166645" duration="2597000" />
+      <workItem from="1707467204386" duration="10267000" />
+      <workItem from="1707534164453" duration="2502000" />
+      <workItem from="1707583042863" duration="1505000" />
+      <workItem from="1707635832907" duration="2843000" />
+      <workItem from="1707730354147" duration="3423000" />
+      <workItem from="1707813384660" duration="7748000" />
+      <workItem from="1707838710749" duration="1022000" />
+      <workItem from="1707880246070" duration="4612000" />
+      <workItem from="1707903273941" duration="5188000" />
+      <workItem from="1707966926022" duration="6084000" />
+      <workItem from="1708077857996" duration="4101000" />
+      <workItem from="1708188807465" duration="2025000" />
+      <workItem from="1708192823818" duration="1569000" />
+      <workItem from="1708239324322" duration="1191000" />
+      <workItem from="1708244819887" duration="730000" />
     </task>
     <servers />
   </component>
