@@ -1,7 +1,7 @@
 # Decorator Volume tool
 A "volumetric" tool made in Unreal Engine 5 using C++ that simplifies the placement of decorations, foliage, props, etc.
 
-Trello: https://trello.com/b/lAVw5H68/unreal-prop-projector-tool
+Roadmap: https://trello.com/b/lAVw5H68/unreal-prop-projector-tool
 
 # Version Support
 The tool itself was first developed in UE5.2 and later upgraded to UE5.3. Due to this, the tool have not been tested in both UE5.0 and 5.1, as well as any versions of UE4, so please beware when using the tool in those untested versions.
@@ -27,7 +27,7 @@ Head to the [release page](https://github.com/lowkangxuan/decorator-volume-tool/
 You get the option to install an example project that includes the plugin itself, or you can choose to install only the plugin which you can then use in any of your other unreal projects.
 
 ## Adding the plugin to your project
-After downloading the plugin, head to your project directory (where your `.uproject` file located), create a folder named `Plugins` (if it does not exist already), and place the tool's plugin folder in there.
+After downloading the plugin, head to your project directory (where your `.uproject` file located), create a folder named `Plugins` (if it does not already exist), and place the tool's plugin folder in there.
 
 Once done, open your project and open the plugins window (`Edit -> Plugins`). Under the `Installed` section, select `Projector Tool`, enable the plugin by ensuring the checkbox is checked, and restart the project.
 
@@ -36,6 +36,8 @@ When the above steps are done properly, the tool should be usable in your projec
 # Usage
 To make use of the tool itself, you will have to place a `Decorator Volume` actor into your level, assign a `Decorator Palette` to the volume actor and tweak the parameters available to your ideal look and feel.
 
+There are 2 types of volumes, `Decorator Volume ISM` and `Decorator Volume HISM`. Both have similar functionality, except the `HISM` version uses Hierarchical Instanced Static Mesh Component to store the instances which allows for mesh LODs.
+
 ## Creating a volume and palette
-Right click the content browser, go to the "Decorator Volume" category, and you can choose to create either a `Volume` or `Palette`<br><br>
-![](https://i.imgur.com/O9vLccu.png)
+Right click the content browser, go to the "Projector Tool" category, choose the asset to create.<br><br>
+![](https://i.imgur.com/hA83q8W.png)
