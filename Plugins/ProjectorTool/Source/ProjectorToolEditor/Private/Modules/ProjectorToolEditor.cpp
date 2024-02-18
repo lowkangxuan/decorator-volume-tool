@@ -34,7 +34,7 @@ void FProjectorToolEditor::StartupModule()
 
 #pragma region Factory Stuff
 	IAssetTools& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
-	EAssetTypeCategories::Type NewCategory = AssetTools.RegisterAdvancedAssetCategory(FName(TEXT("Decorator Volume")), FText::FromString("Decorator Volume"));
+	EAssetTypeCategories::Type NewCategory = AssetTools.RegisterAdvancedAssetCategory(FName(TEXT("Projector Tool")), FText::FromString("Projector Tool"));
 
 	const TSharedPtr<IAssetTypeActions> PaletteAction = MakeShareable(new FDecoratorPaletteAssetTypeActions(NewCategory));
 	const TSharedPtr<IAssetTypeActions> VolumeISMAction = MakeShareable(new FDecoratorVolumeAssetTypeActions(NewCategory));

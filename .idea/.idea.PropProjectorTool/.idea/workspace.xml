@@ -11,29 +11,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="89ad8f4e-bb5b-4318-83d2-c880857c0d50" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolRuntime/Private/Enums/VolumeActionsEnum.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolRuntime/Public/Enums/VolumeActionsEnum.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.PropProjectorTool/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.PropProjectorTool/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/TestTerrainMap.umap" beforeDir="false" afterPath="$PROJECT_DIR$/Content/TestTerrainMap.umap" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/ThirdPerson/Blueprints/BP_ThirdPersonCharacter.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/ThirdPerson/Blueprints/BP_ThirdPersonCharacter.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/ThirdPerson/Maps/ThirdPersonMap.umap" beforeDir="false" afterPath="$PROJECT_DIR$/Content/ThirdPerson/Maps/ThirdPersonMap.umap" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolEditor/Private/CustomMenu/ProjectToolCommands.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolEditor/Private/CustomMenu/ProjectToolCommands.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolEditor/Private/CustomMenu/ProjectorToolMenu.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolEditor/Private/CustomMenu/ProjectorToolMenu.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolEditor/Private/DetailCustomization/BaseDecoratorVolumeCustomization.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolEditor/Private/DetailCustomizations/BaseDecoratorVolumeDetails.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolEditor/Private/DetailCustomization/DecoratorPaletteCustomization.cpp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolEditor/Private/DetailCustomization/DecoratorVolumeCustomization.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolEditor/Private/DetailCustomizations/DecoratorVolumeISMDetails.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolEditor/Private/Modules/ProjectorToolEditor.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolEditor/Private/Modules/ProjectorToolEditor.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolEditor/Public/CustomMenu/ProjectorToolMenu.h" beforeDir="false" afterPath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolEditor/Public/CustomMenu/ProjectorToolMenu.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolEditor/Public/DetailCustomization/BaseDecoratorVolumeCustomization.h" beforeDir="false" afterPath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolEditor/Public/DetailCustomizations/BaseDecoratorVolumeDetails.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolEditor/Public/DetailCustomization/DecoratorPaletteCustomization.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolEditor/Public/DetailCustomization/DecoratorVolumeCustomization.h" beforeDir="false" afterPath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolEditor/Public/DetailCustomizations/DecoratorVolumeISMDetails.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolRuntime/Private/Components/PointsGeneratorComponent.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolRuntime/Private/Components/PointsGeneratorComponent.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolRuntime/Private/DecoratorPalette.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolRuntime/Private/DecoratorPalette.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolRuntime/Private/ToolEnums.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolRuntime/Private/Enums/ToolEnums.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolRuntime/Public/BaseDecoratorVolume.h" beforeDir="false" afterPath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolRuntime/Public/BaseDecoratorVolume.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolRuntime/Public/Components/DecoratorVolumeVisualizerComponent.h" beforeDir="false" afterPath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolRuntime/Public/Components/DecoratorVolumeVisualizerComponent.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolRuntime/Public/Components/PointsGeneratorComponent.h" beforeDir="false" afterPath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolRuntime/Public/Components/PointsGeneratorComponent.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolRuntime/Public/ToolEnums.h" beforeDir="false" afterPath="$PROJECT_DIR$/Plugins/ProjectorTool/Source/ProjectorToolRuntime/Public/Enums/ToolEnums.h" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -217,6 +196,7 @@
       <workItem from="1708192823818" duration="1569000" />
       <workItem from="1708239324322" duration="1191000" />
       <workItem from="1708244819887" duration="730000" />
+      <workItem from="1708245753681" duration="471000" />
     </task>
     <servers />
   </component>
